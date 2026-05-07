@@ -3,15 +3,31 @@
 import { useState } from "react";
 import API from "../api/axios";
 
-const Login = () => {
+const Login = ({ onLogin }) => {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+
+  const setAuthCookie = (token) => {
+    document.cookie = `token=${encodeURIComponent(token)}; path=/; max-age=86400; samesite=lax`;
+  };
 
   const handleLogin = async () => {
-    const res = await API.post("/auth/login", form);
+    try {
+      setError("");
+      const res = await API.post("/auth/login", form);
+      const token = res.data?.data?.token;
 
-    localStorage.setItem("token", res.data.token);
+      if (!token) {
+        setError("Login failed: token not received.");
+        return;
+      }
 
-    window.location.href = "/";
+      localStorage.setItem("token", token);
+      setAuthCookie(token);
+      onLogin?.(token);
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed. Please try again.");
+    }
   };
 
   return (
@@ -42,6 +58,7 @@ const Login = () => {
         >
           Login
         </button>
+        {error ? <p className="text-red-500 text-sm mt-3">{error}</p> : null}
       </div>
     </div>
   );

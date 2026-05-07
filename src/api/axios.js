@@ -3,11 +3,20 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:2002/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
+const getTokenFromCookie = () => {
+  const cookie = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith("token="));
+
+  if (!cookie) return null;
+  return decodeURIComponent(cookie.split("=")[1]);
+};
+
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = getTokenFromCookie() || localStorage.getItem("token");
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

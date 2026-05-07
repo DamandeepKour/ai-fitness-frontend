@@ -13,7 +13,7 @@ const Dashboard = () => {
   }, []);
 
   const fetchDashboard = async () => {
-    const res = await API.get("/dashboard");
+    const res = await API.get("/dashboard/show");
     setData(res.data.data);
   };
 
