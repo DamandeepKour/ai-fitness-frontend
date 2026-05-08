@@ -1,5 +1,7 @@
 import { AppShell } from "@/components/AppShell";
+import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { TrendingUp, Goal } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
 
 const weight = [
@@ -30,6 +32,38 @@ function ProgressPage() {
         <p className="text-sm text-muted-foreground">Last 8 weeks</p>
         <h1 className="text-3xl md:text-4xl font-semibold mt-1">Your Progress</h1>
       </header>
+
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="mb-6"
+      >
+        <Card className="rounded-3xl border-0 overflow-hidden text-white">
+          <div className="relative">
+            <img
+              src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1600&q=80"
+              alt="Workout consistency progress"
+              className="h-52 w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/35" />
+            <div className="absolute inset-0 p-6 flex flex-col justify-end">
+              <h2 className="text-2xl md:text-3xl font-semibold">Consistency is your superpower.</h2>
+              <p className="text-sm text-white/90 mt-2">
+                Your charts reflect the effort you've invested in nutrition and training.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1">
+                  <TrendingUp className="h-3.5 w-3.5" /> Weekly momentum
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1">
+                  <Goal className="h-3.5 w-3.5" /> Goal-focused tracking
+                </span>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
 
       <div className="grid md:grid-cols-3 gap-4 mb-6">
         <KPI label="Weight Δ" value="-1.6 kg" tint="oklch(0.7 0.17 145)" />

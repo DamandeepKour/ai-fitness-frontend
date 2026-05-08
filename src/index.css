@@ -1,3 +1,48 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-a: #dff4ff;
+    --bg-b: #f3e8ff;
+    --bg-c: #ffe8d6;
+    --bg-d: #d7f5ec;
+    --bg-e: #e7dcff;
+  }
+
+  .dark {
+    --bg-a: #1a2538;
+    --bg-b: #2b1f3d;
+    --bg-c: #31243a;
+    --bg-d: #1a2f34;
+    --bg-e: #262448;
+  }
+
+  body {
+    min-height: 100vh;
+    color: #111827;
+    background-color: var(--bg-a);
+    background-image:
+      radial-gradient(1200px 700px at -8% -12%, color-mix(in oklab, var(--bg-b) 86%, white), transparent 62%),
+      radial-gradient(1000px 700px at 108% 0%, color-mix(in oklab, var(--bg-c) 85%, white), transparent 62%),
+      radial-gradient(900px 600px at 50% 118%, color-mix(in oklab, var(--bg-d) 82%, white), transparent 60%),
+      linear-gradient(120deg, color-mix(in oklab, var(--bg-a) 80%, white), color-mix(in oklab, var(--bg-e) 80%, white));
+    background-attachment: fixed;
+    background-size: 120% 120%, 120% 120%, 120% 120%, 100% 100%;
+    animation: soft-gradient-shift 14s ease-in-out infinite alternate;
+  }
+
+  .dark body {
+    color: #e5e7eb;
+  }
+}
+
+@keyframes soft-gradient-shift {
+  0% {
+    background-position: 0% 0%, 100% 0%, 50% 100%, 0% 0%;
+  }
+  100% {
+    background-position: 8% 4%, 92% 5%, 50% 94%, 0% 0%;
+  }
+}

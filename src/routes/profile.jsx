@@ -1,9 +1,10 @@
 import { AppShell } from "@/components/AppShell";
+import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Bell, Lock, LogOut, Target } from "lucide-react";
+import { Bell, Lock, LogOut, Target, Sparkles, HeartPulse } from "lucide-react";
 
 function ProfilePage() {
   return (
@@ -12,6 +13,34 @@ function ProfilePage() {
         <p className="text-sm text-muted-foreground">Account</p>
         <h1 className="text-3xl md:text-4xl font-semibold mt-1">Profile</h1>
       </header>
+
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="mb-5"
+      >
+        <Card className="rounded-3xl border-0 overflow-hidden text-white">
+          <div className="relative">
+            <img
+              src="https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&w=1600&q=80"
+              alt="Healthy lifestyle and wellbeing"
+              className="h-48 w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/65 to-black/35" />
+            <div className="absolute inset-0 p-6 flex flex-col justify-end">
+              <p className="inline-flex w-fit items-center gap-1.5 text-xs bg-white/20 rounded-full px-2.5 py-1">
+                <Sparkles className="h-3 w-3" /> Personal wellness profile
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold">Stay committed to your healthiest self.</h2>
+              <p className="text-sm text-white/90 mt-2 inline-flex items-center gap-2">
+                <HeartPulse className="h-4 w-4" />
+                Keep your goals updated and track your daily discipline.
+              </p>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
 
       <Card className="rounded-3xl border-0 p-6 mb-5 text-white" style={{ background: "var(--gradient-hero)" }}>
         <div className="flex items-center gap-5">
