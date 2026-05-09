@@ -4,37 +4,115 @@
 
 @layer base {
   :root {
-    --bg-a: #dff4ff;
-    --bg-b: #f3e8ff;
-    --bg-c: #ffe8d6;
-    --bg-d: #d7f5ec;
-    --bg-e: #e7dcff;
+    --radius: 1rem;
+
+    /* Surfaces & text (RGB channels for Tailwind / opacity) */
+    --background: 250 250 252;
+    --foreground: 24 24 27;
+    --card: 255 255 255;
+    --card-foreground: 24 24 27;
+    --popover: 255 255 255;
+    --popover-foreground: 24 24 27;
+    --muted: 244 244 245;
+    --muted-foreground: 113 113 122;
+    --accent: 244 244 245;
+    --accent-foreground: 24 24 27;
+    --secondary: 244 244 245;
+    --secondary-foreground: 24 24 27;
+    --border: 228 228 231;
+    --input: 228 228 231;
+    --ring: 59 130 246;
+    --primary: 37 99 235;
+    --primary-foreground: 255 255 255;
+    --destructive: 220 38 38;
+    --destructive-foreground: 255 255 255;
+
+    /* Page gradient accents (light) */
+    --bg-a: 219 234 254;
+    --bg-b: 243 232 255;
+    --bg-c: 255 237 213;
+    --bg-d: 209 250 229;
+    --bg-e: 237 233 254;
+
+    --gradient-hero: linear-gradient(135deg, rgb(37 99 235), rgb(124 58 237));
   }
 
   .dark {
-    --bg-a: #1a2538;
-    --bg-b: #2b1f3d;
-    --bg-c: #31243a;
-    --bg-d: #1a2f34;
-    --bg-e: #262448;
+    --background: 9 11 18;
+    --foreground: 244 244 245;
+    --card: 24 31 48;
+    --card-foreground: 244 244 245;
+    --popover: 24 31 48;
+    --popover-foreground: 244 244 245;
+    --muted: 30 38 55;
+    --muted-foreground: 161 161 170;
+    --accent: 39 48 68;
+    --accent-foreground: 244 244 245;
+    --secondary: 30 38 55;
+    --secondary-foreground: 244 244 245;
+    /* Visible outline on dark panels */
+    --border: 82 96 122;
+    --input: 71 85 105;
+    --ring: 96 165 250;
+    --primary: 96 165 250;
+    --primary-foreground: 15 23 42;
+    --destructive: 248 113 113;
+    --destructive-foreground: 15 23 42;
+
+    --bg-a: 15 23 42;
+    --bg-b: 30 27 75;
+    --bg-c: 49 23 60;
+    --bg-d: 15 40 46;
+    --bg-e: 30 27 60;
+
+    --gradient-hero: linear-gradient(135deg, rgb(37 99 235), rgb(109 40 217));
+  }
+
+  * {
+    border-color: rgb(var(--border) / 1);
   }
 
   body {
     min-height: 100vh;
-    color: #111827;
-    background-color: var(--bg-a);
+    color: rgb(var(--foreground) / 1);
+    background-color: rgb(var(--background) / 1);
     background-image:
-      radial-gradient(1200px 700px at -8% -12%, color-mix(in oklab, var(--bg-b) 86%, white), transparent 62%),
-      radial-gradient(1000px 700px at 108% 0%, color-mix(in oklab, var(--bg-c) 85%, white), transparent 62%),
-      radial-gradient(900px 600px at 50% 118%, color-mix(in oklab, var(--bg-d) 82%, white), transparent 60%),
-      linear-gradient(120deg, color-mix(in oklab, var(--bg-a) 80%, white), color-mix(in oklab, var(--bg-e) 80%, white));
+      radial-gradient(1200px 700px at -8% -12%, rgb(var(--bg-b) / 0.55) 0%, transparent 62%),
+      radial-gradient(1000px 700px at 108% 0%, rgb(var(--bg-c) / 0.5) 0%, transparent 62%),
+      radial-gradient(900px 600px at 50% 118%, rgb(var(--bg-d) / 0.45) 0%, transparent 60%),
+      linear-gradient(
+        120deg,
+        rgb(var(--bg-a) / 0.35),
+        rgb(var(--bg-e) / 0.35)
+      );
     background-attachment: fixed;
     background-size: 120% 120%, 120% 120%, 120% 120%, 100% 100%;
     animation: soft-gradient-shift 14s ease-in-out infinite alternate;
   }
 
   .dark body {
-    color: #e5e7eb;
+    background-image:
+      radial-gradient(1000px 700px at -5% -10%, rgb(49 46 129 / 0.45) 0%, transparent 55%),
+      radial-gradient(900px 650px at 105% 5%, rgb(88 28 135 / 0.35) 0%, transparent 55%),
+      radial-gradient(800px 600px at 50% 110%, rgb(15 118 110 / 0.2) 0%, transparent 58%),
+      radial-gradient(700px 500px at 80% 45%, rgb(30 58 138 / 0.25) 0%, transparent 55%),
+      linear-gradient(165deg, rgb(9 11 18) 0%, rgb(15 23 42) 45%, rgb(9 11 18) 100%);
+    background-size: 120% 120%, 120% 120%, 120% 120%, 100% 100%, 100% 100%;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background-color: rgb(var(--card) / 0.88);
+    backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid rgb(var(--border) / 0.85);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+  }
+
+  .dark .glass-card {
+    background-color: rgb(var(--card) / 0.92);
+    border-color: rgb(var(--border) / 0.95);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.45);
   }
 }
 

@@ -36,8 +36,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-100 via-purple-100 to-orange-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl bg-white/70 backdrop-blur-xl rounded-3xl border border-white/80 shadow-xl overflow-hidden grid lg:grid-cols-2">
+    <div className="min-h-screen flex items-center justify-center bg-background bg-gradient-to-br from-sky-100/90 via-background to-orange-50/80 p-4 dark:from-slate-950 dark:via-background dark:to-slate-900">
+      <div className="grid w-full max-w-6xl overflow-hidden rounded-3xl border border-border bg-card/95 shadow-xl backdrop-blur-xl dark:bg-card/90 dark:shadow-black/40 lg:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -45,7 +45,7 @@ const Login = () => {
           className="p-8 md:p-12"
         >
           <p className="text-sm text-muted-foreground mb-2">Welcome back to Vital</p>
-          <h2 className="text-4xl font-semibold mb-2">Login to continue</h2>
+          <h2 className="mb-2 text-4xl font-semibold text-foreground">Login to continue</h2>
           <p className="text-sm text-muted-foreground mb-8">
             Track meals, workouts, hydration, and your healthy progress every day.
           </p>
@@ -53,28 +53,28 @@ const Login = () => {
           <div className="space-y-4">
             <input
               placeholder="Email"
-              className="w-full h-12 px-4 border border-border rounded-xl bg-white/80 outline-none focus:ring-2 focus:ring-primary/30"
+              className="h-12 w-full rounded-xl border border-input bg-background px-4 text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40"
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
 
             <input
               placeholder="Password"
               type="password"
-              className="w-full h-12 px-4 border border-border rounded-xl bg-white/80 outline-none focus:ring-2 focus:ring-primary/30"
+              className="h-12 w-full rounded-xl border border-input bg-background px-4 text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40"
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
           </div>
 
           <button
             onClick={handleLogin}
-            className="w-full mt-6 bg-black text-white py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
+            className="mt-6 w-full rounded-xl bg-primary py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
             Login
           </button>
-          {error ? <p className="text-red-500 text-sm mt-3">{error}</p> : null}
-          <p className="text-sm mt-4">
+          {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
+          <p className="mt-4 text-sm text-muted-foreground">
             New user?{" "}
-            <Link to="/signup" className="text-blue-600 font-medium">
+            <Link to="/signup" className="font-medium text-primary hover:underline">
               Create account
             </Link>
           </p>

@@ -61,7 +61,7 @@ function ProfilePage() {
         transition={{ duration: 0.35 }}
         className="mb-5"
       >
-        <Card className="rounded-3xl border-0 overflow-hidden text-white">
+        <Card className="rounded-3xl border border-border overflow-hidden text-white shadow-lg dark:shadow-black/30">
           <div className="relative">
             <img
               src="https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&w=1600&q=80"
@@ -83,7 +83,10 @@ function ProfilePage() {
         </Card>
       </motion.div>
 
-        <Card className="rounded-3xl border-0 p-6 mb-5 text-white" style={{ background: "var(--gradient-hero)" }}>
+        <Card
+          className="mb-5 rounded-3xl border border-border p-6 text-white shadow-lg dark:shadow-black/30"
+          style={{ background: "var(--gradient-hero)" }}
+        >
         <div className="flex items-center gap-5">
           {profile.profileImageUrl ? (
             <img
@@ -104,7 +107,7 @@ function ProfilePage() {
           <Button
             type="button"
             variant="secondary"
-            className="rounded-full bg-white/15 hover:bg-white/25 text-white border-0"
+            className="rounded-full bg-white/15 px-4 text-white shadow-sm ring-1 ring-white/25 hover:bg-white/25 dark:ring-white/20"
             onClick={() => setIsEditProfileOpen(true)}
           >
             Edit
@@ -118,7 +121,7 @@ function ProfilePage() {
       </Card>
 
       <div className="grid md:grid-cols-2 gap-5">
-        <Card className="glass-card rounded-3xl p-6 border-0">
+        <Card className="glass-card rounded-3xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <Target className="h-5 w-5 text-primary" />
             <h3 className="font-semibold">Daily Goals</h3>
@@ -133,7 +136,7 @@ function ProfilePage() {
         </Card>
 
         <div className="space-y-5">
-          <Card className="glass-card rounded-3xl border-0 p-6">
+          <Card className="glass-card rounded-3xl p-6">
             <h3 className="font-semibold mb-4">Preferences</h3>
             <Row icon={<Bell className="h-4 w-4" />} title="Notifications" desc="Meal reminders & coaching" />
             <Row icon={<Lock className="h-4 w-4" />} title="Privacy" desc="Data and sharing controls" />
@@ -173,7 +176,7 @@ function Field({ label, defaultValue }) {
 
 function Row({ icon, title, desc }) {
   return (
-    <button className="w-full flex items-center gap-3 py-3 border-b border-border/60 last:border-0 text-left hover:bg-accent/40 -mx-2 px-2 rounded-xl transition-colors">
+    <button className="w-full flex items-center gap-3 py-3 border-b border-border last:border-0 text-left hover:bg-accent/40 -mx-2 px-2 rounded-xl transition-colors">
       <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary">{icon}</div>
       <div className="flex-1">
         <p className="font-medium text-sm">{title}</p>

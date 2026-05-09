@@ -23,8 +23,8 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-100 via-purple-100 to-orange-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl bg-white/70 backdrop-blur-xl rounded-3xl border border-white/80 shadow-xl overflow-hidden grid lg:grid-cols-2">
+    <div className="min-h-screen flex items-center justify-center bg-background bg-gradient-to-br from-sky-100/90 via-background to-orange-50/80 p-4 dark:from-slate-950 dark:via-background dark:to-slate-900">
+      <div className="grid w-full max-w-6xl overflow-hidden rounded-3xl border border-border bg-card/95 shadow-xl backdrop-blur-xl dark:bg-card/90 dark:shadow-black/40 lg:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -32,7 +32,7 @@ const Signup = () => {
           className="p-8 md:p-12"
         >
           <p className="text-sm text-muted-foreground mb-2">Start your healthy journey</p>
-          <h2 className="text-4xl font-semibold mb-2">Create account</h2>
+          <h2 className="mb-2 text-4xl font-semibold text-foreground">Create account</h2>
           <p className="text-sm text-muted-foreground mb-8">
             Build better food and fitness habits with motivating daily insights.
           </p>
@@ -40,18 +40,18 @@ const Signup = () => {
           <div className="space-y-4">
             <input
               placeholder="Name"
-              className="w-full h-12 px-4 border border-border rounded-xl bg-white/80 outline-none focus:ring-2 focus:ring-primary/30"
+              className="h-12 w-full rounded-xl border border-input bg-background px-4 text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40"
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
             <input
               placeholder="Email"
-              className="w-full h-12 px-4 border border-border rounded-xl bg-white/80 outline-none focus:ring-2 focus:ring-primary/30"
+              className="h-12 w-full rounded-xl border border-input bg-background px-4 text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40"
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
             <input
               placeholder="Password"
               type="password"
-              className="w-full h-12 px-4 border border-border rounded-xl bg-white/80 outline-none focus:ring-2 focus:ring-primary/30"
+              className="h-12 w-full rounded-xl border border-input bg-background px-4 text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40"
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
           </div>
@@ -59,14 +59,14 @@ const Signup = () => {
           <button
             onClick={handleSignup}
             disabled={loading}
-            className="w-full mt-6 bg-black text-white py-3 rounded-xl font-medium disabled:opacity-60"
+            className="mt-6 w-full rounded-xl bg-primary py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {loading ? "Creating..." : "Create Account"}
           </button>
-          {error ? <p className="text-red-500 text-sm mt-3">{error}</p> : null}
-          <p className="text-sm mt-4">
+          {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
+          <p className="mt-4 text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link to="/login" className="text-blue-600 font-medium">
+            <Link to="/login" className="font-medium text-primary hover:underline">
               Login here
             </Link>
           </p>

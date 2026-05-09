@@ -84,7 +84,7 @@ export function EditProfileModal({
       role="presentation"
     >
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/75"
         aria-hidden
         onClick={onClose}
       />
@@ -92,7 +92,7 @@ export function EditProfileModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="edit-profile-title"
-        className="relative z-[1] grid w-full max-w-md overflow-hidden rounded-3xl border border-border/80 bg-background text-card-foreground shadow-xl"
+        className="relative z-[1] grid w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-xl dark:shadow-black/40"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -104,7 +104,7 @@ export function EditProfileModal({
           <X className="h-4 w-4" />
         </button>
 
-        <div className="border-b border-border/60 px-6 pb-4 pt-6 pr-14">
+        <div className="border-b border-border px-6 pb-4 pt-6 pr-14">
           <div className="space-y-1.5 text-left">
             <h2 id="edit-profile-title" className="text-xl font-semibold tracking-tight">
               Edit profile
@@ -115,7 +115,7 @@ export function EditProfileModal({
 
         <div className="space-y-6 px-6 py-6">
           <div className="flex flex-wrap items-start gap-4">
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-border/60 bg-muted">
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
               {form.profileImageUrl ? (
                 <img src={form.profileImageUrl} alt="" className="h-full w-full object-cover" />
               ) : (
@@ -210,7 +210,7 @@ export function EditProfileModal({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-border/60 px-6 py-4">
+        <div className="flex items-center justify-end gap-3 border-t border-border px-6 py-4">
           <Button type="button" variant="ghost" className="rounded-xl" onClick={onClose}>
             Cancel
           </Button>

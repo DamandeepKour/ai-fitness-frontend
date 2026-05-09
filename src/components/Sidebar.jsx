@@ -13,7 +13,7 @@ const items = [
 export function Sidebar() {
   const { pathname } = useLocation();
   return (
-    <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-border/60 bg-card/80 backdrop-blur-xl px-4 py-6 sticky top-0 h-screen">
+    <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-border bg-card/80 backdrop-blur-xl px-4 py-6 sticky top-0 h-screen">
       <div className="flex items-center gap-2 px-3 mb-8">
         <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: "var(--gradient-hero)" }}>
           <Activity className="h-5 w-5 text-white" />
