@@ -1,12 +1,53 @@
+import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { EditProfileModal } from "@/components/EditProfileModal";
 import { Bell, Lock, LogOut, Target, Sparkles, HeartPulse } from "lucide-react";
 
+const defaultProfile = {
+  name: "Alex Carter",
+  email: "alex.carter@vital.app",
+  weight: "72.4",
+  height: "178",
+  age: "28",
+  profileImageUrl: "",
+};
+
 function ProfilePage() {
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [profile, setProfile] = useState(defaultProfile);
+
+  const handleSaveProfile = (data) => {
+    setProfile((prev) => {
+      const next = { ...data };
+      if (
+        prev.profileImageUrl?.startsWith("blob:") &&
+        prev.profileImageUrl !== next.profileImageUrl
+      ) {
+        URL.revokeObjectURL(prev.profileImageUrl);
+      }
+      return next;
+    });
+  };
+
+  const handleChangePhoto = (file) => {
+    // Optional: upload `file` to your API here; the modal already shows a local preview.
+    void file;
+  };
+
+  const displayInitials = profile.name
+    ? profile.name
+        .split(/\s+/)
+        .map((p) => p[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "?";
+
   return (
     <AppShell>
       <header className="mb-8">
@@ -42,24 +83,37 @@ function ProfilePage() {
         </Card>
       </motion.div>
 
-      <Card className="rounded-3xl border-0 p-6 mb-5 text-white" style={{ background: "var(--gradient-hero)" }}>
+        <Card className="rounded-3xl border-0 p-6 mb-5 text-white" style={{ background: "var(--gradient-hero)" }}>
         <div className="flex items-center gap-5">
-          <div className="h-20 w-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-3xl font-semibold">
-            A
-          </div>
+          {profile.profileImageUrl ? (
+            <img
+              src={profile.profileImageUrl}
+              alt=""
+              className="h-20 w-20 rounded-full object-cover border border-white/30"
+            />
+          ) : (
+            <div className="h-20 w-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-3xl font-semibold">
+              {displayInitials}
+            </div>
+          )}
           <div className="flex-1">
-            <h2 className="text-2xl font-semibold">Alex Carter</h2>
-            <p className="opacity-80 text-sm">alex.carter@vital.app</p>
+            <h2 className="text-2xl font-semibold">{profile.name}</h2>
+            <p className="opacity-80 text-sm">{profile.email}</p>
             <p className="text-xs opacity-80 mt-1">Member since Jan 2025</p>
           </div>
-          <Button variant="secondary" className="rounded-full bg-white/15 hover:bg-white/25 text-white border-0">
+          <Button
+            type="button"
+            variant="secondary"
+            className="rounded-full bg-white/15 hover:bg-white/25 text-white border-0"
+            onClick={() => setIsEditProfileOpen(true)}
+          >
             Edit
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-3 mt-6">
-          <Stat label="Weight" value="72.4 kg" />
-          <Stat label="Height" value="178 cm" />
-          <Stat label="Age" value="28" />
+          <Stat label="Weight" value={`${profile.weight} kg`} />
+          <Stat label="Height" value={`${profile.height} cm`} />
+          <Stat label="Age" value={profile.age} />
         </div>
       </Card>
 
@@ -87,6 +141,14 @@ function ProfilePage() {
           </Card>
         </div>
       </div>
+
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        initialData={profile}
+        onSave={handleSaveProfile}
+        onChangePhoto={handleChangePhoto}
+      />
     </AppShell>
   );
 }
