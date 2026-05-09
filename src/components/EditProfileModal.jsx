@@ -209,7 +209,6 @@ export function EditProfileModal({
             </div>
           </div>
         </div>
-
         <div className="flex items-center justify-end gap-3 border-t border-border px-6 py-4">
           <Button type="button" variant="ghost" className="rounded-xl" onClick={onClose}>
             Cancel
