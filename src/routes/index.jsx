@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { Ring } from "@/components/Ring";
+import Loader from "@/components/Loader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Flame, Footprints, Dumbbell, Apple, Beef, Wheat, Droplet, Sparkles } from "lucide-react";
@@ -46,9 +48,26 @@ const motivationCards = [
 ];
 
 function Dashboard() {
+  const [isBooting, setIsBooting] = useState(true);
   const consumed = 1080;
   const goal = 2200;
   const remaining = goal - consumed;
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setIsBooting(false);
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (isBooting) {
+    return (
+      <AppShell>
+        <Loader text="Preparing your dashboard..." />
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
       <header className="flex flex-wrap items-end justify-between gap-4 mb-8">
