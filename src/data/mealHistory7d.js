@@ -40,20 +40,56 @@ const dayTemplates = [
   ],
 ];
 
-export function getMealHistoryLast7Days(now = new Date()) {
+/** @typedef {'today' | '7days' | 'this_month' | 'last_month'} MealHistoryFilter */
+
+/**
+ * @param {MealHistoryFilter} filter
+ * @param {Date} [now]
+ * @returns {{ date: Date, meals: typeof dayTemplates[0], totalKcal: number }[]}
+ * Newest calendar day first (today at top when in range).
+ */
+export function getMealHistoryForFilter(filter, now = new Date()) {
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
 
-  const out = [];
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const templateIndex = (6 - i) % dayTemplates.length;
+  let start;
+  let end = new Date(today);
+
+  switch (filter) {
+    case "today":
+      start = new Date(today);
+      break;
+    case "7days":
+      start = new Date(today);
+      start.setDate(start.getDate() - 6);
+      break;
+    case "this_month":
+      start = new Date(today.getFullYear(), today.getMonth(), 1);
+      break;
+    case "last_month":
+      start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      end = new Date(today.getFullYear(), today.getMonth(), 0);
+      break;
+    default:
+      start = new Date(today);
+      start.setDate(start.getDate() - 6);
+  }
+
+  start.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+
+  const ascending = [];
+  for (let d = new Date(start); d.getTime() <= end.getTime(); d.setDate(d.getDate() + 1)) {
+    const date = new Date(d);
+    const dayIndex = Math.floor(date.getTime() / 86400000);
+    const templateIndex = Math.abs(dayIndex) % dayTemplates.length;
     const meals = dayTemplates[templateIndex].map((m) => ({ ...m }));
     const totalKcal = meals.reduce((acc, m) => acc + m.kcal, 0);
-    out.push({ date, meals, totalKcal });
+    ascending.push({ date, meals, totalKcal });
   }
-  return out;
+
+  ascending.reverse();
+  return ascending;
 }
 
 export function formatHistoryDayTitle(date) {

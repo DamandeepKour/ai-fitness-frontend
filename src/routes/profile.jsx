@@ -148,7 +148,7 @@ function ProfilePage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm">Meal history</p>
-                <p className="text-xs text-muted-foreground">View the last 7 days of logged meals</p>
+                <p className="text-xs text-muted-foreground">Today, 7 days, or monthly views</p>
               </div>
               <span className="text-muted-foreground shrink-0">›</span>
             </Link>
