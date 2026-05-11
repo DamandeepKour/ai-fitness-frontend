@@ -10,6 +10,7 @@ import AddPage from "./routes/add";
 import ProgressPage from "./routes/progress";
 import ProfilePage from "./routes/profile";
 import MealHistoryPage from "./routes/meal-history";
+import NotificationsPage from "./routes/notifications";
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -39,6 +40,7 @@ const AnimatedRoutes = () => {
           <Route path="/progress" element={<PageTransition><ProgressPage /></PageTransition>} />
           <Route path="/profile" element={<PageTransition><ProfilePage /></PageTransition>} />
           <Route path="/meal-history" element={<PageTransition><MealHistoryPage /></PageTransition>} />
+          <Route path="/notifications" element={<PageTransition><NotificationsPage /></PageTransition>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

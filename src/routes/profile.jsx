@@ -156,7 +156,19 @@ function ProfilePage() {
 
           <Card className="glass-card rounded-3xl p-6">
             <h3 className="font-semibold mb-4">Preferences</h3>
-            <Row icon={<Bell className="h-4 w-4" />} title="Notifications" desc="Meal reminders & coaching" />
+            <Link
+              to="/notifications"
+              className="w-full flex items-center gap-3 py-3 border-b border-border last:border-0 text-left hover:bg-accent/40 -mx-2 px-2 rounded-xl transition-colors"
+            >
+              <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary">
+                <Bell className="h-4 w-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm">Notifications</p>
+                <p className="text-xs text-muted-foreground">Meal reminders & coaching</p>
+              </div>
+              <span className="text-muted-foreground shrink-0">›</span>
+            </Link>
             <Row icon={<Lock className="h-4 w-4" />} title="Privacy" desc="Data and sharing controls" />
             <Row icon={<LogOut className="h-4 w-4" />} title="Sign out" desc="End session on this device" />
           </Card>
