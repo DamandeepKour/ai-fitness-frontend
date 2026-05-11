@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { EditProfileModal } from "@/components/EditProfileModal";
-import { Bell, Lock, LogOut, Target, Sparkles, HeartPulse } from "lucide-react";
+import { Bell, Lock, LogOut, Target, Sparkles, HeartPulse, History } from "lucide-react";
 
 const defaultProfile = {
   name: "Alex Carter",
@@ -136,6 +137,23 @@ function ProfilePage() {
         </Card>
 
         <div className="space-y-5">
+          <Card className="glass-card rounded-3xl p-6">
+            <h3 className="font-semibold mb-4">Meals</h3>
+            <Link
+              to="/meal-history"
+              className="w-full flex items-center gap-3 py-3 border-b border-border last:border-0 text-left hover:bg-accent/40 -mx-2 px-2 rounded-xl transition-colors"
+            >
+              <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary">
+                <History className="h-4 w-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm">Meal history</p>
+                <p className="text-xs text-muted-foreground">View the last 7 days of logged meals</p>
+              </div>
+              <span className="text-muted-foreground shrink-0">›</span>
+            </Link>
+          </Card>
+
           <Card className="glass-card rounded-3xl p-6">
             <h3 className="font-semibold mb-4">Preferences</h3>
             <Row icon={<Bell className="h-4 w-4" />} title="Notifications" desc="Meal reminders & coaching" />
