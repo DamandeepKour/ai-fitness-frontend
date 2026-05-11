@@ -1,13 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { EditProfileModal } from "@/components/EditProfileModal";
-import { Bell, Lock, LogOut, Target, Sparkles, HeartPulse, History } from "lucide-react";
+import {
+  Bell,
+  Lock,
+  LogOut,
+  Target,
+  Sparkles,
+  HeartPulse,
+  History,
+  ChevronDown,
+} from "lucide-react";
 
 const defaultProfile = {
   name: "Alex Carter",
@@ -21,6 +30,7 @@ const defaultProfile = {
 function ProfilePage() {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [profile, setProfile] = useState(defaultProfile);
+  const [isGoalsOpen, setIsGoalsOpen] = useState(false);
 
   const handleSaveProfile = (data) => {
     setProfile((prev) => {
@@ -36,7 +46,6 @@ function ProfilePage() {
   };
 
   const handleChangePhoto = (file) => {
-    // Optional: upload `file` to your API here; the modal already shows a local preview.
     void file;
   };
 
@@ -56,13 +65,14 @@ function ProfilePage() {
         <h1 className="text-3xl md:text-4xl font-semibold mt-1">Profile</h1>
       </header>
 
+      {/* Hero Banner — col-12 */}
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        className="mb-5"
+        className="mb-5 w-full"
       >
-        <Card className="rounded-3xl border border-border overflow-hidden text-white shadow-lg dark:shadow-black/30">
+        <Card className="rounded-3xl border border-border overflow-hidden text-white shadow-lg dark:shadow-black/30 w-full">
           <div className="relative">
             <img
               src="https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&w=1600&q=80"
@@ -74,7 +84,9 @@ function ProfilePage() {
               <p className="inline-flex w-fit items-center gap-1.5 text-xs bg-white/20 rounded-full px-2.5 py-1">
                 <Sparkles className="h-3 w-3" /> Personal wellness profile
               </p>
-              <h2 className="mt-3 text-2xl font-semibold">Stay committed to your healthiest self.</h2>
+              <h2 className="mt-3 text-2xl font-semibold">
+                Stay committed to your healthiest self.
+              </h2>
               <p className="text-sm text-white/90 mt-2 inline-flex items-center gap-2">
                 <HeartPulse className="h-4 w-4" />
                 Keep your goals updated and track your daily discipline.
@@ -84,10 +96,11 @@ function ProfilePage() {
         </Card>
       </motion.div>
 
-        <Card
-          className="mb-5 rounded-3xl border border-border p-6 text-white shadow-lg dark:shadow-black/30"
-          style={{ background: "var(--gradient-hero)" }}
-        >
+      {/* Profile Card — col-12 */}
+      <Card
+        className="mb-5 rounded-3xl border border-border p-6 text-white shadow-lg dark:shadow-black/30 w-full"
+        style={{ background: "var(--gradient-hero)" }}
+      >
         <div className="flex items-center gap-5">
           {profile.profileImageUrl ? (
             <img
@@ -121,59 +134,125 @@ function ProfilePage() {
         </div>
       </Card>
 
-      <div className="grid md:grid-cols-2 gap-5">
-        <Card className="glass-card rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Target className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">Daily Goals</h3>
+      {/* Daily Goals — col-12, collapsible dropdown */}
+      <Card className="glass-card rounded-3xl w-full mb-5 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setIsGoalsOpen((v) => !v)}
+          className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/30 transition-colors"
+        >
+          <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
+            <Target className="h-5 w-5" />
           </div>
-          <div className="space-y-3">
-            <Field label="Calorie target (kcal)" defaultValue="2200" />
-            <Field label="Protein (g)" defaultValue="140" />
-            <Field label="Steps" defaultValue="10000" />
-            <Field label="Water (L)" defaultValue="2.5" />
+          <div className="flex-1">
+            <p className="font-semibold text-sm">Daily Goals</p>
+            <p className="text-xs text-muted-foreground">
+              Calories, protein, steps & water
+            </p>
           </div>
-          <Button className="mt-5 rounded-xl w-full">Save goals</Button>
-        </Card>
+          <motion.span
+            animate={{ rotate: isGoalsOpen ? 180 : 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          </motion.span>
+        </button>
 
-        <div className="space-y-5">
-          <Card className="glass-card rounded-3xl p-6">
-            <h3 className="font-semibold mb-4">Meals</h3>
-            <Link
-              to="/meal-history"
-              className="w-full flex items-center gap-3 py-3 border-b border-border last:border-0 text-left hover:bg-accent/40 -mx-2 px-2 rounded-xl transition-colors"
+        <AnimatePresence initial={false}>
+          {isGoalsOpen && (
+            <motion.div
+              key="goals-body"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden"
             >
-              <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary">
-                <History className="h-4 w-4" />
+              <div className="px-6 pb-6 pt-0 space-y-3">
+                <div className="h-px bg-border mb-4" />
+                <Field label="Calorie target (kcal)" defaultValue="2200" />
+                <Field label="Protein (g)" defaultValue="140" />
+                <Field label="Steps" defaultValue="10000" />
+                <Field label="Water (L)" defaultValue="2.5" />
+                <Button className="mt-3 rounded-xl w-full">Save goals</Button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">Meal history</p>
-                <p className="text-xs text-muted-foreground">Today, 7 days, or monthly views</p>
-              </div>
-              <span className="text-muted-foreground shrink-0">›</span>
-            </Link>
-          </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Card>
 
-          <Card className="glass-card rounded-3xl p-6">
-            <h3 className="font-semibold mb-4">Preferences</h3>
-            <Link
-              to="/notifications"
-              className="w-full flex items-center gap-3 py-3 border-b border-border last:border-0 text-left hover:bg-accent/40 -mx-2 px-2 rounded-xl transition-colors"
-            >
-              <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary">
-                <Bell className="h-4 w-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">Notifications</p>
-                <p className="text-xs text-muted-foreground">Meal reminders & coaching</p>
-              </div>
-              <span className="text-muted-foreground shrink-0">›</span>
-            </Link>
-            <Row icon={<Lock className="h-4 w-4" />} title="Privacy" desc="Data and sharing controls" />
-            <Row icon={<LogOut className="h-4 w-4" />} title="Sign out" desc="End session on this device" />
-          </Card>
-        </div>
-      </div>
+      {/* Meal History — col-12 */}
+      <Card className="glass-card rounded-3xl w-full mb-5">
+        <Link
+          to="/meal-history"
+          className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/40 transition-colors rounded-3xl"
+        >
+          <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
+            <History className="h-4 w-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-sm">Meal history</p>
+            <p className="text-xs text-muted-foreground">
+              Today, 7 days, or monthly views
+            </p>
+          </div>
+          <span className="text-muted-foreground shrink-0">›</span>
+        </Link>
+      </Card>
+
+      {/* Notifications — col-12 */}
+      <Card className="glass-card rounded-3xl w-full mb-5">
+        <Link
+          to="/notifications"
+          className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/40 transition-colors rounded-3xl"
+        >
+          <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
+            <Bell className="h-4 w-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-sm">Notifications</p>
+            <p className="text-xs text-muted-foreground">
+              Meal reminders &amp; coaching
+            </p>
+          </div>
+          <span className="text-muted-foreground shrink-0">›</span>
+        </Link>
+      </Card>
+
+      {/* Privacy — col-12 */}
+      <Card className="glass-card rounded-3xl w-full mb-5">
+        <Link
+          to="/privacy"
+          className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/40 transition-colors rounded-3xl"
+        >
+          <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
+            <Lock className="h-4 w-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-sm">Privacy</p>
+            <p className="text-xs text-muted-foreground">
+              Data and sharing controls
+            </p>
+          </div>
+          <span className="text-muted-foreground shrink-0">›</span>
+        </Link>
+      </Card>
+
+      {/* Sign Out — col-12 */}
+      <Card className="glass-card rounded-3xl w-full mb-5">
+        <button className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/40 transition-colors rounded-3xl">
+          <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
+            <LogOut className="h-4 w-4" />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-sm">Sign out</p>
+            <p className="text-xs text-muted-foreground">
+              End session on this device
+            </p>
+          </div>
+          <span className="text-muted-foreground">›</span>
+        </button>
+      </Card>
 
       <EditProfileModal
         isOpen={isEditProfileOpen}
@@ -201,19 +280,6 @@ function Field({ label, defaultValue }) {
       <Label className="text-xs text-muted-foreground">{label}</Label>
       <Input defaultValue={defaultValue} className="mt-1.5 h-11 rounded-xl" />
     </div>
-  );
-}
-
-function Row({ icon, title, desc }) {
-  return (
-    <button className="w-full flex items-center gap-3 py-3 border-b border-border last:border-0 text-left hover:bg-accent/40 -mx-2 px-2 rounded-xl transition-colors">
-      <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary">{icon}</div>
-      <div className="flex-1">
-        <p className="font-medium text-sm">{title}</p>
-        <p className="text-xs text-muted-foreground">{desc}</p>
-      </div>
-      <span className="text-muted-foreground">›</span>
-    </button>
   );
 }
 
