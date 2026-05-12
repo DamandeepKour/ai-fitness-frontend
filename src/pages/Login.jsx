@@ -1,10 +1,10 @@
 // src/pages/Login.jsx
 
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import API from "../api/axios";
 import { useRotatingIndex } from "@/hooks/use-rotating-index";
+import { useLogin } from "@/hooks/use-login";
 import { LOGIN_MARKETING_SLIDES } from "@/data/auth-visual-slides";
 import { AuthAmbientBackdrop } from "@/components/auth/AuthAmbientBackdrop";
 import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
@@ -13,37 +13,15 @@ import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 const ROTATE_MS = 5500;
 
 const Login = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/dashboard";
   const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+  const { login, loading, error, clearError } = useLogin();
 
   const slides = LOGIN_MARKETING_SLIDES;
   const bgSources = slides.map((s) => s.src);
   const activeIndex = useRotatingIndex(slides.length, ROTATE_MS);
 
-  const setAuthCookie = (token) => {
-    document.cookie = `token=${encodeURIComponent(token)}; path=/; max-age=86400; samesite=lax`;
-  };
-
-  const handleLogin = async () => {
-    try {
-      setError("");
-      const res = await API.post("/auth/login", form);
-      const token = res.data?.data?.token;
-
-      if (!token) {
-        setError("Login failed: token not received.");
-        return;
-      }
-
-      localStorage.setItem("token", token);
-      setAuthCookie(token);
-      navigate(from, { replace: true });
-    } catch (err) {
-      setError(err.response?.data?.message || "Login failed. Please try again.");
-    }
+  const handleSubmit = async () => {
+    await login({ email: form.email.trim(), password: form.password });
   };
 
   return (
@@ -74,24 +52,36 @@ const Login = () => {
             <div className="space-y-4">
               <input
                 placeholder="Email"
+                type="email"
+                autoComplete="email"
                 className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                value={form.email}
+                onChange={(e) => {
+                  clearError();
+                  setForm((f) => ({ ...f, email: e.target.value }));
+                }}
               />
 
               <input
                 placeholder="Password"
                 type="password"
+                autoComplete="current-password"
                 className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                value={form.password}
+                onChange={(e) => {
+                  clearError();
+                  setForm((f) => ({ ...f, password: e.target.value }));
+                }}
               />
             </div>
 
             <button
               type="button"
-              onClick={handleLogin}
-              className="mt-6 w-full rounded-xl bg-gradient-to-r from-primary to-primary/90 py-3 font-medium text-primary-foreground shadow-md shadow-primary/25 transition-[transform,box-shadow] hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99]"
+              onClick={handleSubmit}
+              disabled={loading}
+              className="mt-6 w-full rounded-xl bg-gradient-to-r from-primary to-primary/90 py-3 font-medium text-primary-foreground shadow-md shadow-primary/25 transition-[transform,box-shadow] hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
             >
-              Login
+              {loading ? "Signing in…" : "Login"}
             </button>
             {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
             <p className="mt-4 text-sm text-muted-foreground">

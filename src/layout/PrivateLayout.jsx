@@ -1,17 +1,9 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-
-const getToken = () => {
-  const cookie = document.cookie
-    .split("; ")
-    .find((item) => item.startsWith("token="));
-
-  if (cookie) return decodeURIComponent(cookie.split("=")[1]);
-  return localStorage.getItem("token");
-};
+import { getAuthToken } from "@/lib/auth-token";
 
 const PrivateLayout = () => {
   const location = useLocation();
-  const token = getToken();
+  const token = getAuthToken();
 
   if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />;

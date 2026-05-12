@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { EditProfileModal } from "@/components/EditProfileModal";
+import { useAuth } from "@/hooks/use-auth";
+import { getStoredUser } from "@/lib/auth-token";
 import {
   Bell,
   Lock,
@@ -28,8 +30,16 @@ const defaultProfile = {
 };
 
 function ProfilePage() {
+  const { logout } = useAuth();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [profile, setProfile] = useState(defaultProfile);
+  const [profile, setProfile] = useState(() => {
+    const stored = getStoredUser();
+    return {
+      ...defaultProfile,
+      ...(stored?.name ? { name: stored.name } : {}),
+      ...(stored?.email ? { email: stored.email } : {}),
+    };
+  });
   const [isGoalsOpen, setIsGoalsOpen] = useState(false);
 
   const handleSaveProfile = (data) => {
@@ -240,7 +250,11 @@ function ProfilePage() {
 
       {/* Sign Out — col-12 */}
       <Card className="glass-card rounded-3xl w-full mb-5">
-        <button className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/40 transition-colors rounded-3xl">
+        <button
+          type="button"
+          onClick={logout}
+          className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/40 transition-colors rounded-3xl"
+        >
           <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
             <LogOut className="h-4 w-4" />
           </div>

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import API from "../api/axios";
 import { useRotatingIndex } from "@/hooks/use-rotating-index";
+import { useSignup } from "@/hooks/use-signup";
 import { SIGNUP_MARKETING_SLIDES } from "@/data/auth-visual-slides";
 import { AuthAmbientBackdrop } from "@/components/auth/AuthAmbientBackdrop";
 import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
@@ -11,26 +11,19 @@ import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 const ROTATE_MS = 5500;
 
 const Signup = () => {
-  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { signup, loading, error, clearError } = useSignup();
 
   const slides = SIGNUP_MARKETING_SLIDES;
   const bgSources = slides.map((s) => s.src);
   const activeIndex = useRotatingIndex(slides.length, ROTATE_MS);
 
-  const handleSignup = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      await API.post("/auth/signup", form);
-      navigate("/login");
-    } catch (err) {
-      setError(err.response?.data?.message || "Signup failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  const handleSubmit = async () => {
+    await signup({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      password: form.password,
+    });
   };
 
   return (
@@ -61,29 +54,45 @@ const Signup = () => {
             <div className="space-y-4">
               <input
                 placeholder="Name"
+                autoComplete="name"
                 className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                value={form.name}
+                onChange={(e) => {
+                  clearError();
+                  setForm((f) => ({ ...f, name: e.target.value }));
+                }}
               />
               <input
                 placeholder="Email"
+                type="email"
+                autoComplete="email"
                 className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                value={form.email}
+                onChange={(e) => {
+                  clearError();
+                  setForm((f) => ({ ...f, email: e.target.value }));
+                }}
               />
               <input
                 placeholder="Password"
                 type="password"
+                autoComplete="new-password"
                 className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                value={form.password}
+                onChange={(e) => {
+                  clearError();
+                  setForm((f) => ({ ...f, password: e.target.value }));
+                }}
               />
             </div>
 
             <button
               type="button"
-              onClick={handleSignup}
+              onClick={handleSubmit}
               disabled={loading}
               className="mt-6 w-full rounded-xl bg-gradient-to-r from-primary to-primary/90 py-3 font-medium text-primary-foreground shadow-md shadow-primary/25 transition-[transform,box-shadow] hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
             >
-              {loading ? "Creating..." : "Create Account"}
+              {loading ? "Creating…" : "Create Account"}
             </button>
             {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
             <p className="mt-4 text-sm text-muted-foreground">
