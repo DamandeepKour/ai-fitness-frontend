@@ -4,6 +4,13 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import API from "../api/axios";
+import { useRotatingIndex } from "@/hooks/use-rotating-index";
+import { LOGIN_MARKETING_SLIDES } from "@/data/auth-visual-slides";
+import { AuthAmbientBackdrop } from "@/components/auth/AuthAmbientBackdrop";
+import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
+import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
+
+const ROTATE_MS = 5500;
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,6 +18,10 @@ const Login = () => {
   const from = location.state?.from?.pathname || "/dashboard";
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+
+  const slides = LOGIN_MARKETING_SLIDES;
+  const bgSources = slides.map((s) => s.src);
+  const activeIndex = useRotatingIndex(slides.length, ROTATE_MS);
 
   const setAuthCookie = (token) => {
     document.cookie = `token=${encodeURIComponent(token)}; path=/; max-age=86400; samesite=lax`;
@@ -36,69 +47,63 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background bg-gradient-to-br from-sky-100/90 via-background to-orange-50/80 p-4 dark:from-slate-950 dark:via-background dark:to-slate-900">
-      <div className="grid w-full max-w-6xl overflow-hidden rounded-3xl border border-border bg-card/95 shadow-xl backdrop-blur-xl dark:bg-card/90 dark:shadow-black/40 lg:grid-cols-2">
+    <div className="relative min-h-screen flex items-center justify-center p-4 md:p-6">
+      <AuthAmbientBackdrop sources={bgSources} activeIndex={activeIndex} />
+
+      <div className="relative z-10 grid w-full max-w-6xl overflow-hidden rounded-3xl border border-border/70 bg-card/90 shadow-[0_28px_90px_-20px_rgba(59,130,246,0.2),0_12px_40px_-15px_rgba(236,72,153,0.12)] backdrop-blur-xl dark:border-border/60 dark:bg-card/85 dark:shadow-[0_28px_80px_-24px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.06)] lg:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.45 }}
-          className="p-8 md:p-12"
+          className="relative p-8 md:p-12 bg-gradient-to-br from-card via-card to-primary/5 dark:to-primary/[0.07]"
         >
-          <p className="text-sm text-muted-foreground mb-2">Welcome back to Vital</p>
-          <h2 className="mb-2 text-4xl font-semibold text-foreground">Login to continue</h2>
-          <p className="text-sm text-muted-foreground mb-8">
-            Track meals, workouts, hydration, and your healthy progress every day.
-          </p>
+          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-gradient-to-br from-sky-400/20 to-violet-500/15 blur-3xl dark:from-sky-500/10 dark:to-violet-600/10" />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-gradient-to-tr from-rose-400/15 to-amber-400/10 blur-3xl" />
 
-          <div className="space-y-4">
-            <input
-              placeholder="Email"
-              className="h-12 w-full rounded-xl border border-input bg-background px-4 text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40"
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
+          <div className="relative">
+            <AuthMobileHeroStrip slides={slides} activeIndex={activeIndex} />
 
-            <input
-              placeholder="Password"
-              type="password"
-              className="h-12 w-full rounded-xl border border-input bg-background px-4 text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40"
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-          </div>
+            <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-violet-600 dark:from-sky-400 dark:to-violet-400 mb-2">
+              Welcome back to Vital
+            </p>
+            <h2 className="mb-2 text-4xl font-semibold tracking-tight text-foreground">Login to continue</h2>
+            <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
+              Track meals, workouts, hydration, and your healthy progress every day.
+            </p>
 
-          <button
-            onClick={handleLogin}
-            className="mt-6 w-full rounded-xl bg-primary py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            Login
-          </button>
-          {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
-          <p className="mt-4 text-sm text-muted-foreground">
-            New user?{" "}
-            <Link to="/signup" className="font-medium text-primary hover:underline">
-              Create account
-            </Link>
-          </p>
-        </motion.div>
+            <div className="space-y-4">
+              <input
+                placeholder="Email"
+                className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
 
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.45, delay: 0.1 }}
-          className="hidden lg:block relative min-h-[560px]"
-        >
-          <img
-            src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1400&q=80"
-            alt="Healthy food and active lifestyle"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
-          <div className="absolute bottom-8 left-8 right-8 text-white">
-            <h3 className="text-3xl font-semibold leading-tight">Eat smart. Train strong. Live positive.</h3>
-            <p className="mt-3 text-sm text-white/90">
-              Your daily dashboard keeps nutrition and exercise goals clear and motivating.
+              <input
+                placeholder="Password"
+                type="password"
+                className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleLogin}
+              className="mt-6 w-full rounded-xl bg-gradient-to-r from-primary to-primary/90 py-3 font-medium text-primary-foreground shadow-md shadow-primary/25 transition-[transform,box-shadow] hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99]"
+            >
+              Login
+            </button>
+            {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
+            <p className="mt-4 text-sm text-muted-foreground">
+              New user?{" "}
+              <Link to="/signup" className="font-medium text-primary hover:underline">
+                Create account
+              </Link>
             </p>
           </div>
         </motion.div>
+
+        <AuthMarketingPanel slides={slides} activeIndex={activeIndex} />
       </div>
     </div>
   );
