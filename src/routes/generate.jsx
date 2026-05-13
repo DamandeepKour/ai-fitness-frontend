@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import API from "@/api/axios";
 import { Flame, Sparkles } from "lucide-react";
+import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
 
 const INITIAL_FORM = {
   weight: 72,
@@ -15,6 +16,16 @@ const INITIAL_FORM = {
   plan_type: "weekly",
   workout_type: "home",
   meal_preference: "north_indian",
+  ai_prompt: "",
+};
+
+const MEAL_EMOJI = {
+  breakfast: "🥣",
+  lunch: "🥗",
+  dinner: "🍽️",
+  mid_morning_snack: "🍌",
+  evening_snack: "🍎",
+  cheat_meal: "✨",
 };
 
 function formatMealType(type = "Meal") {
@@ -29,6 +40,7 @@ function GeneratePage() {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [loggingKey, setLoggingKey] = useState("");
   const [message, setMessage] = useState("");
 
   const groupedMeals = useMemo(() => {
@@ -92,6 +104,30 @@ function GeneratePage() {
     }
   };
 
+  const handleLogGeneratedMeal = async (meal) => {
+    const key = `${meal.day}-${meal.meal_type}-${meal.food_name}`;
+    const nutrition = estimateNutrition(meal.food_name, 250, meal.calories);
+
+    setLoggingKey(key);
+    setMessage("");
+
+    try {
+      await API.post("/daily-log/add", {
+        meal_type: toDailyLogMealType(meal.meal_type),
+        food_name: meal.food_name,
+        calories: nutrition.calories,
+        protein: nutrition.protein,
+        carbs: nutrition.carbs,
+        fat: nutrition.fat,
+      });
+      setMessage(`${formatMealType(meal.meal_type)} logged for today.`);
+    } catch {
+      setMessage("Unable to log generated meal right now.");
+    } finally {
+      setLoggingKey("");
+    }
+  };
+
   return (
     <AppShell>
       <header className="mb-8">
@@ -110,6 +146,13 @@ function GeneratePage() {
           <form onSubmit={handleGenerate} className="space-y-4">
             <Field label="Weight (kg)" value={form.weight} onChange={(value) => updateForm("weight", value)} type="number" />
             <Field label="Height (cm)" value={form.height} onChange={(value) => updateForm("height", value)} type="number" />
+            <Select label="Generate For" value={form.plan_type} onChange={(value) => updateForm("plan_type", value)} options={["daily", "weekly"]} />
+            <Field
+              label="Meal request"
+              value={form.ai_prompt}
+              onChange={(value) => updateForm("ai_prompt", value)}
+              placeholder="e.g. high protein daily meals with paneer, no rice"
+            />
             <Select label="Goal" value={form.goal} onChange={(value) => updateForm("goal", value)} options={["weight_loss", "maintenance", "muscle_gain"]} />
             <Select label="Diet Type" value={form.diet_type} onChange={(value) => updateForm("diet_type", value)} options={["veg", "veg_egg", "non veg"]} />
             <Select label="Meal Preference" value={form.meal_preference} onChange={(value) => updateForm("meal_preference", value)} options={["north_indian", "south_indian"]} />
@@ -134,15 +177,31 @@ function GeneratePage() {
                   {meals.map((meal) => (
                     <div key={`${meal.meal_type}-${meal.food_name}`} className="rounded-2xl bg-accent/50 p-4">
                       <div className="flex items-start justify-between gap-3">
-                        <div>
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className="h-11 w-11 rounded-2xl bg-background flex items-center justify-center text-xl shrink-0">
+                            {MEAL_EMOJI[meal.meal_type] || "🍽️"}
+                          </div>
+                          <div className="min-w-0">
                           <p className="text-xs text-primary font-medium">{formatMealType(meal.meal_type)}</p>
                           <h3 className="font-medium mt-1">{meal.food_name}</h3>
+                          </div>
                         </div>
                         <p className="text-sm font-semibold tabular-nums inline-flex items-center gap-1">
                           <Flame className="h-4 w-4" />
                           {meal.calories || 0} kcal
                         </p>
                       </div>
+                      {["breakfast", "lunch", "evening_snack", "dinner"].includes(meal.meal_type) ? (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="w-full mt-3 rounded-xl"
+                          onClick={() => handleLogGeneratedMeal(meal)}
+                          disabled={loggingKey === `${meal.day}-${meal.meal_type}-${meal.food_name}`}
+                        >
+                          {loggingKey === `${meal.day}-${meal.meal_type}-${meal.food_name}` ? "Logging..." : `Log ${formatMealType(meal.meal_type)}`}
+                        </Button>
+                      ) : null}
                     </div>
                   ))}
                 </div>
@@ -159,11 +218,17 @@ function GeneratePage() {
   );
 }
 
-function Field({ label, value, onChange, type = "text" }) {
+function Field({ label, value, onChange, type = "text", placeholder }) {
   return (
     <div>
       <Label className="text-xs text-muted-foreground">{label}</Label>
-      <Input value={value} type={type} onChange={(event) => onChange(event.target.value)} className="mt-1.5 h-11 rounded-xl" />
+      <Input
+        value={value}
+        type={type}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-1.5 h-11 rounded-xl"
+      />
     </div>
   );
 }

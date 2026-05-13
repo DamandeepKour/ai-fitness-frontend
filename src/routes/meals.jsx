@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Clock3, Flame, Beef, Wheat, Apple } from "lucide-react";
 import API from "@/api/axios";
+import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
 
 const MEAL_EMOJI = {
   breakfast: "🥣",
@@ -13,6 +14,7 @@ const MEAL_EMOJI = {
   dinner: "🍽️",
   mid_morning_snack: "🍌",
   evening_snack: "🍎",
+  cheat_meal: "✨",
 };
 
 function formatMealType(type = "Meal") {
@@ -26,6 +28,8 @@ function MealsPage() {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [loggingKey, setLoggingKey] = useState("");
+  const [message, setMessage] = useState("");
   const meals = dashboard?.meals || [];
   const generatedMeals = dashboard?.generated_meals || [];
   const total = dashboard?.today?.consumed_calories ?? meals.reduce((acc, meal) => acc + (meal.calories || 0), 0);
@@ -59,6 +63,36 @@ function MealsPage() {
     };
   }, []);
 
+  const refreshDashboard = async () => {
+    const res = await API.get("/dashboard/show");
+    setDashboard(res.data.data);
+  };
+
+  const handleLogGeneratedMeal = async (meal) => {
+    const key = `${meal.day}-${meal.meal_type}-${meal.food_name}`;
+    const nutrition = estimateNutrition(meal.food_name, 250, meal.calories);
+
+    setLoggingKey(key);
+    setMessage("");
+
+    try {
+      await API.post("/daily-log/add", {
+        meal_type: toDailyLogMealType(meal.meal_type),
+        food_name: meal.food_name,
+        calories: nutrition.calories,
+        protein: nutrition.protein,
+        carbs: nutrition.carbs,
+        fat: nutrition.fat,
+      });
+      await refreshDashboard();
+      setMessage(`${formatMealType(meal.meal_type)} logged for today.`);
+    } catch {
+      setMessage("Unable to log generated meal right now.");
+    } finally {
+      setLoggingKey("");
+    }
+  };
+
   if (loading) {
     return (
       <AppShell>
@@ -73,6 +107,7 @@ function MealsPage() {
         <p className="text-sm text-muted-foreground">AI-curated for your goals</p>
         <h1 className="text-3xl md:text-4xl font-semibold mt-1">Today's Meals</h1>
         {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
+        {message ? <p className="mt-2 text-sm text-muted-foreground">{message}</p> : null}
       </header>
 
       <motion.div
@@ -162,11 +197,30 @@ function MealsPage() {
         <div className="grid md:grid-cols-2 gap-3">
           {generatedMeals.slice(0, 6).map((m) => (
             <div key={`${m.day}-${m.meal_type}-${m.food_name}`} className="rounded-2xl bg-accent/50 p-4">
-              <p className="text-xs text-primary font-medium">
-                {m.day} · {formatMealType(m.meal_type)}
-              </p>
-              <h3 className="font-medium mt-1">{m.food_name}</h3>
-              <p className="text-sm text-muted-foreground mt-1">{m.calories || 0} kcal</p>
+              <div className="flex items-start gap-3">
+                <div className="h-11 w-11 rounded-2xl bg-background flex items-center justify-center text-xl shrink-0">
+                  {MEAL_EMOJI[m.meal_type] || "🍽️"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-primary font-medium">
+                    {m.day} · {formatMealType(m.meal_type)}
+                  </p>
+                  <h3 className="font-medium mt-1">{m.food_name}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{m.calories || 0} kcal</p>
+                </div>
+              </div>
+              {["breakfast", "lunch", "evening_snack", "dinner"].includes(m.meal_type) ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-full mt-3 rounded-xl"
+                  onClick={() => handleLogGeneratedMeal(m)}
+                  disabled={loggingKey === `${m.day}-${m.meal_type}-${m.food_name}`}
+                >
+                  <Plus className="h-4 w-4" />
+                  {loggingKey === `${m.day}-${m.meal_type}-${m.food_name}` ? "Logging..." : `Log ${formatMealType(m.meal_type)}`}
+                </Button>
+              ) : null}
             </div>
           ))}
           {!generatedMeals.length ? (

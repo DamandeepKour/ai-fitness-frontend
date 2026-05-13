@@ -7,30 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Flame, Salad, Dumbbell } from "lucide-react";
 import API from "@/api/axios";
-
-const TABLE = {
-  chicken: 1.65,
-  rice: 1.3,
-  egg: 1.55,
-  salad: 0.4,
-  banana: 0.89,
-  oats: 3.8,
-  salmon: 2.08,
-  bread: 2.65,
-  avocado: 1.6,
-  yogurt: 0.6,
-  almonds: 5.79,
-  pasta: 1.31,
-  beef: 2.5,
-  tofu: 1.45,
-  cheese: 4.0,
-};
-
-function estimate(food, grams) {
-  const key = Object.keys(TABLE).find((k) => food.toLowerCase().includes(k));
-  const factor = key ? TABLE[key] : 1.5;
-  return Math.round(factor * grams);
-}
+import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
 
 function AddPage() {
   const [food, setFood] = useState("Grilled chicken with rice");
@@ -39,10 +16,11 @@ function AddPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  const kcal = useMemo(() => estimate(food, grams), [food, grams]);
-  const protein = Math.round(grams * 0.18);
-  const carbs = Math.round(grams * 0.22);
-  const fat = Math.round(grams * 0.06);
+  const nutrition = useMemo(() => estimateNutrition(food, grams), [food, grams]);
+  const kcal = nutrition.calories;
+  const protein = nutrition.protein;
+  const carbs = nutrition.carbs;
+  const fat = nutrition.fat;
 
   const handleSave = async () => {
     setSaving(true);
@@ -50,7 +28,7 @@ function AddPage() {
 
     try {
       await API.post("/daily-log/add", {
-        meal_type: meal.toLowerCase() === "snack" ? "evening_snack" : meal.toLowerCase(),
+        meal_type: toDailyLogMealType(meal),
         food_name: food,
         calories: kcal,
         protein,
@@ -102,7 +80,7 @@ function AddPage() {
           <div>
             <Label className="text-xs text-muted-foreground">Meal</Label>
             <div className="grid grid-cols-4 gap-2 mt-2">
-              {["Breakfast", "Lunch", "Dinner", "Snack"].map((m) => (
+              {["Breakfast", "Lunch", "Evening Snack", "Dinner"].map((m) => (
                 <button
                   key={m}
                   onClick={() => setMeal(m)}
@@ -170,7 +148,8 @@ function AddPage() {
             <Pill label="Fats" value={`${fat}g`} />
           </div>
           <p className="text-xs opacity-80 mt-6 leading-relaxed">
-            Estimates are based on common nutritional ranges. Confirm portion size for best accuracy.
+            Estimate uses the meal name plus portion size. Matched foods:{" "}
+            {nutrition.matchedFoods.length ? nutrition.matchedFoods.join(", ") : "general meal estimate"}.
           </p>
           <div className="mt-6 grid grid-cols-2 gap-2">
             <div className="rounded-xl bg-white/15 px-3 py-2 text-sm inline-flex items-center gap-2">
