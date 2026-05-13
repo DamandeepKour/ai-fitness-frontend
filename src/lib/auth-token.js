@@ -15,11 +15,27 @@ export function persistAuth({ token, user }) {
       id: user.id,
       email: user.email,
       name: user.name,
+      mobile_number: user.mobile_number,
+      country_code: user.country_code,
+      age: user.age,
+      gender: user.gender,
+      height: user.height,
+      weight: user.weight,
+      goal: user.goal,
+      diet_type: user.diet_type,
+      activity_level: user.activity_level,
     };
     if (safe.id != null || safe.email) {
       localStorage.setItem(USER_KEY, JSON.stringify(safe));
     }
   }
+}
+
+export function updateStoredUser(user) {
+  if (!user || typeof user !== "object") return;
+
+  const current = getStoredUser() || {};
+  localStorage.setItem(USER_KEY, JSON.stringify({ ...current, ...user }));
 }
 
 export function clearAuth() {

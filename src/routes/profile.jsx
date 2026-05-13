@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { EditProfileModal } from "@/components/EditProfileModal";
 import { useAuth } from "@/hooks/use-auth";
-import { getStoredUser } from "@/lib/auth-token";
+import { getStoredUser, updateStoredUser } from "@/lib/auth-token";
+import API from "@/api/axios";
 import {
   Bell,
   Lock,
@@ -26,6 +27,12 @@ const defaultProfile = {
   weight: "72.4",
   height: "178",
   age: "28",
+  gender: "Female",
+  mobile_number: "",
+  country_code: "+91",
+  goal: "fat_loss",
+  diet_type: "veg",
+  activity_level: "medium",
   profileImageUrl: "",
 };
 
@@ -36,23 +43,76 @@ function ProfilePage() {
     const stored = getStoredUser();
     return {
       ...defaultProfile,
-      ...(stored?.name ? { name: stored.name } : {}),
-      ...(stored?.email ? { email: stored.email } : {}),
+      ...(stored || {}),
     };
   });
   const [isGoalsOpen, setIsGoalsOpen] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
 
-  const handleSaveProfile = (data) => {
-    setProfile((prev) => {
-      const next = { ...data };
-      if (
-        prev.profileImageUrl?.startsWith("blob:") &&
-        prev.profileImageUrl !== next.profileImageUrl
-      ) {
-        URL.revokeObjectURL(prev.profileImageUrl);
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadProfile() {
+      try {
+        const res = await API.get("/user/me");
+        if (ignore || !res.data?.data) return;
+        const user = res.data.data;
+        setProfile((prev) => ({ ...prev, ...user }));
+        updateStoredUser(user);
+      } catch {
+        if (!ignore) setProfileMessage("Unable to load latest profile right now.");
       }
-      return next;
-    });
+    }
+
+    loadProfile();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const handleSaveProfile = async (data) => {
+    setSavingProfile(true);
+    setProfileMessage("");
+
+    const payload = {
+      name: data.name,
+      email: data.email,
+      mobile_number: data.mobile_number,
+      country_code: data.country_code,
+      age: Number(data.age) || null,
+      gender: data.gender,
+      height: Number(data.height) || null,
+      weight: Number(data.weight) || null,
+      goal: data.goal,
+      diet_type: data.diet_type,
+      activity_level: data.activity_level,
+      ...(data.password ? { password: data.password } : {}),
+    };
+
+    try {
+      const res = await API.put("/user/update", payload);
+      const updated = res.data?.data || payload;
+
+      setProfile((prev) => {
+        const next = { ...prev, ...updated, profileImageUrl: data.profileImageUrl };
+        if (
+          prev.profileImageUrl?.startsWith("blob:") &&
+          prev.profileImageUrl !== next.profileImageUrl
+        ) {
+          URL.revokeObjectURL(prev.profileImageUrl);
+        }
+        return next;
+      });
+      updateStoredUser(updated);
+      setProfileMessage("Profile updated successfully.");
+      setIsEditProfileOpen(false);
+    } catch {
+      setProfileMessage("Unable to update profile right now.");
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   const handleChangePhoto = (file) => {
@@ -73,6 +133,7 @@ function ProfilePage() {
       <header className="mb-8">
         <p className="text-sm text-muted-foreground">Account</p>
         <h1 className="text-3xl md:text-4xl font-semibold mt-1">Profile</h1>
+        {profileMessage ? <p className="text-sm text-muted-foreground mt-2">{profileMessage}</p> : null}
       </header>
 
       {/* Hero Banner — col-12 */}
@@ -126,6 +187,11 @@ function ProfilePage() {
           <div className="flex-1">
             <h2 className="text-2xl font-semibold">{profile.name}</h2>
             <p className="opacity-80 text-sm">{profile.email}</p>
+            {profile.mobile_number ? (
+              <p className="opacity-80 text-sm">
+                {profile.country_code} {profile.mobile_number}
+              </p>
+            ) : null}
             <p className="text-xs opacity-80 mt-1">Member since Jan 2025</p>
           </div>
           <Button
@@ -137,10 +203,11 @@ function ProfilePage() {
             Edit
           </Button>
         </div>
-        <div className="grid grid-cols-3 gap-3 mt-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
           <Stat label="Weight" value={`${profile.weight} kg`} />
           <Stat label="Height" value={`${profile.height} cm`} />
           <Stat label="Age" value={profile.age} />
+          <Stat label="Goal" value={profile.goal || "N/A"} />
         </div>
       </Card>
 
@@ -274,6 +341,7 @@ function ProfilePage() {
         initialData={profile}
         onSave={handleSaveProfile}
         onChangePhoto={handleChangePhoto}
+        isSaving={savingProfile}
       />
     </AppShell>
   );
