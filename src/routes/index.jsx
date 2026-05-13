@@ -9,22 +9,32 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Flame, Footprints, Dumbbell, Apple, Beef, Wheat, Droplet, Sparkles } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import API from "@/api/axios";
+import { getStoredUser } from "@/lib/auth-token";
 
-const weekData = [
-  { d: "Mon", kcal: 1820 },
-  { d: "Tue", kcal: 2100 },
-  { d: "Wed", kcal: 1950 },
-  { d: "Thu", kcal: 1700 },
-  { d: "Fri", kcal: 2240 },
-  { d: "Sat", kcal: 1880 },
-  { d: "Sun", kcal: 1680 },
-];
+const MEAL_EMOJI = {
+  breakfast: "🥣",
+  lunch: "🥗",
+  dinner: "🍽️",
+  mid_morning_snack: "🍌",
+  evening_snack: "🍎",
+  snack: "🍎",
+};
 
-const todayMeals = [
-  { name: "Greek Yogurt & Berries", time: "Breakfast · 8:20 AM", kcal: 320, emoji: "🥣" },
-  { name: "Grilled Chicken Bowl", time: "Lunch · 1:05 PM", kcal: 540, emoji: "🥗" },
-  { name: "Apple & Almonds", time: "Snack · 4:30 PM", kcal: 220, emoji: "🍎" },
-];
+function formatMealType(type = "Meal") {
+  return type
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatDate() {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
+}
 
 const motivationCards = [
   {
@@ -49,16 +59,40 @@ const motivationCards = [
 
 function Dashboard() {
   const [isBooting, setIsBooting] = useState(true);
-  const consumed = 1080;
-  const goal = 2200;
-  const remaining = goal - consumed;
+  const [dashboard, setDashboard] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setIsBooting(false);
-    }, 900);
-    return () => window.clearTimeout(timer);
+    let ignore = false;
+
+    async function loadDashboard() {
+      try {
+        const res = await API.get("/dashboard/show");
+        if (!ignore) setDashboard(res.data.data);
+      } catch {
+        if (!ignore) setError("Unable to load dashboard right now.");
+      } finally {
+        if (!ignore) setIsBooting(false);
+      }
+    }
+
+    loadDashboard();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
+
+  const storedUser = getStoredUser();
+  const userName = dashboard?.user?.name || storedUser?.name || "there";
+  const consumed = dashboard?.today?.consumed_calories ?? 0;
+  const goal = dashboard?.targets?.calories ?? dashboard?.plan?.calories ?? 2200;
+  const remaining = dashboard?.today?.remaining_calories ?? Math.max(goal - consumed, 0);
+  const macros = dashboard?.today?.macros || {};
+  const targets = dashboard?.targets || {};
+  const weekData = dashboard?.graph?.length ? dashboard.graph : [];
+  const todayMeals = dashboard?.meals || [];
+  const weightHistory = dashboard?.weight_history || [];
 
   if (isBooting) {
     return (
@@ -68,12 +102,22 @@ function Dashboard() {
     );
   }
 
+  if (error) {
+    return (
+      <AppShell>
+        <Card className="glass-card rounded-3xl p-6 border-0">
+          <p className="text-sm text-destructive">{error}</p>
+        </Card>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
       <header className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
-          <p className="text-sm text-muted-foreground">Friday, May 8</p>
-          <h1 className="text-3xl md:text-4xl font-semibold mt-1">Good morning, Alex</h1>
+          <p className="text-sm text-muted-foreground">{formatDate()}</p>
+          <h1 className="text-3xl md:text-4xl font-semibold mt-1">Welcome back, {userName}</h1>
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
@@ -140,9 +184,9 @@ function Dashboard() {
           <h2 className="text-lg font-semibold">Macros</h2>
           <p className="text-xs text-muted-foreground mb-5">Today's split</p>
           <div className="space-y-4">
-            <Macro icon={<Beef className="h-4 w-4" />} name="Protein" value={68} max={140} color="oklch(0.7 0.2 25)" unit="g" />
-            <Macro icon={<Wheat className="h-4 w-4" />} name="Carbs" value={120} max={250} color="oklch(0.78 0.16 75)" unit="g" />
-            <Macro icon={<Apple className="h-4 w-4" />} name="Fats" value={32} max={70} color="oklch(0.7 0.17 145)" unit="g" />
+            <Macro icon={<Beef className="h-4 w-4" />} name="Protein" value={macros.protein || 0} max={targets.protein || 140} color="oklch(0.7 0.2 25)" unit="g" />
+            <Macro icon={<Wheat className="h-4 w-4" />} name="Carbs" value={macros.carbs || 0} max={targets.carbs || 250} color="oklch(0.78 0.16 75)" unit="g" />
+            <Macro icon={<Apple className="h-4 w-4" />} name="Fats" value={macros.fat || 0} max={targets.fat || 70} color="oklch(0.7 0.17 145)" unit="g" />
           </div>
         </Card>
       </div>
@@ -151,7 +195,9 @@ function Dashboard() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold">Calories — Last 7 days</h2>
-            <p className="text-xs text-muted-foreground">Avg 1,910 kcal/day</p>
+            <p className="text-xs text-muted-foreground">
+              Avg {Math.round(weekData.reduce((sum, item) => sum + (item.kcal || 0), 0) / Math.max(weekData.length, 1))} kcal/day
+            </p>
           </div>
           <Link to="/progress" className="text-sm text-primary inline-flex items-center gap-1">
             View progress <ArrowUpRight className="h-4 w-4" />
@@ -183,31 +229,35 @@ function Dashboard() {
             </Link>
           </div>
           <div className="divide-y divide-border/60">
-            {todayMeals.map((m) => (
-              <div key={m.name} className="flex items-center gap-4 py-3.5">
-                <div className="h-11 w-11 rounded-2xl bg-accent flex items-center justify-center text-xl">{m.emoji}</div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{m.name}</p>
-                  <p className="text-xs text-muted-foreground">{m.time}</p>
+            {todayMeals.length ? todayMeals.map((m) => (
+              <div key={`${m.meal_type}-${m.food_name}`} className="flex items-center gap-4 py-3.5">
+                <div className="h-11 w-11 rounded-2xl bg-accent flex items-center justify-center text-xl">
+                  {MEAL_EMOJI[m.meal_type] || "🍽️"}
                 </div>
-                <span className="text-sm font-semibold tabular-nums">{m.kcal} kcal</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{m.food_name}</p>
+                  <p className="text-xs text-muted-foreground">{formatMealType(m.meal_type)}</p>
+                </div>
+                <span className="text-sm font-semibold tabular-nums">{m.calories || 0} kcal</span>
               </div>
-            ))}
+            )) : (
+              <p className="py-6 text-sm text-muted-foreground">No meals logged for today yet.</p>
+            )}
           </div>
         </Card>
 
         <Card className="p-6 rounded-3xl border-0 text-white" style={{ background: "var(--gradient-hero)" }}>
           <p className="text-xs uppercase tracking-wider opacity-80">Weight</p>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-4xl font-semibold">72.4</span>
+            <span className="text-4xl font-semibold">{dashboard?.weight || "N/A"}</span>
             <span className="opacity-80">kg</span>
           </div>
-          <p className="text-sm opacity-90 mt-1">▾ 1.6 kg this month</p>
+          <p className="text-sm opacity-90 mt-1">{dashboard?.plan?.goal || "Keep tracking your progress"}</p>
           <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-            {[73.4, 73.0, 72.7, 72.6, 72.5, 72.4].map((v, i) => (
-              <div key={i} className="rounded-xl bg-white/15 backdrop-blur px-2 py-2">
-                <p className="text-[10px] opacity-80">W{i + 1}</p>
-                <p className="text-sm font-semibold">{v}</p>
+            {(weightHistory.length ? weightHistory : [{ label: "Now", weight: dashboard?.weight || "N/A" }]).map((item) => (
+              <div key={`${item.label}-${item.weight}`} className="rounded-xl bg-white/15 backdrop-blur px-2 py-2">
+                <p className="text-[10px] opacity-80">{item.label}</p>
+                <p className="text-sm font-semibold">{item.weight}</p>
               </div>
             ))}
           </div>
@@ -251,7 +301,7 @@ function Stat({ icon, label, value, sub, tint }) {
 }
 
 function Macro({ icon, name, value, max, color, unit }) {
-  const pct = Math.min((value / max) * 100, 100);
+  const pct = max ? Math.min((value / max) * 100, 100) : 0;
   return (
     <div>
       <div className="flex items-center justify-between text-sm mb-1.5">

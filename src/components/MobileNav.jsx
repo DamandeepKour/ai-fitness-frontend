@@ -1,10 +1,11 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Utensils, PlusCircle, LineChart, User } from "lucide-react";
+import { LayoutDashboard, Utensils, PlusCircle, LineChart, User, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard },
   { to: "/meals", label: "Meals", icon: Utensils },
+  { to: "/generate", label: "AI", icon: Sparkles },
   { to: "/add", label: "Add", icon: PlusCircle },
   { to: "/progress", label: "Stats", icon: LineChart },
   { to: "/profile", label: "Me", icon: User },

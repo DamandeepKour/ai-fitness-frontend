@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./routes/index";
 import MealsPage from "./routes/meals";
+import GeneratePage from "./routes/generate";
 import AddPage from "./routes/add";
 import ProgressPage from "./routes/progress";
 import ProfilePage from "./routes/profile";
@@ -37,6 +38,7 @@ const AnimatedRoutes = () => {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
           <Route path="/meals" element={<PageTransition><MealsPage /></PageTransition>} />
+          <Route path="/generate" element={<PageTransition><GeneratePage /></PageTransition>} />
           <Route path="/add" element={<PageTransition><AddPage /></PageTransition>} />
           <Route path="/progress" element={<PageTransition><ProgressPage /></PageTransition>} />
           <Route path="/profile" element={<PageTransition><ProfilePage /></PageTransition>} />

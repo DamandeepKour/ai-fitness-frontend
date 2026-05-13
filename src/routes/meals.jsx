@@ -1,30 +1,78 @@
 import { AppShell } from "@/components/AppShell";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Clock3, Flame, Beef, Wheat, Apple } from "lucide-react";
+import API from "@/api/axios";
 
-const meals = [
-  { name: "Avocado Toast & Eggs", kcal: 420, p: 22, c: 38, f: 20, emoji: "🥑", tag: "Breakfast" },
-  { name: "Quinoa Chicken Bowl", kcal: 560, p: 42, c: 55, f: 16, emoji: "🥗", tag: "Lunch" },
-  { name: "Greek Yogurt Parfait", kcal: 240, p: 18, c: 28, f: 6, emoji: "🍓", tag: "Snack" },
-  { name: "Salmon, Rice & Greens", kcal: 620, p: 38, c: 60, f: 22, emoji: "🍣", tag: "Dinner" },
-];
+const MEAL_EMOJI = {
+  breakfast: "🥣",
+  lunch: "🥗",
+  dinner: "🍽️",
+  mid_morning_snack: "🍌",
+  evening_snack: "🍎",
+};
+
+function formatMealType(type = "Meal") {
+  return type
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
 
 function MealsPage() {
-  const total = meals.reduce((acc, meal) => acc + meal.kcal, 0);
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const meals = dashboard?.meals || [];
+  const generatedMeals = dashboard?.generated_meals || [];
+  const total = dashboard?.today?.consumed_calories ?? meals.reduce((acc, meal) => acc + (meal.calories || 0), 0);
+  const targetsFromApi = dashboard?.targets || {};
+  const macros = dashboard?.today?.macros || {};
   const targets = [
-    { label: "Calories", value: `${total} / 2200kcal`, pct: Math.round((total / 2200) * 100), color: "oklch(0.62 0.19 255)", icon: Flame },
-    { label: "Protein", value: "120 / 140g", pct: 86, color: "oklch(0.7 0.2 25)", icon: Beef },
-    { label: "Carbs", value: "181 / 250g", pct: 72, color: "oklch(0.78 0.16 75)", icon: Wheat },
-    { label: "Fats", value: "64 / 70g", pct: 91, color: "oklch(0.7 0.17 145)", icon: Apple },
+    { label: "Calories", value: `${total} / ${targetsFromApi.calories || 2200}kcal`, pct: Math.round((total / (targetsFromApi.calories || 2200)) * 100), color: "oklch(0.62 0.19 255)", icon: Flame },
+    { label: "Protein", value: `${macros.protein || 0} / ${targetsFromApi.protein || 140}g`, pct: Math.round(((macros.protein || 0) / (targetsFromApi.protein || 140)) * 100), color: "oklch(0.7 0.2 25)", icon: Beef },
+    { label: "Carbs", value: `${macros.carbs || 0} / ${targetsFromApi.carbs || 250}g`, pct: Math.round(((macros.carbs || 0) / (targetsFromApi.carbs || 250)) * 100), color: "oklch(0.78 0.16 75)", icon: Wheat },
+    { label: "Fats", value: `${macros.fat || 0} / ${targetsFromApi.fat || 70}g`, pct: Math.round(((macros.fat || 0) / (targetsFromApi.fat || 70)) * 100), color: "oklch(0.7 0.17 145)", icon: Apple },
   ];
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadDashboard() {
+      try {
+        const res = await API.get("/dashboard/show");
+        if (!ignore) setDashboard(res.data.data);
+      } catch {
+        if (!ignore) setError("Unable to load meals right now.");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+
+    loadDashboard();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <AppShell>
+        <p className="text-sm text-muted-foreground">Loading meals...</p>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
       <header className="mb-8">
         <p className="text-sm text-muted-foreground">AI-curated for your goals</p>
         <h1 className="text-3xl md:text-4xl font-semibold mt-1">Today's Meals</h1>
+        {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
       </header>
 
       <motion.div
@@ -55,7 +103,7 @@ function MealsPage() {
                   <p className="text-2xl tabular-nums">{item.value}</p>
                 </div>
                 <div className="h-2 rounded-full bg-border overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${item.pct}%`, background: item.color }} />
+                  <div className="h-full rounded-full" style={{ width: `${Math.min(item.pct, 100)}%`, background: item.color }} />
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">{item.pct}% of target</p>
               </div>
@@ -65,41 +113,67 @@ function MealsPage() {
       </motion.div>
 
       <div className="grid sm:grid-cols-2 gap-5">
-        {meals.map((m) => (
-          <Card key={m.name} className="glass-card rounded-3xl p-5 border-0">
+        {meals.length ? meals.map((m) => (
+          <Card key={`${m.meal_type}-${m.food_name}`} className="glass-card rounded-3xl p-5 border-0">
             <div className="flex items-start gap-4">
-              <div className="h-16 w-16 rounded-2xl bg-accent flex items-center justify-center text-3xl">{m.emoji}</div>
+              <div className="h-16 w-16 rounded-2xl bg-accent flex items-center justify-center text-3xl">
+                {MEAL_EMOJI[m.meal_type] || "🍽️"}
+              </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-primary font-medium">{m.tag}</p>
+                  <p className="text-xs text-primary font-medium">{formatMealType(m.meal_type)}</p>
                   <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
                     <Clock3 className="h-3.5 w-3.5" />
-                    {m.tag === "Breakfast"
-                      ? "8:00 AM"
-                      : m.tag === "Lunch"
-                        ? "1:00 PM"
-                        : m.tag === "Snack"
-                          ? "4:30 PM"
-                          : "7:30 PM"}
+                    Today
                   </p>
                 </div>
-                <h3 className="font-semibold text-lg leading-tight">{m.name}</h3>
+                <h3 className="font-semibold text-lg leading-tight">{m.food_name}</h3>
                 <p className="text-sm text-muted-foreground mt-0.5 inline-flex items-center gap-1">
-                  <Flame className="h-4 w-4" /> {m.kcal} kcal
+                  <Flame className="h-4 w-4" /> {m.calories || 0} kcal
                 </p>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-              <Macro label="P" value={m.p} color="oklch(0.7 0.2 25)" />
-              <Macro label="C" value={m.c} color="oklch(0.78 0.16 75)" />
-              <Macro label="F" value={m.f} color="oklch(0.7 0.17 145)" />
+              <Macro label="P" value={m.protein || 0} color="oklch(0.7 0.2 25)" />
+              <Macro label="C" value={m.carbs || 0} color="oklch(0.78 0.16 75)" />
+              <Macro label="F" value={m.fat || 0} color="oklch(0.7 0.17 145)" />
             </div>
             <Button variant="secondary" className="w-full mt-4 rounded-xl">
               <Plus className="h-4 w-4" /> Add to log
             </Button>
           </Card>
-        ))}
+        )) : (
+          <Card className="glass-card rounded-3xl p-6 border-0 sm:col-span-2">
+            <p className="text-sm text-muted-foreground">No meals logged for today yet.</p>
+          </Card>
+        )}
       </div>
+
+      <Card className="glass-card rounded-3xl p-6 border-0 mt-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 className="text-xl font-semibold">Generated Customized Meals</h2>
+            <p className="text-sm text-muted-foreground">Latest meals from your generated plan.</p>
+          </div>
+          <Button asChild variant="secondary" className="rounded-xl">
+            <Link to="/generate">View all</Link>
+          </Button>
+        </div>
+        <div className="grid md:grid-cols-2 gap-3">
+          {generatedMeals.slice(0, 6).map((m) => (
+            <div key={`${m.day}-${m.meal_type}-${m.food_name}`} className="rounded-2xl bg-accent/50 p-4">
+              <p className="text-xs text-primary font-medium">
+                {m.day} · {formatMealType(m.meal_type)}
+              </p>
+              <h3 className="font-medium mt-1">{m.food_name}</h3>
+              <p className="text-sm text-muted-foreground mt-1">{m.calories || 0} kcal</p>
+            </div>
+          ))}
+          {!generatedMeals.length ? (
+            <p className="text-sm text-muted-foreground md:col-span-2">No generated meal plan found yet.</p>
+          ) : null}
+        </div>
+      </Card>
     </AppShell>
   );
 }

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Flame, Salad, Dumbbell } from "lucide-react";
+import API from "@/api/axios";
 
 const TABLE = {
   chicken: 1.65,
@@ -35,11 +36,34 @@ function AddPage() {
   const [food, setFood] = useState("Grilled chicken with rice");
   const [grams, setGrams] = useState(250);
   const [meal, setMeal] = useState("Lunch");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
 
   const kcal = useMemo(() => estimate(food, grams), [food, grams]);
   const protein = Math.round(grams * 0.18);
   const carbs = Math.round(grams * 0.22);
   const fat = Math.round(grams * 0.06);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setMessage("");
+
+    try {
+      await API.post("/daily-log/add", {
+        meal_type: meal.toLowerCase() === "snack" ? "evening_snack" : meal.toLowerCase(),
+        food_name: food,
+        calories: kcal,
+        protein,
+        carbs,
+        fat,
+      });
+      setMessage("Meal saved for today.");
+    } catch {
+      setMessage("Unable to save meal right now.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <AppShell>
@@ -122,9 +146,10 @@ function AddPage() {
               className="w-full mt-3 accent-[var(--primary)]"
             />
           </div>
-          <Button size="lg" className="w-full rounded-xl">
-            Add to today
+          <Button size="lg" className="w-full rounded-xl" onClick={handleSave} disabled={saving}>
+            {saving ? "Saving..." : "Add to today"}
           </Button>
+          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
         </Card>
 
         <Card className="lg:col-span-2 rounded-3xl p-6 border-0 text-white" style={{ background: "var(--gradient-hero)" }}>
