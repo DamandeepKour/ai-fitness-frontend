@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import API from "@/api/axios";
 import { Flame, Sparkles } from "lucide-react";
 import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
+import { getLocalDateYmd } from "@/lib/local-date";
 
 const INITIAL_FORM = {
   weight: 72,
@@ -55,7 +56,7 @@ function GeneratePage() {
   }, [dashboard?.generated_meals]);
 
   async function loadDashboard() {
-    const res = await API.get("/dashboard/show");
+    const res = await API.get("/dashboard/show", { params: { date: getLocalDateYmd() } });
     setDashboard(res.data.data);
   }
 
@@ -64,7 +65,7 @@ function GeneratePage() {
 
     async function fetchGeneratedMeals() {
       try {
-        const res = await API.get("/dashboard/show");
+        const res = await API.get("/dashboard/show", { params: { date: getLocalDateYmd() } });
         if (!ignore) setDashboard(res.data.data);
       } catch {
         if (!ignore) setMessage("Unable to load generated meals right now.");
@@ -113,6 +114,7 @@ function GeneratePage() {
 
     try {
       await API.post("/daily-log/add", {
+        log_date: getLocalDateYmd(),
         meal_type: toDailyLogMealType(meal.meal_type),
         food_name: meal.food_name,
         calories: nutrition.calories,
@@ -120,6 +122,7 @@ function GeneratePage() {
         carbs: nutrition.carbs,
         fat: nutrition.fat,
       });
+      await loadDashboard();
       setMessage(`${formatMealType(meal.meal_type)} logged for today.`);
     } catch {
       setMessage("Unable to log generated meal right now.");

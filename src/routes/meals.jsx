@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Clock3, Flame, Beef, Wheat, Apple } from "lucide-react";
 import API from "@/api/axios";
 import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
+import { getLocalDateYmd } from "@/lib/local-date";
 
 const MEAL_EMOJI = {
   breakfast: "🥣",
@@ -47,7 +48,7 @@ function MealsPage() {
 
     async function loadDashboard() {
       try {
-        const res = await API.get("/dashboard/show");
+        const res = await API.get("/dashboard/show", { params: { date: getLocalDateYmd() } });
         if (!ignore) setDashboard(res.data.data);
       } catch {
         if (!ignore) setError("Unable to load meals right now.");
@@ -64,7 +65,7 @@ function MealsPage() {
   }, []);
 
   const refreshDashboard = async () => {
-    const res = await API.get("/dashboard/show");
+    const res = await API.get("/dashboard/show", { params: { date: getLocalDateYmd() } });
     setDashboard(res.data.data);
   };
 
@@ -77,6 +78,7 @@ function MealsPage() {
 
     try {
       await API.post("/daily-log/add", {
+        log_date: getLocalDateYmd(),
         meal_type: toDailyLogMealType(meal.meal_type),
         food_name: meal.food_name,
         calories: nutrition.calories,

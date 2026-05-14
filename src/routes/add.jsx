@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Flame, Salad, Dumbbell } from "lucide-react";
 import API from "@/api/axios";
 import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
+import { getLocalDateYmd } from "@/lib/local-date";
+
+function formatMealType(type = "") {
+  return type
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
 
 function AddPage() {
   const [food, setFood] = useState("Grilled chicken with rice");
@@ -15,6 +23,7 @@ function AddPage() {
   const [meal, setMeal] = useState("Lunch");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [todayMeals, setTodayMeals] = useState([]);
 
   const nutrition = useMemo(() => estimateNutrition(food, grams), [food, grams]);
   const kcal = nutrition.calories;
@@ -22,12 +31,27 @@ function AddPage() {
   const carbs = nutrition.carbs;
   const fat = nutrition.fat;
 
+  const loadTodayLogs = useCallback(async () => {
+    const date = getLocalDateYmd();
+    try {
+      const res = await API.get("/daily-log/summary", { params: { date } });
+      setTodayMeals(res.data?.data?.meals || []);
+    } catch {
+      setTodayMeals([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadTodayLogs();
+  }, [loadTodayLogs]);
+
   const handleSave = async () => {
     setSaving(true);
     setMessage("");
 
     try {
       await API.post("/daily-log/add", {
+        log_date: getLocalDateYmd(),
         meal_type: toDailyLogMealType(meal),
         food_name: food,
         calories: kcal,
@@ -36,8 +60,14 @@ function AddPage() {
         fat,
       });
       setMessage("Meal saved for today.");
-    } catch {
-      setMessage("Unable to save meal right now.");
+      await loadTodayLogs();
+    } catch (err) {
+      const apiMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Unable to save meal right now.";
+      setMessage(apiMsg);
     } finally {
       setSaving(false);
     }
@@ -75,6 +105,22 @@ function AddPage() {
           </div>
         </Card>
       </motion.div>
+
+      {todayMeals.length ? (
+        <Card className="glass-card rounded-3xl p-5 border-0 mb-5">
+          <h2 className="text-sm font-semibold mb-3">Logged today ({getLocalDateYmd()})</h2>
+          <ul className="divide-y divide-border/60 text-sm">
+            {todayMeals.map((m, idx) => (
+              <li key={m.id != null ? String(m.id) : `${m.meal_type}-${m.food_name}-${idx}`} className="py-2 flex justify-between gap-3">
+                <span className="text-muted-foreground shrink-0">{formatMealType(m.meal_type)}</span>
+                <span className="font-medium truncate">{m.food_name}</span>
+                <span className="tabular-nums shrink-0">{m.calories} kcal</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+
       <div className="grid lg:grid-cols-5 gap-5">
         <Card className="glass-card lg:col-span-3 rounded-3xl p-6 border-0 space-y-5">
           <div>
@@ -83,6 +129,7 @@ function AddPage() {
               {["Breakfast", "Lunch", "Evening Snack", "Dinner"].map((m) => (
                 <button
                   key={m}
+                  type="button"
                   onClick={() => setMeal(m)}
                   className={`rounded-xl py-2 text-sm font-medium transition-colors ${meal === m ? "bg-primary text-primary-foreground" : "bg-accent text-foreground"}`}
                 >
@@ -127,7 +174,11 @@ function AddPage() {
           <Button size="lg" className="w-full rounded-xl" onClick={handleSave} disabled={saving}>
             {saving ? "Saving..." : "Add to today"}
           </Button>
-          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+          {message ? (
+            <p className={`text-sm ${message.includes("Unable") || message.toLowerCase().includes("invalid") ? "text-destructive" : "text-muted-foreground"}`}>
+              {message}
+            </p>
+          ) : null}
         </Card>
 
         <Card className="lg:col-span-2 rounded-3xl p-6 border-0 text-white" style={{ background: "var(--gradient-hero)" }}>

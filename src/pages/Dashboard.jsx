@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import API from "../api/axios";
+import { getLocalDateYmd } from "../lib/local-date";
 import Card from "../components/Card";
 import CalorieChart from "../components/CalorieChart";
 
@@ -13,7 +14,7 @@ const Dashboard = () => {
   }, []);
 
   const fetchDashboard = async () => {
-    const res = await API.get("/dashboard/show");
+    const res = await API.get("/dashboard/show", { params: { date: getLocalDateYmd() } });
     setData(res.data.data);
   };
 

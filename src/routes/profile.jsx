@@ -1,12 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
-import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { EditProfileModal } from "@/components/EditProfileModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
 import { getStoredUser, updateStoredUser } from "@/lib/auth-token";
 import API from "@/api/axios";
@@ -15,40 +21,85 @@ import {
   Lock,
   LogOut,
   Target,
+  Camera,
+  History,
   Sparkles,
   HeartPulse,
-  History,
   ChevronDown,
+  ChevronRight,
+  Mail,
+  Phone,
+  Calendar,
 } from "lucide-react";
 
 const defaultProfile = {
-  name: "Alex Carter",
-  email: "alex.carter@vital.app",
-  weight: "72.4",
-  height: "178",
-  age: "28",
-  gender: "Female",
+  name: "",
+  email: "",
+  password: "",
+  weight: "",
+  height: "",
+  age: "",
+  gender: "",
   mobile_number: "",
   country_code: "+91",
-  goal: "fat_loss",
-  diet_type: "veg",
-  activity_level: "medium",
+  goal: "",
+  diet_type: "",
+  activity_level: "",
   profileImageUrl: "",
+  created_at: "",
 };
+
+const countries = [
+  { code: "+91", label: "India (+91)" },
+  { code: "+1", label: "United States (+1)" },
+  { code: "+44", label: "United Kingdom (+44)" },
+  { code: "+61", label: "Australia (+61)" },
+  { code: "+971", label: "UAE (+971)" },
+];
+
+function dietLabel(v) {
+  const map = {
+    veg: "Vegetarian",
+    veg_egg: "Vegetarian + egg",
+    "non veg": "Non-vegetarian",
+    non_veg: "Non-vegetarian",
+  };
+  return map[v] || (v ? String(v).replace(/_/g, " ") : "—");
+}
+
+function activityLabel(v) {
+  const map = { low: "Light", medium: "Moderate", high: "Active" };
+  return map[v] || (v ? String(v).replace(/_/g, " ") : "—");
+}
+
+function goalLabel(v) {
+  if (!v) return "—";
+  return String(v).replace(/_/g, " ");
+}
+
+function memberSinceText(createdAt) {
+  if (!createdAt) return "Member since Jan 2025";
+  try {
+    const d = new Date(createdAt);
+    if (Number.isNaN(d.getTime())) return "Member since Jan 2025";
+    return `Member since ${d.toLocaleDateString(undefined, { month: "short", year: "numeric" })}`;
+  } catch {
+    return "Member since Jan 2025";
+  }
+}
 
 function ProfilePage() {
   const { logout } = useAuth();
-  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [profile, setProfile] = useState(() => {
-    const stored = getStoredUser();
-    return {
-      ...defaultProfile,
-      ...(stored || {}),
-    };
-  });
-  const [isGoalsOpen, setIsGoalsOpen] = useState(false);
+  const [profile, setProfile] = useState(() => ({
+    ...defaultProfile,
+    ...(getStoredUser() || {}),
+  }));
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(() => ({ ...defaultProfile, ...(getStoredUser() || {}) }));
+  const [goalsOpen, setGoalsOpen] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
+  const fileRef = useRef(null);
 
   useEffect(() => {
     let ignore = false;
@@ -71,6 +122,11 @@ function ProfilePage() {
       ignore = true;
     };
   }, []);
+
+  const openEdit = () => {
+    setDraft({ ...profile, password: "" });
+    setOpen(true);
+  };
 
   const handleSaveProfile = async (data) => {
     setSavingProfile(true);
@@ -107,7 +163,7 @@ function ProfilePage() {
       });
       updateStoredUser(updated);
       setProfileMessage("Profile updated successfully.");
-      setIsEditProfileOpen(false);
+      setOpen(false);
     } catch {
       setProfileMessage("Unable to update profile right now.");
     } finally {
@@ -115,11 +171,24 @@ function ProfilePage() {
     }
   };
 
-  const handleChangePhoto = (file) => {
-    void file;
+  const save = () => {
+    void handleSaveProfile({ ...draft });
   };
 
-  const displayInitials = profile.name
+  const onPickFile = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return;
+    setDraft((d) => {
+      if (d.profileImageUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(d.profileImageUrl);
+      }
+      return { ...d, profileImageUrl: URL.createObjectURL(file) };
+    });
+  };
+
+  const initials = profile.name
     ? profile.name
         .split(/\s+/)
         .map((p) => p[0])
@@ -130,228 +199,299 @@ function ProfilePage() {
 
   return (
     <AppShell>
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="text-sm text-muted-foreground">Account</p>
         <h1 className="text-3xl md:text-4xl font-semibold mt-1">Profile</h1>
-        {profileMessage ? <p className="text-sm text-muted-foreground mt-2">{profileMessage}</p> : null}
+        {profileMessage ? (
+          <p className="text-sm text-muted-foreground mt-2">{profileMessage}</p>
+        ) : null}
       </header>
 
-      {/* Hero Banner — col-12 */}
-      <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="mb-5 w-full"
-      >
-        <Card className="rounded-3xl border border-border overflow-hidden text-white shadow-lg dark:shadow-black/30 w-full">
-          <div className="relative">
-            <img
-              src="https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&w=1600&q=80"
-              alt="Healthy lifestyle and wellbeing"
-              className="h-48 w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/65 to-black/35" />
-            <div className="absolute inset-0 p-6 flex flex-col justify-end">
-              <p className="inline-flex w-fit items-center gap-1.5 text-xs bg-white/20 rounded-full px-2.5 py-1">
-                <Sparkles className="h-3 w-3" /> Personal wellness profile
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold">
-                Stay committed to your healthiest self.
-              </h2>
-              <p className="text-sm text-white/90 mt-2 inline-flex items-center gap-2">
-                <HeartPulse className="h-4 w-4" />
-                Keep your goals updated and track your daily discipline.
-              </p>
-            </div>
-          </div>
-        </Card>
-      </motion.div>
-
-      {/* Profile Card — col-12 */}
       <Card
-        className="mb-5 rounded-3xl border border-border p-6 text-white shadow-lg dark:shadow-black/30 w-full"
+        className="rounded-3xl border-0 p-6 md:p-8 mb-5 text-white relative overflow-hidden"
         style={{ background: "var(--gradient-hero)" }}
       >
-        <div className="flex items-center gap-5">
-          {profile.profileImageUrl ? (
-            <img
-              src={profile.profileImageUrl}
-              alt=""
-              className="h-20 w-20 rounded-full object-cover border border-white/30"
-            />
-          ) : (
-            <div className="h-20 w-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-3xl font-semibold">
-              {displayInitials}
-            </div>
-          )}
-          <div className="flex-1">
-            <h2 className="text-2xl font-semibold">{profile.name}</h2>
-            <p className="opacity-80 text-sm">{profile.email}</p>
-            {profile.mobile_number ? (
-              <p className="opacity-80 text-sm">
-                {profile.country_code} {profile.mobile_number}
-              </p>
-            ) : null}
-            <p className="text-xs opacity-80 mt-1">Member since Jan 2025</p>
-          </div>
-          <Button
-            type="button"
-            variant="secondary"
-            className="rounded-full bg-white/15 px-4 text-white shadow-sm ring-1 ring-white/25 hover:bg-white/25 dark:ring-white/20"
-            onClick={() => setIsEditProfileOpen(true)}
-          >
-            Edit
-          </Button>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-          <Stat label="Weight" value={`${profile.weight} kg`} />
-          <Stat label="Height" value={`${profile.height} cm`} />
-          <Stat label="Age" value={profile.age} />
-          <Stat label="Goal" value={profile.goal || "N/A"} />
+        <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute -left-8 -bottom-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+        <div className="relative">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-white/15 backdrop-blur rounded-full px-3 py-1">
+            <Sparkles className="h-3.5 w-3.5" /> Personal wellness profile
+          </span>
+          <h2 className="text-2xl md:text-3xl font-semibold mt-3 max-w-md">
+            Stay committed to your healthiest self.
+          </h2>
+          <p className="opacity-85 text-sm mt-2 inline-flex items-center gap-2">
+            <HeartPulse className="h-4 w-4" />
+            Keep your goals updated and track your daily discipline.
+          </p>
         </div>
       </Card>
 
-      {/* Daily Goals — col-12, collapsible dropdown */}
-      <Card className="glass-card rounded-3xl w-full mb-5 overflow-hidden">
+      <Card className="glass-card rounded-3xl border-0 p-6 mb-5">
+        <div className="flex items-center gap-5 flex-wrap">
+          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-2xl font-semibold overflow-hidden text-primary">
+            {profile.profileImageUrl ? (
+              <img
+                src={profile.profileImageUrl}
+                alt={profile.name || "Profile"}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              initials
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl font-semibold truncate">{profile.name || "Your name"}</h2>
+            <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5 mt-0.5">
+              <Mail className="h-3.5 w-3.5" /> {profile.email || "—"}
+            </p>
+            {profile.mobile_number ? (
+              <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5 mt-0.5">
+                <Phone className="h-3.5 w-3.5" /> {profile.country_code} {profile.mobile_number}
+              </p>
+            ) : null}
+            <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5 mt-1">
+              <Calendar className="h-3 w-3" /> {memberSinceText(profile.created_at)}
+            </p>
+          </div>
+          <Button type="button" onClick={openEdit} className="rounded-full">
+            Edit profile
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+          <Stat label="Weight" value={profile.weight ? `${profile.weight} kg` : "—"} />
+          <Stat label="Height" value={profile.height ? `${profile.height} cm` : "—"} />
+          <Stat label="Age" value={profile.age ? String(profile.age) : "—"} />
+          <Stat label="Gender" value={profile.gender || "—"} />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+          <Tag label="Goal" value={goalLabel(profile.goal)} />
+          <Tag label="Diet" value={dietLabel(profile.diet_type)} />
+          <Tag label="Activity" value={activityLabel(profile.activity_level)} />
+        </div>
+      </Card>
+
+      <Card className="glass-card rounded-3xl border-0 mb-5 overflow-hidden">
         <button
           type="button"
-          onClick={() => setIsGoalsOpen((v) => !v)}
-          className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/30 transition-colors"
+          onClick={() => setGoalsOpen((v) => !v)}
+          className="w-full flex items-center gap-4 p-5 text-left hover:bg-accent/40 transition-colors"
         >
-          <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
+          <div className="h-10 w-10 rounded-xl bg-accent flex items-center justify-center text-primary">
             <Target className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-sm">Daily Goals</p>
-            <p className="text-xs text-muted-foreground">
-              Calories, protein, steps & water
-            </p>
+            <p className="font-medium">Daily goals</p>
+            <p className="text-xs text-muted-foreground">Calories, protein, steps & water</p>
           </div>
-          <motion.span
-            animate={{ rotate: isGoalsOpen ? 180 : 0 }}
-            transition={{ duration: 0.25 }}
-          >
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          </motion.span>
+          <ChevronDown
+            className={`h-5 w-5 text-muted-foreground transition-transform shrink-0 ${goalsOpen ? "rotate-180" : ""}`}
+          />
         </button>
-
-        <AnimatePresence initial={false}>
-          {isGoalsOpen && (
-            <motion.div
-              key="goals-body"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <div className="px-6 pb-6 pt-0 space-y-3">
-                <div className="h-px bg-border mb-4" />
-                <Field label="Calorie target (kcal)" defaultValue="2200" />
-                <Field label="Protein (g)" defaultValue="140" />
-                <Field label="Steps" defaultValue="10000" />
-                <Field label="Water (L)" defaultValue="2.5" />
-                <Button className="mt-3 rounded-xl w-full">Save goals</Button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {goalsOpen ? (
+          <div className="px-5 pb-5 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Field label="Calorie target (kcal)" defaultValue="2200" />
+              <Field label="Protein (g)" defaultValue="140" />
+              <Field label="Steps" defaultValue="10000" />
+              <Field label="Water (L)" defaultValue="2.5" />
+            </div>
+            <Button type="button" className="rounded-xl mt-4 w-full md:w-auto">
+              Save goals
+            </Button>
+          </div>
+        ) : null}
       </Card>
 
-      {/* Meal History — col-12 */}
-      <Card className="glass-card rounded-3xl w-full mb-5">
-        <Link
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+        <ActionTile
           to="/meal-history"
-          className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/40 transition-colors rounded-3xl"
-        >
-          <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
-            <History className="h-4 w-4" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm">Meal history</p>
-            <p className="text-xs text-muted-foreground">
-              Today, 7 days, or monthly views
-            </p>
-          </div>
-          <span className="text-muted-foreground shrink-0">›</span>
-        </Link>
-      </Card>
-
-      {/* Notifications — col-12 */}
-      <Card className="glass-card rounded-3xl w-full mb-5">
-        <Link
+          icon={<History className="h-5 w-5" />}
+          title="Meal history"
+          desc="Today, 7 days, or monthly views"
+          accent="from-amber-500/15 to-orange-500/5"
+          iconClass="bg-amber-500/15 text-amber-600 dark:text-amber-400"
+        />
+        <ActionTile
           to="/notifications"
-          className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/40 transition-colors rounded-3xl"
-        >
-          <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
-            <Bell className="h-4 w-4" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm">Notifications</p>
-            <p className="text-xs text-muted-foreground">
-              Meal reminders &amp; coaching
-            </p>
-          </div>
-          <span className="text-muted-foreground shrink-0">›</span>
-        </Link>
-      </Card>
-
-      {/* Privacy — col-12 */}
-      <Card className="glass-card rounded-3xl w-full mb-5">
-        <Link
+          icon={<Bell className="h-5 w-5" />}
+          title="Notifications"
+          desc="Meal reminders & coaching"
+          accent="from-sky-500/15 to-blue-500/5"
+          iconClass="bg-sky-500/15 text-sky-600 dark:text-sky-400"
+        />
+        <ActionTile
           to="/privacy"
-          className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/40 transition-colors rounded-3xl"
-        >
-          <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
-            <Lock className="h-4 w-4" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm">Privacy</p>
-            <p className="text-xs text-muted-foreground">
-              Data and sharing controls
-            </p>
-          </div>
-          <span className="text-muted-foreground shrink-0">›</span>
-        </Link>
-      </Card>
+          icon={<Lock className="h-5 w-5" />}
+          title="Privacy"
+          desc="Data and sharing controls"
+          accent="from-emerald-500/15 to-teal-500/5"
+          iconClass="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+        />
+        <ActionTile
+          icon={<LogOut className="h-5 w-5" />}
+          title="Sign out"
+          desc="End session on this device"
+          accent="from-rose-500/15 to-red-500/5"
+          iconClass="bg-rose-500/15 text-rose-600 dark:text-rose-400"
+          destructive
+          footerLabel="Sign out"
+          onActivate={logout}
+        />
+      </div>
 
-      {/* Sign Out — col-12 */}
-      <Card className="glass-card rounded-3xl w-full mb-5">
-        <button
-          type="button"
-          onClick={logout}
-          className="w-full flex items-center gap-3 p-6 text-left hover:bg-accent/40 transition-colors rounded-3xl"
-        >
-          <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-primary shrink-0">
-            <LogOut className="h-4 w-4" />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg rounded-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit profile</DialogTitle>
+            <DialogDescription>Update your photo and personal details.</DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="relative h-20 w-20 rounded-2xl bg-accent overflow-hidden flex items-center justify-center text-2xl font-semibold group shrink-0"
+            >
+              {draft.profileImageUrl ? (
+                <img
+                  src={draft.profileImageUrl}
+                  alt="Avatar preview"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span>{draft.name?.charAt(0) || "?"}</span>
+              )}
+              <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                <Camera className="h-5 w-5" />
+              </span>
+            </button>
+            <div>
+              <Button
+                type="button"
+                variant="secondary"
+                className="rounded-full"
+                onClick={() => fileRef.current?.click()}
+              >
+                <Camera className="h-4 w-4" /> Change photo
+              </Button>
+              <p className="text-xs text-muted-foreground mt-1.5">PNG or JPG, up to 5 MB</p>
+            </div>
+            <input ref={fileRef} type="file" accept="image/png,image/jpeg" hidden onChange={onPickFile} />
           </div>
-          <div className="flex-1">
-            <p className="font-medium text-sm">Sign out</p>
-            <p className="text-xs text-muted-foreground">
-              End session on this device
-            </p>
+          <div className="grid gap-3 mt-2">
+            <DraftField label="Name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} />
+            <DraftField
+              label="Email"
+              value={draft.email}
+              onChange={(v) => setDraft({ ...draft, email: v })}
+              type="email"
+            />
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Country</Label>
+                <select
+                  value={draft.country_code}
+                  onChange={(e) => setDraft({ ...draft, country_code: e.target.value })}
+                  className="mt-1.5 h-11 w-full rounded-xl border border-input bg-background px-3 text-sm"
+                >
+                  {countries.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <DraftField
+                label="Mobile"
+                value={draft.mobile_number}
+                onChange={(v) => setDraft({ ...draft, mobile_number: v })}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <DraftField
+                label="Weight (kg)"
+                value={draft.weight}
+                onChange={(v) => setDraft({ ...draft, weight: v })}
+                type="number"
+              />
+              <DraftField
+                label="Height (cm)"
+                value={draft.height}
+                onChange={(v) => setDraft({ ...draft, height: v })}
+                type="number"
+              />
+              <DraftField label="Age" value={draft.age} onChange={(v) => setDraft({ ...draft, age: v })} type="number" />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <DraftSelect
+                label="Gender"
+                value={draft.gender}
+                onChange={(v) => setDraft({ ...draft, gender: v })}
+                options={["Female", "Male", "Other"]}
+              />
+              <DraftSelect
+                label="Goal"
+                value={draft.goal}
+                onChange={(v) => setDraft({ ...draft, goal: v })}
+                options={["fat_loss", "weight_loss", "maintenance", "muscle_gain"]}
+                formatOption={(o) => o.replace(/_/g, " ")}
+              />
+              <DraftSelect
+                label="Diet"
+                value={draft.diet_type}
+                onChange={(v) => setDraft({ ...draft, diet_type: v })}
+                options={["veg", "veg_egg", "non veg"]}
+                formatOption={(o) => dietLabel(o)}
+              />
+              <DraftSelect
+                label="Activity"
+                value={draft.activity_level}
+                onChange={(v) => setDraft({ ...draft, activity_level: v })}
+                options={["low", "medium", "high"]}
+                formatOption={(o) => activityLabel(o)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">New password</Label>
+              <Input
+                type="password"
+                value={draft.password}
+                placeholder="Leave blank to keep current"
+                onChange={(e) => setDraft({ ...draft, password: e.target.value })}
+                className="mt-1.5 h-11 rounded-xl"
+              />
+            </div>
           </div>
-          <span className="text-muted-foreground">›</span>
-        </button>
-      </Card>
-
-      <EditProfileModal
-        isOpen={isEditProfileOpen}
-        onClose={() => setIsEditProfileOpen(false)}
-        initialData={profile}
-        onSave={handleSaveProfile}
-        onChangePhoto={handleChangePhoto}
-        isSaving={savingProfile}
-      />
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-full">
+              Cancel
+            </Button>
+            <Button type="button" onClick={save} className="rounded-full" disabled={savingProfile}>
+              {savingProfile ? "Saving..." : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
 
 function Stat({ label, value }) {
   return (
-    <div className="rounded-2xl bg-white/15 backdrop-blur px-4 py-3">
-      <p className="text-[11px] opacity-80">{label}</p>
-      <p className="text-lg font-semibold mt-0.5">{value}</p>
+    <div className="rounded-2xl bg-accent/60 px-4 py-3">
+      <p className="text-[11px] text-muted-foreground">{label}</p>
+      <p className="text-base font-semibold mt-0.5">{value}</p>
+    </div>
+  );
+}
+
+function Tag({ label, value }) {
+  return (
+    <div className="rounded-2xl border border-border/60 px-4 py-3 flex items-center justify-between gap-2">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-medium text-right truncate">{value}</p>
     </div>
   );
 }
@@ -362,6 +502,73 @@ function Field({ label, defaultValue }) {
       <Label className="text-xs text-muted-foreground">{label}</Label>
       <Input defaultValue={defaultValue} className="mt-1.5 h-11 rounded-xl" />
     </div>
+  );
+}
+
+function DraftField({ label, value, onChange, type = "text" }) {
+  return (
+    <div>
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Input
+        value={value}
+        type={type}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1.5 h-11 rounded-xl"
+      />
+    </div>
+  );
+}
+
+function DraftSelect({ label, value, onChange, options, formatOption }) {
+  const fmt = formatOption || ((o) => o.replace(/_/g, " "));
+  return (
+    <div>
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1.5 h-11 w-full rounded-xl border border-input bg-background px-3 text-sm"
+      >
+        <option value="">Select {label.toLowerCase()}</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {fmt(o)}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function ActionTile({ icon, title, desc, to, destructive, accent, iconClass, onActivate, footerLabel = "Open" }) {
+  const content = (
+    <div className="relative h-full glass-card rounded-3xl border-0 p-5 overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-lg">
+      <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-70 pointer-events-none`} />
+      <div className="relative flex flex-col h-full min-h-[140px]">
+        <div className={`h-11 w-11 rounded-2xl flex items-center justify-center ${iconClass}`}>{icon}</div>
+        <div className="mt-4 flex-1">
+          <p className={`font-semibold ${destructive ? "text-destructive" : ""}`}>{title}</p>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{desc}</p>
+        </div>
+        <div className="flex items-center gap-1 text-xs font-medium mt-4 opacity-80">
+          {footerLabel} <ChevronRight className="h-3.5 w-3.5" />
+        </div>
+      </div>
+    </div>
+  );
+
+  if (to) {
+    return (
+      <Link to={to} className="block h-full">
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" className="block h-full text-left w-full" onClick={onActivate}>
+      {content}
+    </button>
   );
 }
 

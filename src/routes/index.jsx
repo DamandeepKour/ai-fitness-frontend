@@ -11,6 +11,7 @@ import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import API from "@/api/axios";
 import { getStoredUser } from "@/lib/auth-token";
+import { getLocalDateYmd } from "@/lib/local-date";
 
 const MEAL_EMOJI = {
   breakfast: "🥣",
@@ -67,7 +68,7 @@ function Dashboard() {
 
     async function loadDashboard() {
       try {
-        const res = await API.get("/dashboard/show");
+        const res = await API.get("/dashboard/show", { params: { date: getLocalDateYmd() } });
         if (!ignore) setDashboard(res.data.data);
       } catch {
         if (!ignore) setError("Unable to load dashboard right now.");
