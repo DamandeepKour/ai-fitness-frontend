@@ -43,12 +43,17 @@ const Signup = () => {
           <div className="relative">
             <AuthMobileHeroStrip slides={slides} activeIndex={activeIndex} />
 
+            <img
+              src="/fitnova-logo-wide.png"
+              alt="FitNova AI"
+              className="h-24 mb-5 ring-primary/15 rounded-2xl w-full"
+            />
             <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-violet-600 dark:from-emerald-400 dark:to-violet-400 mb-2">
-              Start your healthy journey
+              Start your FitNova AI journey
             </p>
             <h2 className="mb-2 text-4xl font-semibold tracking-tight text-foreground">Create account</h2>
             <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-              Build better food and fitness habits with motivating daily insights.
+              Build better food and fitness habits with intelligent daily insights.
             </p>
 
             <div className="space-y-4">

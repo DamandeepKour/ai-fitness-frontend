@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Utensils, PlusCircle, LineChart, User, Activity, Sparkles } from "lucide-react";
+import { LayoutDashboard, Utensils, PlusCircle, LineChart, User, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -16,12 +16,14 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-border bg-card/80 backdrop-blur-xl px-4 py-6 sticky top-0 h-screen">
       <div className="flex items-center gap-2 px-3 mb-8">
-        <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: "var(--gradient-hero)" }}>
-          <Activity className="h-5 w-5 text-white" />
-        </div>
+        <img
+          src="/fitnova-logo.png"
+          alt="FitNova AI"
+          className="h-12 w-12 rounded-2xl object-cover shadow-sm ring-1 ring-border"
+        />
         <div>
-          <p className="text-sm font-semibold leading-none">Vital</p>
-          <p className="text-[11px] text-muted-foreground">AI Fitness</p>
+          <p className="text-sm font-semibold leading-none">FitNova AI</p>
+          <p className="text-[11px] text-muted-foreground">Intelligent Fitness & Nutrition</p>
         </div>
       </div>
       <nav className="flex flex-col gap-1">

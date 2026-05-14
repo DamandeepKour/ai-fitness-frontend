@@ -41,12 +41,17 @@ const Login = () => {
           <div className="relative">
             <AuthMobileHeroStrip slides={slides} activeIndex={activeIndex} />
 
+            <img
+              src="/fitnova-logo-wide.png"
+              alt="FitNova AI"
+              className="h-24 mb-5 ring-primary/15 rounded-2xl w-full"
+            />
             <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-violet-600 dark:from-sky-400 dark:to-violet-400 mb-2">
-              Welcome back to Vital
+              Welcome back to FitNova AI
             </p>
             <h2 className="mb-2 text-4xl font-semibold tracking-tight text-foreground">Login to continue</h2>
             <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-              Track meals, workouts, hydration, and your healthy progress every day.
+              Intelligent fitness and nutrition tracking for your healthy progress every day.
             </p>
 
             <div className="space-y-4">

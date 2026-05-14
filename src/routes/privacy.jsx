@@ -12,7 +12,7 @@ import { ChevronLeft, Lock, Shield, Eye, Share2, Database } from "lucide-react";
 const DEFAULT_PREFS = [
   { key: "profile", title: "Public profile", desc: "Allow friends to find you by name", icon: Eye, on: false },
   { key: "share", title: "Share workout activity", desc: "Visible to your connections", icon: Share2, on: true },
-  { key: "analytics", title: "Anonymous analytics", desc: "Help us improve Vital", icon: Database, on: true },
+  { key: "analytics", title: "Anonymous analytics", desc: "Help us improve FitNova AI", icon: Database, on: true },
   { key: "ai", title: "AI personalization", desc: "Use my data to tailor coaching", icon: Shield, on: true },
 ];
 

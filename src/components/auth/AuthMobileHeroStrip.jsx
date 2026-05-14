@@ -24,7 +24,7 @@ export function AuthMobileHeroStrip({ slides, activeIndex }) {
       </AnimatePresence>
       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-violet-900/25 to-cyan-600/15" />
       <div className="absolute bottom-0 left-0 right-0 p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-cyan-200/90">Vital</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-cyan-200/90">FitNova AI</p>
         <p className="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-white drop-shadow-sm">{slide.headline}</p>
         <div className="mt-2 flex gap-1.5">
           {slides.map((s, i) => (

@@ -18,7 +18,7 @@ export const LOGIN_MARKETING_SLIDES = [
     src: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1600&q=80",
     alt: "Peaceful yoga and mindful movement",
     headline: "Balance energy and recovery.",
-    sub: "Hydration, sleep, and movement — Vital helps you connect the dots.",
+    sub: "Hydration, sleep, and movement — FitNova AI helps you connect the dots.",
   },
   {
     src: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=1600&q=80",
@@ -40,7 +40,7 @@ export const SIGNUP_MARKETING_SLIDES = [
     src: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1600&q=80",
     alt: "Gym equipment and strength training",
     headline: "Strong body, focused mind, better life.",
-    sub: "Join Vital and turn everyday choices into long-term healthy results.",
+    sub: "Join FitNova AI and turn everyday choices into long-term healthy results.",
   },
   {
     src: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1600&q=80",
@@ -58,7 +58,7 @@ export const SIGNUP_MARKETING_SLIDES = [
     src: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1600&q=80",
     alt: "Modern gym interior and dumbbells",
     headline: "Your space, your pace.",
-    sub: "Whether at home or in the gym, Vital meets you where you train.",
+    sub: "Whether at home or in the gym, FitNova AI meets you where you train.",
   },
   {
     src: "https://images.unsplash.com/photo-1599058945522-28ba584b771f?auto=format&fit=crop&w=1600&q=80",
