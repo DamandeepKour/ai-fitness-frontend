@@ -1,9 +1,7 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Routes } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
-import { WebsiteRoutes } from "@/website/routes";
-import { UserRoutes } from "@/user/routes";
-import { SuperAdminRoutes } from "@/superadmin/routes";
+import { getAppRoutes } from "@/app-routes";
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -16,27 +14,22 @@ const PageTransition = ({ children }) => (
   </motion.div>
 );
 
-const AnimatedRoutes = () => {
+function AnimatedRoutes() {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
-        <WebsiteRoutes PageTransition={PageTransition} />
-        <UserRoutes PageTransition={PageTransition} />
-        <SuperAdminRoutes PageTransition={PageTransition} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        {getAppRoutes(PageTransition)}
       </Routes>
     </AnimatePresence>
   );
-};
+}
 
-const App = () => {
+export default function App() {
   return (
     <BrowserRouter>
       <AnimatedRoutes />
     </BrowserRouter>
   );
-};
-
-export default App;
+}

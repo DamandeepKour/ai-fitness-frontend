@@ -11,9 +11,9 @@ import NotificationsPage from "@/user/routes/notifications";
 import PrivacyPage from "@/user/routes/privacy";
 
 /** Authenticated app routes (user area). */
-export function UserRoutes({ PageTransition }) {
-  return (
-    <Route element={<PrivateLayout />}>
+export function userRouteElements(PageTransition) {
+  return [
+    <Route key="user-layout" element={<PrivateLayout />}>
       <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
       <Route path="/meals" element={<PageTransition><MealsPage /></PageTransition>} />
       <Route path="/generate" element={<PageTransition><GeneratePage /></PageTransition>} />
@@ -23,6 +23,6 @@ export function UserRoutes({ PageTransition }) {
       <Route path="/meal-history" element={<PageTransition><MealHistoryPage /></PageTransition>} />
       <Route path="/notifications" element={<PageTransition><NotificationsPage /></PageTransition>} />
       <Route path="/privacy" element={<PageTransition><PrivacyPage /></PageTransition>} />
-    </Route>
-  );
+    </Route>,
+  ];
 }

@@ -1,15 +1,14 @@
 import { Route } from "react-router-dom";
-import Home from "@/website/pages/Home";
+import Welcome from "@/website/pages/Welcome";
 import Login from "@/website/pages/Login";
 import Signup from "@/website/pages/Signup";
 
 /** Public marketing & auth routes (website area). */
-export function WebsiteRoutes({ PageTransition }) {
-  return (
-    <>
-      <Route path="/" element={<PageTransition><Home /></PageTransition>} />
-      <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-      <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
-    </>
-  );
+export function websiteRouteElements(PageTransition) {
+  return [
+    <Route key="welcome-home" path="/" element={<PageTransition><Welcome /></PageTransition>} />,
+    <Route key="welcome" path="/welcome" element={<PageTransition><Welcome /></PageTransition>} />,
+    <Route key="login" path="/login" element={<PageTransition><Login /></PageTransition>} />,
+    <Route key="signup" path="/signup" element={<PageTransition><Signup /></PageTransition>} />,
+  ];
 }
