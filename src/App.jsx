@@ -1,18 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
-import PrivateLayout from "./layout/PrivateLayout";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./routes/index";
-import MealsPage from "./routes/meals";
-import GeneratePage from "./routes/generate";
-import AddPage from "./routes/add";
-import ProgressPage from "./routes/progress";
-import ProfilePage from "./routes/profile";
-import MealHistoryPage from "./routes/meal-history";
-import NotificationsPage from "./routes/notifications";
-import PrivacyPage from "./routes/privacy";
+import { WebsiteRoutes } from "@/website/routes";
+import { UserRoutes } from "@/user/routes";
+import { SuperAdminRoutes } from "@/superadmin/routes";
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -31,22 +22,9 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
-        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-        <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
-
-        <Route element={<PrivateLayout />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
-          <Route path="/meals" element={<PageTransition><MealsPage /></PageTransition>} />
-          <Route path="/generate" element={<PageTransition><GeneratePage /></PageTransition>} />
-          <Route path="/add" element={<PageTransition><AddPage /></PageTransition>} />
-          <Route path="/progress" element={<PageTransition><ProgressPage /></PageTransition>} />
-          <Route path="/profile" element={<PageTransition><ProfilePage /></PageTransition>} />
-          <Route path="/meal-history" element={<PageTransition><MealHistoryPage /></PageTransition>} />
-          <Route path="/notifications" element={<PageTransition><NotificationsPage /></PageTransition>} />
-          <Route path="/privacy" element={<PageTransition><PrivacyPage /></PageTransition>} />
-        </Route>
-
+        <WebsiteRoutes PageTransition={PageTransition} />
+        <UserRoutes PageTransition={PageTransition} />
+        <SuperAdminRoutes PageTransition={PageTransition} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </AnimatePresence>
