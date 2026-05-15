@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useRotatingIndex } from "@/hooks/use-rotating-index";
 import { useLogin } from "@/hooks/use-login";
 import { LOGIN_MARKETING_SLIDES } from "@/data/auth-visual-slides";
@@ -10,7 +9,7 @@ import { AuthAmbientBackdrop } from "@/components/auth/AuthAmbientBackdrop";
 import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
 import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 
-const ROTATE_MS = 5500;
+const ROTATE_MS = 2000;
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -29,12 +28,7 @@ const Login = () => {
       <AuthAmbientBackdrop sources={bgSources} activeIndex={activeIndex} />
 
       <div className="relative z-10 grid w-full max-w-6xl overflow-hidden rounded-3xl border border-border/70 bg-card/90 shadow-[0_28px_90px_-20px_rgba(59,130,246,0.2),0_12px_40px_-15px_rgba(236,72,153,0.12)] backdrop-blur-xl dark:border-border/60 dark:bg-card/85 dark:shadow-[0_28px_80px_-24px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.06)] lg:grid-cols-2">
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.45 }}
-          className="relative p-8 md:p-12 bg-gradient-to-br from-card via-card to-primary/5 dark:to-primary/[0.07]"
-        >
+        <div className="relative p-8 md:p-12 bg-gradient-to-br from-card via-card to-primary/5 dark:to-primary/[0.07]">
           <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-gradient-to-br from-sky-400/20 to-violet-500/15 blur-3xl dark:from-sky-500/10 dark:to-violet-600/10" />
           <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-gradient-to-tr from-rose-400/15 to-amber-400/10 blur-3xl" />
 
@@ -96,7 +90,7 @@ const Login = () => {
               </Link>
             </p>
           </div>
-        </motion.div>
+        </div>
 
         <AuthMarketingPanel slides={slides} activeIndex={activeIndex} />
       </div>

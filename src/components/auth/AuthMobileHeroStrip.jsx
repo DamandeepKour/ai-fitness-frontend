@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 
+const SLIDE_FADE = { duration: 0.75, ease: "easeInOut" };
+
 /**
- * Compact rotating hero for small screens (synced index with marketing slides).
- * @param {{ slides: import("@/data/auth-visual-slides").AuthSlide[]; activeIndex: number }} props
+ * Compact rotating hero for small screens (synced with marketing slides).
  */
 export function AuthMobileHeroStrip({ slides, activeIndex }) {
   const slide = slides[activeIndex % slides.length];
@@ -10,15 +11,15 @@ export function AuthMobileHeroStrip({ slides, activeIndex }) {
 
   return (
     <div className="relative mb-8 h-44 w-full overflow-hidden rounded-2xl shadow-lg ring-1 ring-primary/15 lg:hidden">
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="sync" initial={false}>
         <motion.img
           key={slide.src}
           src={slide.src}
           alt={slide.alt}
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.7 }}
+          transition={SLIDE_FADE}
           className="absolute inset-0 h-full w-full object-cover"
         />
       </AnimatePresence>
@@ -30,7 +31,7 @@ export function AuthMobileHeroStrip({ slides, activeIndex }) {
           {slides.map((s, i) => (
             <span
               key={s.src}
-              className={`h-1 rounded-full transition-all duration-300 ${
+              className={`h-1 rounded-full transition-all duration-500 ${
                 i === activeIndex % slides.length ? "w-5 bg-white" : "w-1 bg-white/40"
               }`}
             />

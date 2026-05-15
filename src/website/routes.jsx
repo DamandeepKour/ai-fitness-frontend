@@ -6,68 +6,70 @@ import Signup from "@/website/pages/Signup";
 import SitePlaceholder from "@/website/pages/SitePlaceholder";
 
 /** Public marketing & auth routes (website area). */
-export function websiteRouteElements(PageTransition) {
+export function websiteRouteElements(PageWrap, StableWrap) {
+  const Stable = StableWrap || PageWrap;
+
   return [
     <Route key="site-layout" element={<SiteLayout />}>
       <Route index element={<Navigate to="/welcome" replace />} />
-      <Route path="/welcome" element={<PageTransition><Welcome /></PageTransition>} />
+      <Route path="/welcome" element={<PageWrap><Welcome /></PageWrap>} />
       <Route
         path="/features"
         element={
-          <PageTransition>
+          <PageWrap>
             <SitePlaceholder
               title="Features"
               description="AI meal plans, calorie tracking, macro insights, cardio plans, and progress analytics — all in one beautiful app."
             />
-          </PageTransition>
+          </PageWrap>
         }
       />
       <Route
         path="/pricing"
         element={
-          <PageTransition>
+          <PageWrap>
             <SitePlaceholder
               title="Pricing"
               description="Simple plans for every goal. Start free, upgrade when you are ready to unlock advanced coaching."
             />
-          </PageTransition>
+          </PageWrap>
         }
       />
       <Route
         path="/about"
         element={
-          <PageTransition>
+          <PageWrap>
             <SitePlaceholder
               title="About FitnovaAI"
               description="We help people build sustainable fitness habits with intelligent nutrition and training tools."
             />
-          </PageTransition>
+          </PageWrap>
         }
       />
       <Route
         path="/contact"
         element={
-          <PageTransition>
+          <PageWrap>
             <SitePlaceholder
               title="Contact"
               description="Questions or partnerships? Reach us at hello@fitnovaai.app — we would love to hear from you."
             />
-          </PageTransition>
+          </PageWrap>
         }
       />
       <Route
         path="/privacy-policy"
         element={
-          <PageTransition>
+          <PageWrap>
             <SitePlaceholder
               title="Privacy Policy"
               description="Your data stays yours. We use industry-standard security and never sell personal health information."
             />
-          </PageTransition>
+          </PageWrap>
         }
       />
     </Route>,
-    <Route key="login" path="/login" element={<PageTransition><Login /></PageTransition>} />,
-    <Route key="signup" path="/signup" element={<PageTransition><Signup /></PageTransition>} />,
+    <Route key="login" path="/login" element={<Stable><Login /></Stable>} />,
+    <Route key="signup" path="/signup" element={<Stable><Signup /></Stable>} />,
   ];
 }

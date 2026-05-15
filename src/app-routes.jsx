@@ -5,13 +5,13 @@ import { superAdminRouteElements } from "@/superadmin/routes";
 
 /**
  * All application routes in one place.
- * Returns an array of <Route> elements — must be spread inside <Routes>, not wrapped in a custom component.
+ * PageWrap — animated route shell; StableWrap — auth pages (no route fade).
  */
-export function getAppRoutes(PageTransition) {
+export function getAppRoutes(PageWrap, StableWrap = PageWrap) {
   return [
-    ...websiteRouteElements(PageTransition),
-    ...userRouteElements(PageTransition),
-    ...superAdminRouteElements(PageTransition),
+    ...websiteRouteElements(PageWrap, StableWrap),
+    ...userRouteElements(PageWrap),
+    ...superAdminRouteElements(PageWrap),
     <Route key="not-found" path="*" element={<Navigate to="/dashboard" replace />} />,
   ];
 }
