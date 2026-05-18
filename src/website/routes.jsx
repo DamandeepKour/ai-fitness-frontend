@@ -4,6 +4,8 @@ import Welcome from "@/website/pages/Welcome";
 import Login from "@/website/pages/Login";
 import Signup from "@/website/pages/Signup";
 import SitePlaceholder from "@/website/pages/SitePlaceholder";
+import About from "@/website/pages/About";
+import Features from "@/website/pages/Features";
 
 /** Public marketing & auth routes (website area). */
 export function websiteRouteElements(PageWrap, StableWrap) {
@@ -13,17 +15,7 @@ export function websiteRouteElements(PageWrap, StableWrap) {
     <Route key="site-layout" element={<SiteLayout />}>
       <Route index element={<Navigate to="/welcome" replace />} />
       <Route path="/welcome" element={<PageWrap><Welcome /></PageWrap>} />
-      <Route
-        path="/features"
-        element={
-          <PageWrap>
-            <SitePlaceholder
-              title="Features"
-              description="AI meal plans, calorie tracking, macro insights, cardio plans, and progress analytics — all in one beautiful app."
-            />
-          </PageWrap>
-        }
-      />
+      <Route path="/features" element={<PageWrap><Features /></PageWrap>} />
       <Route
         path="/pricing"
         element={
@@ -35,17 +27,7 @@ export function websiteRouteElements(PageWrap, StableWrap) {
           </PageWrap>
         }
       />
-      <Route
-        path="/about"
-        element={
-          <PageWrap>
-            <SitePlaceholder
-              title="About FitnovaAI"
-              description="We help people build sustainable fitness habits with intelligent nutrition and training tools."
-            />
-          </PageWrap>
-        }
-      />
+      <Route path="/about" element={<PageWrap><About /></PageWrap>} />
       <Route
         path="/contact"
         element={
