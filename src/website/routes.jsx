@@ -6,6 +6,8 @@ import Signup from "@/website/pages/Signup";
 import SitePlaceholder from "@/website/pages/SitePlaceholder";
 import About from "@/website/pages/About";
 import Features from "@/website/pages/Features";
+import Pricing from "@/website/pages/Pricing";
+import Contact from "@/website/pages/Contact";
 
 /** Public marketing & auth routes (website area). */
 export function websiteRouteElements(PageWrap, StableWrap) {
@@ -16,29 +18,9 @@ export function websiteRouteElements(PageWrap, StableWrap) {
       <Route index element={<Navigate to="/welcome" replace />} />
       <Route path="/welcome" element={<PageWrap><Welcome /></PageWrap>} />
       <Route path="/features" element={<PageWrap><Features /></PageWrap>} />
-      <Route
-        path="/pricing"
-        element={
-          <PageWrap>
-            <SitePlaceholder
-              title="Pricing"
-              description="Simple plans for every goal. Start free, upgrade when you are ready to unlock advanced coaching."
-            />
-          </PageWrap>
-        }
-      />
+      <Route path="/pricing" element={<PageWrap><Pricing /></PageWrap>} />
       <Route path="/about" element={<PageWrap><About /></PageWrap>} />
-      <Route
-        path="/contact"
-        element={
-          <PageWrap>
-            <SitePlaceholder
-              title="Contact"
-              description="Questions or partnerships? Reach us at hello@fitnovaai.app — we would love to hear from you."
-            />
-          </PageWrap>
-        }
-      />
+      <Route path="/contact" element={<PageWrap><Contact /></PageWrap>} />
       <Route
         path="/privacy-policy"
         element={
