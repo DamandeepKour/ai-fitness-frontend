@@ -8,6 +8,7 @@ import About from "@/website/pages/About";
 import Features from "@/website/pages/Features";
 import Pricing from "@/website/pages/Pricing";
 import Contact from "@/website/pages/Contact";
+import LogoPreview from "@/website/pages/LogoPreview";
 
 /** Public marketing & auth routes (website area). */
 export function websiteRouteElements(PageWrap, StableWrap) {
@@ -21,6 +22,7 @@ export function websiteRouteElements(PageWrap, StableWrap) {
       <Route path="/pricing" element={<PageWrap><Pricing /></PageWrap>} />
       <Route path="/about" element={<PageWrap><About /></PageWrap>} />
       <Route path="/contact" element={<PageWrap><Contact /></PageWrap>} />
+      <Route path="/logo-preview" element={<PageWrap><LogoPreview /></PageWrap>} />
       <Route
         path="/privacy-policy"
         element={
