@@ -8,6 +8,7 @@ import { LOGIN_MARKETING_SLIDES } from "@/data/auth-visual-slides";
 import { AuthAmbientBackdrop } from "@/components/auth/AuthAmbientBackdrop";
 import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
 import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
+import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
 
 const ROTATE_MS = 2000;
 
@@ -35,11 +36,7 @@ const Login = () => {
           <div className="relative">
             <AuthMobileHeroStrip slides={slides} activeIndex={activeIndex} />
 
-            <img
-              src="/fitnova-logo-wide.png"
-              alt="FitNova AI"
-              className="h-24 mb-5 ring-primary/15 rounded-2xl w-full"
-            />
+            <FitnovaAuthLogo className="mb-6 justify-center" />
             <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-violet-600 dark:from-sky-400 dark:to-violet-400 mb-2">
               Welcome back to FitNova AI
             </p>

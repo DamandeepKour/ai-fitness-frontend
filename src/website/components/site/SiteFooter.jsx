@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Activity, Heart, Share2, Globe, Video } from "lucide-react";
+import { Heart, Share2, Globe, Video } from "lucide-react";
+import { BrandLogo } from "./BrandLogo";
 
 const socialIcons = [Share2, Globe, Video];
 
@@ -10,15 +11,7 @@ export function SiteFooter() {
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-3">
-              <div
-                className="h-9 w-9 rounded-xl flex items-center justify-center shadow-lg"
-                style={{ background: "var(--gradient-hero)" }}
-              >
-                <Activity className="h-5 w-5 text-white" />
-              </div>
-              <p className="text-lg font-bold">FitnovaAI</p>
-            </div>
+            <BrandLogo variant="wide" asLink={false} size="footer" className="mb-3" />
             <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
               Your AI-powered fitness companion. Track meals 🥗, crush cardio 🏃, build strength 💪,
               and hit your macros — all in one place.
@@ -83,7 +76,8 @@ export function SiteFooter() {
         <div className="mt-10 pt-6 border-t border-border/60 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} FitnovaAI. All rights reserved.</p>
           <p className="flex items-center gap-1">
-            Crafted with <Heart className="h-3 w-3 text-rose-500 fill-rose-500" /> for movers & makers
+            Crafted with <Heart className="h-3 w-3 text-rose-500 fill-rose-500" /> for movers &
+            makers
           </p>
         </div>
       </div>

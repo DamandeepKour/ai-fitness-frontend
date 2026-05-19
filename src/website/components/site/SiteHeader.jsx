@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Activity, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "./BrandLogo";
 
 const links = [
   { to: "/welcome", label: "Home" },
@@ -24,18 +25,7 @@ export function SiteHeader() {
       className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/60"
     >
       <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-        <Link to="/welcome" className="flex items-center gap-2">
-          <div
-            className="h-9 w-9 rounded-xl flex items-center justify-center shadow-lg"
-            style={{ background: "var(--gradient-hero)" }}
-          >
-            <Activity className="h-5 w-5 text-white" />
-          </div>
-          <div className="leading-none">
-            <p className="text-base font-bold tracking-tight">FitnovaAI</p>
-            <p className="text-[10px] text-muted-foreground">Train smart · Eat smart</p>
-          </div>
-        </Link>
+        <BrandLogo variant="wide" to="/welcome" />
 
         <nav className="hidden md:flex items-center gap-1">
           {links.map((l) => (
