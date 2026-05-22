@@ -39,7 +39,6 @@ export function AuthAmbientBackdrop({ sources, activeIndex }) {
         animate={{ x: [0, -20, 0], y: [0, -16, 0] }}
         transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
       />
-
       <div className="absolute inset-0 bg-gradient-to-b from-background/75 via-background/60 to-background/88 dark:from-background/92 dark:via-background/82 dark:to-background/96" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-5%,rgba(56,189,248,0.22),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(129,140,248,0.22),transparent_52%)]" />
     </div>

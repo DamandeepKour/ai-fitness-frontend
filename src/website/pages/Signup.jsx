@@ -11,17 +11,33 @@ import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
 const ROTATE_MS = 2000;
 
 const Signup = () => {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const { signup, loading, error, clearError } = useSignup();
+  const [localError, setLocalError] = useState("");
 
   const slides = SIGNUP_MARKETING_SLIDES;
   const bgSources = slides.map((s) => s.src);
   const activeIndex = useRotatingIndex(slides.length, ROTATE_MS);
 
   const handleSubmit = async () => {
+    setLocalError("");
+
+    if (form.password !== form.confirmPassword) {
+      setLocalError("Passwords do not match");
+      return;
+    }
+
     await signup({
       name: form.name.trim(),
       email: form.email.trim(),
+      phone: form.phone.trim(),
       password: form.password,
     });
   };
@@ -39,15 +55,21 @@ const Signup = () => {
             <AuthMobileHeroStrip slides={slides} activeIndex={activeIndex} />
 
             <FitnovaAuthLogo className="mb-6 justify-center" />
+
             <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-violet-600 dark:from-emerald-400 dark:to-violet-400 mb-2">
               Start your FitNova AI journey
             </p>
-            <h2 className="mb-2 text-4xl font-semibold tracking-tight text-foreground">Create account</h2>
+
+            <h2 className="mb-2 text-4xl font-semibold tracking-tight text-foreground">
+              Create account
+            </h2>
+
             <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
               Build better food and fitness habits with intelligent daily insights.
             </p>
 
             <div className="space-y-4">
+              {/* Name */}
               <input
                 placeholder="Name"
                 autoComplete="name"
@@ -55,9 +77,12 @@ const Signup = () => {
                 value={form.name}
                 onChange={(e) => {
                   clearError();
+                  setLocalError("");
                   setForm((f) => ({ ...f, name: e.target.value }));
                 }}
               />
+
+              {/* Email */}
               <input
                 placeholder="Email"
                 type="email"
@@ -66,9 +91,26 @@ const Signup = () => {
                 value={form.email}
                 onChange={(e) => {
                   clearError();
+                  setLocalError("");
                   setForm((f) => ({ ...f, email: e.target.value }));
                 }}
               />
+
+              {/* Phone Number */}
+              <input
+                placeholder="Phone Number"
+                type="tel"
+                autoComplete="tel"
+                className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                value={form.phone}
+                onChange={(e) => {
+                  clearError();
+                  setLocalError("");
+                  setForm((f) => ({ ...f, phone: e.target.value }));
+                }}
+              />
+
+              {/* Password */}
               <input
                 placeholder="Password"
                 type="password"
@@ -77,7 +119,25 @@ const Signup = () => {
                 value={form.password}
                 onChange={(e) => {
                   clearError();
+                  setLocalError("");
                   setForm((f) => ({ ...f, password: e.target.value }));
+                }}
+              />
+
+              {/* Confirm Password */}
+              <input
+                placeholder="Confirm Password"
+                type="password"
+                autoComplete="new-password"
+                className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                value={form.confirmPassword}
+                onChange={(e) => {
+                  clearError();
+                  setLocalError("");
+                  setForm((f) => ({
+                    ...f,
+                    confirmPassword: e.target.value,
+                  }));
                 }}
               />
             </div>
@@ -90,7 +150,15 @@ const Signup = () => {
             >
               {loading ? "Creating…" : "Create Account"}
             </button>
-            {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
+
+            {localError ? (
+              <p className="mt-3 text-sm text-destructive">{localError}</p>
+            ) : null}
+
+            {error ? (
+              <p className="mt-3 text-sm text-destructive">{error}</p>
+            ) : null}
+
             <p className="mt-4 text-sm text-muted-foreground">
               Already have an account?{" "}
               <Link to="/login" className="font-medium text-primary hover:underline">
