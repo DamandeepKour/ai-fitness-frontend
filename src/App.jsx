@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { getAppRoutes } from "@/app-routes";
 
+
 /** Auth screens animate themselves — avoid double fade with route transitions. */
 const AUTH_PATHS = new Set(["/login", "/signup"]);
 

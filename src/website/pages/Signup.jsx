@@ -7,7 +7,7 @@ import { AuthAmbientBackdrop } from "@/components/auth/AuthAmbientBackdrop";
 import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
 import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
-
+import PhoneInput from "react-phone-number-input";
 const ROTATE_MS = 2000;
 
 const Signup = () => {
@@ -97,18 +97,22 @@ const Signup = () => {
               />
 
               {/* Phone Number */}
-              <input
-                placeholder="Phone Number"
-                type="tel"
-                autoComplete="tel"
-                className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
-                value={form.phone}
-                onChange={(e) => {
-                  clearError();
-                  setLocalError("");
-                  setForm((f) => ({ ...f, phone: e.target.value }));
-                }}
-              />
+              <div className="w-full">
+  <PhoneInput
+    international
+    defaultCountry="IN"
+    value={form.phone}
+    onChange={(phone) => {
+      clearError();
+      setLocalError("");
+      setForm((f) => ({
+        ...f,
+        phone: phone || "",
+      }));
+    }}
+    className="flex h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground"
+  />
+</div>
 
               {/* Password */}
               <input
