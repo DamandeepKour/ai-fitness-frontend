@@ -98,21 +98,21 @@ const Signup = () => {
 
               {/* Phone Number */}
               <div className="w-full">
-  <PhoneInput
-    international
-    defaultCountry="IN"
-    value={form.phone}
-    onChange={(phone) => {
-      clearError();
-      setLocalError("");
-      setForm((f) => ({
-        ...f,
-        phone: phone || "",
-      }));
-    }}
-    className="flex h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground"
-  />
-</div>
+                <PhoneInput
+                  international
+                  defaultCountry="IN"
+                  value={form.phone}
+                  onChange={(phone) => {
+                    clearError();
+                    setLocalError("");
+                    setForm((f) => ({
+                      ...f,
+                      phone: phone || "",
+                    }));
+                  }}
+                  className="flex h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground"
+                />
+              </div>
 
               {/* Password */}
               <input
