@@ -25,10 +25,7 @@ export function websiteRouteElements(PageWrap, StableWrap) {
         path="/privacy-policy"
         element={
           <PageWrap>
-            <SitePlaceholder
-              title="Privacy Policy"
-              description="Your data stays yours. We use industry-standard security and never sell personal health information."
-            />
+            <PrivacyPolicy />
           </PageWrap>
         }
       />
