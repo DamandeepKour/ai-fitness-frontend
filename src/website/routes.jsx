@@ -8,6 +8,7 @@ import About from "@/website/pages/About";
 import Features from "@/website/pages/Features";
 import Pricing from "@/website/pages/Pricing";
 import Contact from "@/website/pages/Contact";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 /** Public marketing & auth routes (website area). */
 export function websiteRouteElements(PageWrap, StableWrap) {
