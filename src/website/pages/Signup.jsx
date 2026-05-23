@@ -8,6 +8,7 @@ import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
 import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
 import PhoneInput from "react-phone-number-input";
+
 const ROTATE_MS = 2000;
 
 const Signup = () => {
@@ -43,42 +44,57 @@ const Signup = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 md:p-6">
-      <AuthAmbientBackdrop sources={bgSources} activeIndex={activeIndex} />
+    <div className="relative min-h-screen flex items-center justify-center p-4 md:p-5">
+      <AuthAmbientBackdrop
+        sources={bgSources}
+        activeIndex={activeIndex}
+      />
 
-      <div className="relative z-10 grid w-full max-w-6xl overflow-hidden rounded-3xl border border-border/70 bg-card/90 shadow-[0_28px_90px_-20px_rgba(16,185,129,0.18),0_12px_40px_-15px_rgba(139,92,246,0.14)] backdrop-blur-xl dark:border-border/60 dark:bg-card/85 dark:shadow-[0_28px_80px_-24px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.06)] lg:grid-cols-2">
-        <div className="relative p-8 md:p-12 bg-gradient-to-br from-card via-card to-emerald-500/5 dark:to-emerald-500/10">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-gradient-to-br from-emerald-400/20 to-violet-500/15 blur-3xl dark:from-emerald-500/10 dark:to-violet-600/10" />
+      <div className="relative z-10 grid w-full max-w-6xl overflow-hidden rounded-3xl border border-border/70 bg-card/90 shadow-[0_28px_90px_-20px_rgba(16,185,129,0.18),0_12px_40px_-15px_rgba(139,92,246,0.14)] backdrop-blur-xl lg:grid-cols-2">
+        
+        {/* LEFT SIDE */}
+        <div className="relative p-6 md:p-8 bg-gradient-to-br from-card via-card to-emerald-500/5">
+          
+          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-gradient-to-br from-emerald-400/20 to-violet-500/15 blur-3xl" />
+
           <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-gradient-to-tr from-orange-400/15 to-rose-400/12 blur-3xl" />
 
           <div className="relative">
-            <AuthMobileHeroStrip slides={slides} activeIndex={activeIndex} />
+            
+            <AuthMobileHeroStrip
+              slides={slides}
+              activeIndex={activeIndex}
+            />
 
-            <FitnovaAuthLogo className="mb-6 justify-center" />
+            <FitnovaAuthLogo className="mb-4 justify-center scale-90" />
 
-            <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-violet-600 dark:from-emerald-400 dark:to-violet-400 mb-2">
+            <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-violet-600 mb-1">
               Start your FitNova AI journey
             </p>
 
-            <h2 className="mb-2 text-4xl font-semibold tracking-tight text-foreground">
+            <h2 className="mb-1 text-3xl font-semibold tracking-tight text-foreground">
               Create account
             </h2>
 
-            <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
+            <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
               Build better food and fitness habits with intelligent daily insights.
             </p>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
+              
               {/* Name */}
               <input
                 placeholder="Name"
                 autoComplete="name"
-                className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
                 value={form.name}
                 onChange={(e) => {
                   clearError();
                   setLocalError("");
-                  setForm((f) => ({ ...f, name: e.target.value }));
+                  setForm((f) => ({
+                    ...f,
+                    name: e.target.value,
+                  }));
                 }}
               />
 
@@ -87,16 +103,19 @@ const Signup = () => {
                 placeholder="Email"
                 type="email"
                 autoComplete="email"
-                className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
                 value={form.email}
                 onChange={(e) => {
                   clearError();
                   setLocalError("");
-                  setForm((f) => ({ ...f, email: e.target.value }));
+                  setForm((f) => ({
+                    ...f,
+                    email: e.target.value,
+                  }));
                 }}
               />
 
-              {/* Phone Number */}
+              {/* Phone */}
               <div className="w-full">
                 <PhoneInput
                   international
@@ -105,12 +124,13 @@ const Signup = () => {
                   onChange={(phone) => {
                     clearError();
                     setLocalError("");
+
                     setForm((f) => ({
                       ...f,
                       phone: phone || "",
                     }));
                   }}
-                  className="flex h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground"
+                  className="flex h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm text-foreground"
                 />
               </div>
 
@@ -119,12 +139,16 @@ const Signup = () => {
                 placeholder="Password"
                 type="password"
                 autoComplete="new-password"
-                className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
                 value={form.password}
                 onChange={(e) => {
                   clearError();
                   setLocalError("");
-                  setForm((f) => ({ ...f, password: e.target.value }));
+
+                  setForm((f) => ({
+                    ...f,
+                    password: e.target.value,
+                  }));
                 }}
               />
 
@@ -133,11 +157,12 @@ const Signup = () => {
                 placeholder="Confirm Password"
                 type="password"
                 autoComplete="new-password"
-                className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
                 value={form.confirmPassword}
                 onChange={(e) => {
                   clearError();
                   setLocalError("");
+
                   setForm((f) => ({
                     ...f,
                     confirmPassword: e.target.value,
@@ -146,33 +171,47 @@ const Signup = () => {
               />
             </div>
 
+            {/* BUTTON */}
             <button
               type="button"
               onClick={handleSubmit}
               disabled={loading}
-              className="mt-6 w-full rounded-xl bg-gradient-to-r from-primary to-primary/90 py-3 font-medium text-primary-foreground shadow-md shadow-primary/25 transition-[transform,box-shadow] hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
+              className="mt-4 w-full rounded-xl bg-gradient-to-r from-primary to-primary/90 py-2.5 text-sm font-medium text-primary-foreground shadow-md shadow-primary/25 transition-all hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
             >
               {loading ? "Creating…" : "Create Account"}
             </button>
 
+            {/* ERRORS */}
             {localError ? (
-              <p className="mt-3 text-sm text-destructive">{localError}</p>
+              <p className="mt-2 text-sm text-destructive">
+                {localError}
+              </p>
             ) : null}
 
             {error ? (
-              <p className="mt-3 text-sm text-destructive">{error}</p>
+              <p className="mt-2 text-sm text-destructive">
+                {error}
+              </p>
             ) : null}
 
-            <p className="mt-4 text-sm text-muted-foreground">
+            {/* LOGIN */}
+            <p className="mt-3 text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Link to="/login" className="font-medium text-primary hover:underline">
+              <Link
+                to="/login"
+                className="font-medium text-primary hover:underline"
+              >
                 Login here
               </Link>
             </p>
           </div>
         </div>
 
-        <AuthMarketingPanel slides={slides} activeIndex={activeIndex} />
+        {/* RIGHT SIDE */}
+        <AuthMarketingPanel
+          slides={slides}
+          activeIndex={activeIndex}
+        />
       </div>
     </div>
   );
