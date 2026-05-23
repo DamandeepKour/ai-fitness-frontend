@@ -49,14 +49,14 @@ export function SiteHeader() {
             to="/login"
             className="text-sm font-medium px-4 py-2 rounded-lg hover:bg-accent transition-colors"
           >
-            Sign in
+            Login in
           </Link>
           <Link
             to="/signup"
             className="text-sm font-semibold px-4 py-2 rounded-lg text-white shadow-md hover:opacity-90 transition-opacity"
             style={{ background: "var(--gradient-hero)" }}
           >
-            Open App ✨
+            Open App
           </Link>
         </div>
 
