@@ -7,9 +7,9 @@ import { BrandLogo } from "./BrandLogo";
 
 const links = [
   { to: "/welcome", label: "Home" },
+  { to: "/about", label: "About" },
   { to: "/features", label: "Features" },
   { to: "/pricing", label: "Pricing" },
-  { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
 ];
 
