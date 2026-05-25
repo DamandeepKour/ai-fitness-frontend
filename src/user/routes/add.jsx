@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Flame, Salad, Dumbbell } from "lucide-react";
+import { Sparkles, Flame, Salad, Dumbbell, CheckCircle2, Beef, Wheat, Apple } from "lucide-react";
 import API from "@/api/axios";
 import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
 import { getLocalDateYmd } from "@/lib/local-date";
@@ -24,6 +24,9 @@ function AddPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [todayMeals, setTodayMeals] = useState([]);
+
+  // ✅ Stores the last successfully added meal to show in-form summary
+  const [lastAdded, setLastAdded] = useState(null);
 
   const nutrition = useMemo(() => estimateNutrition(food, grams), [food, grams]);
   const kcal = nutrition.calories;
@@ -59,6 +62,19 @@ function AddPage() {
         carbs,
         fat,
       });
+
+      // ✅ Snapshot what was just logged
+      setLastAdded({
+        meal_type: meal,
+        food_name: food,
+        grams,
+        calories: kcal,
+        protein,
+        carbs,
+        fat,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      });
+
       setMessage("Meal saved for today.");
       await loadTodayLogs();
     } catch (err) {
@@ -79,6 +95,7 @@ function AddPage() {
         <p className="text-sm text-muted-foreground">AI-powered estimation</p>
         <h1 className="text-3xl md:text-4xl font-semibold mt-1">Log Food</h1>
       </header>
+
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
@@ -111,7 +128,10 @@ function AddPage() {
           <h2 className="text-sm font-semibold mb-3">Logged today ({getLocalDateYmd()})</h2>
           <ul className="divide-y divide-border/60 text-sm">
             {todayMeals.map((m, idx) => (
-              <li key={m.id != null ? String(m.id) : `${m.meal_type}-${m.food_name}-${idx}`} className="py-2 flex justify-between gap-3">
+              <li
+                key={m.id != null ? String(m.id) : `${m.meal_type}-${m.food_name}-${idx}`}
+                className="py-2 flex justify-between gap-3"
+              >
                 <span className="text-muted-foreground shrink-0">{formatMealType(m.meal_type)}</span>
                 <span className="font-medium truncate">{m.food_name}</span>
                 <span className="tabular-nums shrink-0">{m.calories} kcal</span>
@@ -123,6 +143,7 @@ function AddPage() {
 
       <div className="grid lg:grid-cols-5 gap-5">
         <Card className="glass-card lg:col-span-3 rounded-3xl p-6 border-0 space-y-5">
+          {/* Meal type selector */}
           <div>
             <Label className="text-xs text-muted-foreground">Meal</Label>
             <div className="grid grid-cols-4 gap-2 mt-2">
@@ -131,13 +152,17 @@ function AddPage() {
                   key={m}
                   type="button"
                   onClick={() => setMeal(m)}
-                  className={`rounded-xl py-2 text-sm font-medium transition-colors ${meal === m ? "bg-primary text-primary-foreground" : "bg-accent text-foreground"}`}
+                  className={`rounded-xl py-2 text-sm font-medium transition-colors ${
+                    meal === m ? "bg-primary text-primary-foreground" : "bg-accent text-foreground"
+                  }`}
                 >
                   {m}
                 </button>
               ))}
             </div>
           </div>
+
+          {/* Food input */}
           <div>
             <Label htmlFor="food" className="text-xs text-muted-foreground">
               What did you eat?
@@ -150,6 +175,8 @@ function AddPage() {
               placeholder="e.g. Avocado toast with egg"
             />
           </div>
+
+          {/* Grams input */}
           <div>
             <Label htmlFor="g" className="text-xs text-muted-foreground">
               Portion (grams)
@@ -171,16 +198,69 @@ function AddPage() {
               className="w-full mt-3 accent-[var(--primary)]"
             />
           </div>
+
           <Button size="lg" className="w-full rounded-xl" onClick={handleSave} disabled={saving}>
             {saving ? "Saving..." : "Add to today"}
           </Button>
+
           {message ? (
-            <p className={`text-sm ${message.includes("Unable") || message.toLowerCase().includes("invalid") ? "text-destructive" : "text-muted-foreground"}`}>
+            <p
+              className={`text-sm ${
+                message.includes("Unable") || message.toLowerCase().includes("invalid")
+                  ? "text-destructive"
+                  : "text-muted-foreground"
+              }`}
+            >
               {message}
             </p>
           ) : null}
+
+          {/* ✅ Last Added Meal Card — animates in after save */}
+          <AnimatePresence>
+            {lastAdded && (
+              <motion.div
+                key="last-added"
+                initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                transition={{ duration: 0.3 }}
+                className="rounded-2xl border border-primary/20 bg-primary/5 p-4"
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="inline-flex items-center gap-1.5 text-xs font-medium text-primary">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Last added
+                  </div>
+                  <span className="text-xs text-muted-foreground">{lastAdded.time}</span>
+                </div>
+
+                {/* Meal info */}
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div>
+                    <p className="font-semibold text-base leading-tight capitalize">{lastAdded.food_name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {lastAdded.meal_type} · {lastAdded.grams}g
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-1 text-lg font-semibold tabular-nums shrink-0">
+                    <Flame className="h-4 w-4 text-orange-400" />
+                    {lastAdded.calories} kcal
+                  </div>
+                </div>
+
+                {/* Macro pills */}
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <MacroPill label="Protein" value={lastAdded.protein} color="oklch(0.7 0.2 25)" Icon={Beef} />
+                  <MacroPill label="Carbs" value={lastAdded.carbs} color="oklch(0.78 0.16 75)" Icon={Wheat} />
+                  <MacroPill label="Fats" value={lastAdded.fat} color="oklch(0.7 0.17 145)" Icon={Apple} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Card>
 
+        {/* AI Estimate card */}
         <Card className="lg:col-span-2 rounded-3xl p-6 border-0 text-white" style={{ background: "var(--gradient-hero)" }}>
           <div className="inline-flex items-center gap-1.5 text-xs bg-white/20 rounded-full px-2.5 py-1">
             <Sparkles className="h-3 w-3" /> AI estimate
@@ -221,6 +301,17 @@ function Pill({ label, value }) {
     <div className="rounded-xl bg-white/15 backdrop-blur px-3 py-2">
       <p className="text-[10px] opacity-80">{label}</p>
       <p className="text-sm font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function MacroPill({ label, value, color, Icon }) {
+  return (
+    <div className="rounded-xl bg-accent/60 py-2 px-2">
+      <p className="text-[11px] inline-flex items-center gap-1 justify-center w-full" style={{ color }}>
+        <Icon className="h-3 w-3" /> {label}
+      </p>
+      <p className="text-sm font-semibold tabular-nums mt-0.5">{value}g</p>
     </div>
   );
 }
