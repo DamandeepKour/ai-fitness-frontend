@@ -10,7 +10,7 @@ import MealHistoryPage from "@/user/routes/meal-history";
 import NotificationsPage from "@/user/routes/notifications";
 import PrivacyPage from "@/user/routes/privacy";
 
-/** Authenticated app routes (user area). */
+//User Routes
 export function userRouteElements(PageTransition) {
   return [
     <Route key="user-layout" element={<PrivateLayout />}>
