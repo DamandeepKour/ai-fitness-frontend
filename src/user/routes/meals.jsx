@@ -31,17 +31,27 @@ function MealsPage() {
   const [error, setError] = useState("");
   const [loggingKey, setLoggingKey] = useState("");
   const [message, setMessage] = useState("");
+
+  // ✅ Track which generated meals have been logged — persists across refreshDashboard()
+  const [loggedKeys, setLoggedKeys] = useState(new Set());
+
   const meals = dashboard?.meals || [];
   const generatedMeals = dashboard?.generated_meals || [];
   const total = dashboard?.today?.consumed_calories ?? meals.reduce((acc, meal) => acc + (meal.calories || 0), 0);
   const targetsFromApi = dashboard?.targets || {};
   const macros = dashboard?.today?.macros || {};
+
   const targets = [
     { label: "Calories", value: `${total} / ${targetsFromApi.calories || 2200}kcal`, pct: Math.round((total / (targetsFromApi.calories || 2200)) * 100), color: "oklch(0.62 0.19 255)", icon: Flame },
     { label: "Protein", value: `${macros.protein || 0} / ${targetsFromApi.protein || 140}g`, pct: Math.round(((macros.protein || 0) / (targetsFromApi.protein || 140)) * 100), color: "oklch(0.7 0.2 25)", icon: Beef },
     { label: "Carbs", value: `${macros.carbs || 0} / ${targetsFromApi.carbs || 250}g`, pct: Math.round(((macros.carbs || 0) / (targetsFromApi.carbs || 250)) * 100), color: "oklch(0.78 0.16 75)", icon: Wheat },
     { label: "Fats", value: `${macros.fat || 0} / ${targetsFromApi.fat || 70}g`, pct: Math.round(((macros.fat || 0) / (targetsFromApi.fat || 70)) * 100), color: "oklch(0.7 0.17 145)", icon: Apple },
   ];
+
+  // ✅ Filter out meals that have already been logged this session
+  const visibleGeneratedMeals = generatedMeals.filter(
+    (m) => !loggedKeys.has(`${m.day}-${m.meal_type}-${m.food_name}`)
+  );
 
   useEffect(() => {
     let ignore = false;
@@ -69,8 +79,10 @@ function MealsPage() {
     setDashboard(res.data.data);
   };
 
-  const handleLogGeneratedMeal = async (meal) => {
-    const key = `${meal.day}-${meal.meal_type}-${meal.food_name}`;
+  // ✅ Unified log handler — works for both generated meals and today's meals
+  const handleLogMeal = async (meal, dayOverride) => {
+    const day = dayOverride ?? meal.day;
+    const key = `${day}-${meal.meal_type}-${meal.food_name}`;
     const nutrition = estimateNutrition(meal.food_name, 250, meal.calories);
 
     setLoggingKey(key);
@@ -87,9 +99,11 @@ function MealsPage() {
         fat: nutrition.fat,
       });
       await refreshDashboard();
+      // ✅ Add to logged set so it disappears from generated meals list
+      setLoggedKeys((prev) => new Set([...prev, key]));
       setMessage(`${formatMealType(meal.meal_type)} logged for today.`);
     } catch {
-      setMessage("Unable to log generated meal right now.");
+      setMessage("Unable to log meal right now.");
     } finally {
       setLoggingKey("");
     }
@@ -112,6 +126,7 @@ function MealsPage() {
         {message ? <p className="mt-2 text-sm text-muted-foreground">{message}</p> : null}
       </header>
 
+      {/* ── Nutrition Breakdown ── */}
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
@@ -149,6 +164,7 @@ function MealsPage() {
         </Card>
       </motion.div>
 
+      {/* ── Today's Logged Meals ── */}
       <div className="grid sm:grid-cols-2 gap-5">
         {meals.length ? meals.map((m) => (
           <Card key={`${m.meal_type}-${m.food_name}`} className="glass-card rounded-3xl p-5 border-0">
@@ -175,8 +191,15 @@ function MealsPage() {
               <Macro label="C" value={m.carbs || 0} color="oklch(0.78 0.16 75)" />
               <Macro label="F" value={m.fat || 0} color="oklch(0.7 0.17 145)" />
             </div>
-            <Button variant="secondary" className="w-full mt-4 rounded-xl">
-              <Plus className="h-4 w-4" /> Add to log
+            {/* ✅ Wired up — logs meal and removes from generated list */}
+            <Button
+              variant="secondary"
+              className="w-full mt-4 rounded-xl"
+              onClick={() => handleLogMeal(m, "today")}
+              disabled={loggingKey === `today-${m.meal_type}-${m.food_name}`}
+            >
+              <Plus className="h-4 w-4" />
+              {loggingKey === `today-${m.meal_type}-${m.food_name}` ? "Logging..." : "Add to log"}
             </Button>
           </Card>
         )) : (
@@ -186,6 +209,7 @@ function MealsPage() {
         )}
       </div>
 
+      {/* ── Generated Customized Meals ── */}
       <Card className="glass-card rounded-3xl p-6 border-0 mt-6">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
@@ -197,7 +221,8 @@ function MealsPage() {
           </Button>
         </div>
         <div className="grid md:grid-cols-2 gap-3">
-          {generatedMeals.slice(0, 6).map((m) => (
+          {/* ✅ Uses visibleGeneratedMeals — logged meals are excluded */}
+          {visibleGeneratedMeals.slice(0, 6).map((m) => (
             <div key={`${m.day}-${m.meal_type}-${m.food_name}`} className="rounded-2xl bg-accent/50 p-4">
               <div className="flex items-start gap-3">
                 <div className="h-11 w-11 rounded-2xl bg-background flex items-center justify-center text-xl shrink-0">
@@ -216,17 +241,24 @@ function MealsPage() {
                   type="button"
                   variant="secondary"
                   className="w-full mt-3 rounded-xl"
-                  onClick={() => handleLogGeneratedMeal(m)}
+                  onClick={() => handleLogMeal(m)}
                   disabled={loggingKey === `${m.day}-${m.meal_type}-${m.food_name}`}
                 >
                   <Plus className="h-4 w-4" />
-                  {loggingKey === `${m.day}-${m.meal_type}-${m.food_name}` ? "Logging..." : `Log ${formatMealType(m.meal_type)}`}
+                  {loggingKey === `${m.day}-${m.meal_type}-${m.food_name}`
+                    ? "Logging..."
+                    : `Log ${formatMealType(m.meal_type)}`}
                 </Button>
               ) : null}
             </div>
           ))}
-          {!generatedMeals.length ? (
-            <p className="text-sm text-muted-foreground md:col-span-2">No generated meal plan found yet.</p>
+          {/* ✅ Empty state accounts for all meals being logged */}
+          {!visibleGeneratedMeals.length ? (
+            <p className="text-sm text-muted-foreground md:col-span-2">
+              {generatedMeals.length
+                ? "All generated meals have been logged for today. 🎉"
+                : "No generated meal plan found yet."}
+            </p>
           ) : null}
         </div>
       </Card>
