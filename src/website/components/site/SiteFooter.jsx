@@ -9,20 +9,31 @@ export function SiteFooter() {
   return (
     <footer className="mt-24 border-t border-border/60 bg-card/40 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+
+        {/* Top Footer */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-          <div className="md:col-span-2">
-            <BrandLogo variant="wide" asLink={false} size="footer" className="mb-3" />
-            <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-              Your AI-powered fitness companion. Track meals 🥗, crush cardio 🏃, build strength 💪,
-              and hit your macros — all in one place.
+
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <BrandLogo
+              variant="wide"
+              asLink={false}
+              size="footer"
+              className="mb-3"
+            />
+
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Your AI-powered fitness companion. Track meals 🥗, crush cardio 🏃,
+              build strength 💪, and hit your macros — all in one place.
             </p>
-            <div className="flex gap-2 mt-4">
+
+            <div className="flex gap-2 mt-5">
               {socialIcons.map((Icon, i) => (
                 <motion.a
                   key={i}
                   href="#"
                   whileHover={{ y: -3, scale: 1.05 }}
-                  className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-foreground hover:text-primary"
+                  className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-foreground hover:text-primary transition"
                 >
                   <Icon className="h-4 w-4" />
                 </motion.a>
@@ -30,65 +41,110 @@ export function SiteFooter() {
             </div>
           </div>
 
+          {/* Product */}
           <div>
-            <p className="text-sm font-semibold mb-3">Product</p>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <p className="text-sm font-semibold mb-4">Product</p>
+
+            <ul className="space-y-3 text-sm text-muted-foreground">
               <li>
-                <Link to="/features" className="hover:text-foreground">
+                <Link
+                  to="/features"
+                  className="hover:text-foreground transition"
+                >
                   Features
                 </Link>
               </li>
+
               <li>
-                <Link to="/pricing" className="hover:text-foreground">
+                <Link
+                  to="/pricing"
+                  className="hover:text-foreground transition"
+                >
                   Pricing
                 </Link>
               </li>
+
               <li>
-                <Link to="/signup" className="hover:text-foreground">
+                <Link
+                  to="/signup"
+                  className="hover:text-foreground transition"
+                >
                   Open App
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Company */}
           <div>
-            <p className="text-sm font-semibold mb-3">Company</p>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <p className="text-sm font-semibold mb-4">Company</p>
+
+            <ul className="space-y-3 text-sm text-muted-foreground">
               <li>
-                <Link to="/about" className="hover:text-foreground">
+                <Link
+                  to="/about"
+                  className="hover:text-foreground transition"
+                >
                   About
                 </Link>
               </li>
+
               <li>
-                <Link to="/contact" className="hover:text-foreground">
+                <Link
+                  to="/contact"
+                  className="hover:text-foreground transition"
+                >
                   Contact
                 </Link>
               </li>
-              <li>
-                <Link to="/privacy-policy" className="hover:text-foreground">
-                  Privacy
-                </Link>
-              </li>
-              <li>
-                <Link to="/cookies-policy" className="hover:text-foreground">
-                  Cookies
-                </Link>
-                </li>
-                <li>
-                    <Link to="/terms-conditions" className="hover:text-foreground">
-                  Terms & Conditions
-                </Link>
-                </li>
             </ul>
           </div>
-          
+
+          {/* General */}
+          <div>
+            <p className="text-sm font-semibold mb-4">General</p>
+
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li>
+                <Link
+                  to="/privacy-policy"
+                  className="hover:text-foreground transition"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/cookies-policy"
+                  className="hover:text-foreground transition"
+                >
+                  Cookies Policy
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/terms-conditions"
+                  className="hover:text-foreground transition"
+                >
+                  Terms & Conditions
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
 
+        {/* Bottom Footer */}
         <div className="mt-10 pt-6 border-t border-border/60 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} FitnovaAI. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} FitnovaAI. All rights reserved.
+          </p>
+
           <p className="flex items-center gap-1">
-            Crafted with <Heart className="h-3 w-3 text-rose-500 fill-rose-500" /> for movers &
-            makers
+            Crafted with{" "}
+            <Heart className="h-3 w-3 text-rose-500 fill-rose-500" />
+            for movers & makers
           </p>
         </div>
       </div>
