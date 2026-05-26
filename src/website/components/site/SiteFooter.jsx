@@ -73,9 +73,15 @@ export function SiteFooter() {
                 <Link to="/cookies-policy" className="hover:text-foreground">
                   Cookies
                 </Link>
-              </li>
+                </li>
+                <li>
+                    <Link to="/terms-conditions" className="hover:text-foreground">
+                  Terms & Conditions
+                </Link>
+                </li>
             </ul>
           </div>
+          
         </div>
 
         <div className="mt-10 pt-6 border-t border-border/60 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
