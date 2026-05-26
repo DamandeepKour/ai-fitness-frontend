@@ -86,7 +86,6 @@ function ProgressPage() {
           </ResponsiveContainer>
         </div>
       </Card>
-
       <Card className="glass-card rounded-3xl p-6 border-0">
         <h2 className="text-lg font-semibold mb-1">Workout minutes</h2>
         <p className="text-xs text-muted-foreground mb-4">This week</p>
