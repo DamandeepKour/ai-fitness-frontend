@@ -9,6 +9,7 @@ import Features from "@/website/pages/Features";
 import Pricing from "@/website/pages/Pricing";
 import Contact from "@/website/pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import CookiesPolicy from "./pages/CookiesPolicy";
 
 /** Public marketing & auth routes (website area). */
 export function websiteRouteElements(PageWrap, StableWrap) {
@@ -31,6 +32,7 @@ export function websiteRouteElements(PageWrap, StableWrap) {
         }
       />
     </Route>,
+    <Route key="cookies-policy" path="/cookies-policy" element={<PageWrap><CookiesPolicy /></PageWrap>} />,
     <Route key="login" path="/login" element={<Stable><Login /></Stable>} />,
     <Route key="signup" path="/signup" element={<Stable><Signup /></Stable>} />,
   ];
