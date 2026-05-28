@@ -1,13 +1,18 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { getAuthToken } from "@/lib/auth-token";
+import { getAuthToken, getStoredUser } from "@/lib/auth-token";
 
 /** Superadmin shell — extend with role checks when backend supports it. */
 export default function SuperAdminLayout() {
   const location = useLocation();
   const token = getAuthToken();
+  const user = getStoredUser();
 
   if (!token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/superadmin/login" state={{ from: location }} replace />;
+  }
+
+  if (user?.user_type !== "superadmin") {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (

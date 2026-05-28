@@ -35,6 +35,8 @@ export function websiteRouteElements(PageWrap, StableWrap) {
     </Route>,
     <Route key="cookies-policy" path="/cookies-policy" element={<PageWrap><CookiesPolicy /></PageWrap>} />,
     <Route key="terms-conditions" path="/terms-conditions" element={<PageWrap><TermsConditions /></PageWrap>} />,
+    <Route key="website-login-redirect" path="/website/login" element={<Navigate to="/login" replace />} />,
+    <Route key="website-signup-redirect" path="/website/signup" element={<Navigate to="/signup" replace />} />,
     <Route key="login" path="/login" element={<Stable><Login /></Stable>} />,
     <Route key="signup" path="/signup" element={<Stable><Signup /></Stable>} />,
   ];

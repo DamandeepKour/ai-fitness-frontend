@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { signupRequest } from "@/api/auth";
+import { signupRequestByType } from "@/api/auth";
 
 function formatSignupError(err) {
   return (
@@ -10,7 +10,8 @@ function formatSignupError(err) {
   );
 }
 
-export function useSignup() {
+export function useSignup(options = {}) {
+  const { userType = "user", redirectTo } = options;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -20,8 +21,8 @@ export function useSignup() {
       setLoading(true);
       setError("");
       try {
-        await signupRequest({ name, email, password });
-        navigate("/login", { replace: false });
+        await signupRequestByType({ name, email, password }, userType);
+        navigate(redirectTo || (userType === "superadmin" ? "/superadmin/login" : "/login"), { replace: false });
         return { ok: true };
       } catch (err) {
         setError(formatSignupError(err));
@@ -30,7 +31,7 @@ export function useSignup() {
         setLoading(false);
       }
     },
-    [navigate],
+    [navigate, redirectTo, userType],
   );
 
   const clearError = useCallback(() => setError(""), []);

@@ -5,7 +5,12 @@ import { getAppRoutes } from "@/app-routes";
 
 
 /** Auth screens animate themselves — avoid double fade with route transitions. */
-const AUTH_PATHS = new Set(["/login", "/signup"]);
+const AUTH_PATHS = new Set([
+  "/login",
+  "/signup",
+  "/superadmin/login",
+  "/superadmin/signup",
+]);
 
 export function PageTransition({ children }) {
   return (

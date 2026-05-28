@@ -15,6 +15,7 @@ export function persistAuth({ token, user }) {
       id: user.id,
       email: user.email,
       name: user.name,
+      user_type: user.user_type,
       mobile_number: user.mobile_number,
       country_code: user.country_code,
       age: user.age,

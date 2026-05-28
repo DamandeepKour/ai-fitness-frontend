@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { loginRequest } from "@/api/auth";
+import { loginRequestByType } from "@/api/auth";
 import { persistAuth } from "@/lib/auth-token";
 
 function formatLoginError(err) {
@@ -11,7 +11,8 @@ function formatLoginError(err) {
   );
 }
 
-export function useLogin() {
+export function useLogin(options = {}) {
+  const { userType = "user", defaultRedirect } = options;
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
@@ -22,9 +23,9 @@ export function useLogin() {
       setLoading(true);
       setError("");
       try {
-        const data = await loginRequest({ email, password });
+        const data = await loginRequestByType({ email, password }, userType);
         persistAuth({ token: data.token, user: data.user });
-        const from = location.state?.from?.pathname || "/dashboard";
+        const from = location.state?.from?.pathname || defaultRedirect || "/dashboard";
         navigate(from, { replace: true });
         return { ok: true };
       } catch (err) {
@@ -34,7 +35,7 @@ export function useLogin() {
         setLoading(false);
       }
     },
-    [navigate, location],
+    [defaultRedirect, location, navigate, userType],
   );
 
   const clearError = useCallback(() => setError(""), []);
