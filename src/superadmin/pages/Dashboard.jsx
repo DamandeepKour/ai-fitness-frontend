@@ -3,10 +3,13 @@ import { Card } from "@/components/ui/card";
 import API from "@/api/axios";
 import {
   Activity,
+  BarChart3,
   CheckCircle2,
   Globe,
   Languages,
+  ListChecks,
   TrendingUp,
+  UserCircle2,
   Users,
 } from "lucide-react";
 
@@ -101,7 +104,9 @@ function normalizeLogins(raw) {
 
 export default function SuperAdminDashboard() {
   const [analytics, setAnalytics] = useState(null);
-  const [recentLogins, setRecentLogins] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [search, setSearch] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -128,7 +133,9 @@ export default function SuperAdminDashboard() {
 
         if (ignore) return;
         setAnalytics(normalizeAnalytics(analyticsRes.data));
-        setRecentLogins(normalizeLogins(loginsRes.data).slice(0, 8));
+        const normalizedUsers = normalizeLogins(loginsRes.data);
+        setAllUsers(normalizedUsers);
+        setSelectedUserId(normalizedUsers[0]?.id || null);
       } catch {
         if (ignore) return;
         setError("Unable to load superadmin analytics right now.");
@@ -157,107 +164,276 @@ export default function SuperAdminDashboard() {
     ];
   }, [analytics]);
 
+  const recentLogins = useMemo(() => allUsers.slice(0, 8), [allUsers]);
+
+  const filteredUsers = useMemo(() => {
+    if (!search.trim()) return allUsers;
+    const q = search.toLowerCase();
+    return allUsers.filter(
+      (user) =>
+        String(user.name || "").toLowerCase().includes(q) ||
+        String(user.email || "").toLowerCase().includes(q),
+    );
+  }, [allUsers, search]);
+
+  const selectedUser = useMemo(
+    () => filteredUsers.find((user) => user.id === selectedUserId) || filteredUsers[0] || null,
+    [filteredUsers, selectedUserId],
+  );
+
+  const activeFromList = useMemo(
+    () => allUsers.filter((u) => String(u.status).toLowerCase() === "active").length,
+    [allUsers],
+  );
+
+  const inactiveFromList = useMemo(
+    () => allUsers.filter((u) => String(u.status).toLowerCase() !== "active").length,
+    [allUsers],
+  );
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">Admin Dashboard</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          User analytics with signups, activity, onboarding progress, goals, and login visibility.
+    <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-6">
+      <Card className="h-fit rounded-3xl p-4 lg:sticky lg:top-6">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground px-2 pb-2">
+          Admin Menu
         </p>
-      </div>
-
-      {error ? (
-        <Card className="rounded-3xl border border-destructive/30 p-5">
-          <p className="text-sm text-destructive">{error}</p>
-        </Card>
-      ) : null}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard
-          icon={Users}
-          label="Total Signups"
-          value={loading ? "..." : analytics?.totalSignups || 0}
-        />
-        <StatCard
-          icon={Activity}
-          label="Active Users"
-          value={loading ? "..." : analytics?.activeUsers || 0}
-        />
-        <StatCard
-          icon={CheckCircle2}
-          label="Onboarding Complete"
-          value={loading ? "..." : `${analytics?.onboardingCompleted || 0} (${onboardingRate}%)`}
-        />
-        <StatCard
-          icon={TrendingUp}
-          label="Goal Records"
-          value={loading ? "..." : goalRows.reduce((acc, row) => acc + row.count, 0)}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <BreakdownCard title="Goal Split" rows={goalRows} />
-        <BreakdownCard
-          title="Region Preference"
-          icon={Globe}
-          rows={analytics?.regionPreference || []}
-          emptyLabel="No region data yet"
-        />
-        <BreakdownCard
-          title="Language Preference"
-          icon={Languages}
-          rows={analytics?.languagePreference || []}
-          emptyLabel="No language data yet"
-        />
-      </div>
-
-      <Card className="rounded-3xl p-5">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold">Recent User Logins</h3>
-          <p className="text-xs text-muted-foreground">
-            Latest users with visible login timestamp and status.
-          </p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-muted-foreground border-b border-border">
-                <th className="py-2 pr-4 font-medium">Name</th>
-                <th className="py-2 pr-4 font-medium">Email</th>
-                <th className="py-2 pr-4 font-medium">Last Login</th>
-                <th className="py-2 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentLogins.length === 0 && !loading ? (
-                <tr>
-                  <td colSpan={4} className="py-5 text-muted-foreground">
-                    No login records available.
-                  </td>
-                </tr>
-              ) : null}
-              {(loading ? [{ id: "loading" }] : recentLogins).map((row) => (
-                <tr key={row.id} className="border-b border-border/60">
-                  <td className="py-3 pr-4">{loading ? "Loading..." : row.name}</td>
-                  <td className="py-3 pr-4 text-muted-foreground">
-                    {loading ? "Loading..." : row.email}
-                  </td>
-                  <td className="py-3 pr-4 text-muted-foreground">
-                    {loading ? "Loading..." : formatDate(row.lastLogin)}
-                  </td>
-                  <td className="py-3">
-                    <span className="inline-flex rounded-full border px-2.5 py-0.5 text-xs">
-                      {loading ? "Loading..." : row.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <nav className="space-y-1">
+          <SidebarLink icon={BarChart3} href="#overview" label="Overview" />
+          <SidebarLink icon={Activity} href="#user-activity" label="User Activity" />
+          <SidebarLink icon={ListChecks} href="#user-list" label="User List" />
+          <SidebarLink icon={UserCircle2} href="#per-user-activity" label="Per User Activity" />
+        </nav>
       </Card>
+
+      <div className="space-y-6">
+        <section id="overview" className="scroll-mt-24 space-y-4">
+          <div>
+            <h2 className="text-2xl font-semibold">Admin Dashboard</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              User analytics with signups, activity, onboarding progress, goals, and preferences.
+            </p>
+          </div>
+
+          {error ? (
+            <Card className="rounded-3xl border border-destructive/30 p-5">
+              <p className="text-sm text-destructive">{error}</p>
+            </Card>
+          ) : null}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <StatCard
+              icon={Users}
+              label="Total Signups"
+              value={loading ? "..." : analytics?.totalSignups || 0}
+            />
+            <StatCard
+              icon={Activity}
+              label="Active Users"
+              value={loading ? "..." : analytics?.activeUsers || 0}
+            />
+            <StatCard
+              icon={CheckCircle2}
+              label="Onboarding Complete"
+              value={loading ? "..." : `${analytics?.onboardingCompleted || 0} (${onboardingRate}%)`}
+            />
+            <StatCard
+              icon={TrendingUp}
+              label="Goal Records"
+              value={loading ? "..." : goalRows.reduce((acc, row) => acc + row.count, 0)}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            <BreakdownCard title="Goal Split" rows={goalRows} />
+            <BreakdownCard
+              title="Region Preference"
+              icon={Globe}
+              rows={analytics?.regionPreference || []}
+              emptyLabel="No region data yet"
+            />
+            <BreakdownCard
+              title="Language Preference"
+              icon={Languages}
+              rows={analytics?.languagePreference || []}
+              emptyLabel="No language data yet"
+            />
+          </div>
+        </section>
+
+        <section id="user-activity" className="scroll-mt-24">
+          <Card className="rounded-3xl p-5">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">User Activity</h3>
+              <p className="text-xs text-muted-foreground">
+                Recent logins and active/inactive state overview.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="rounded-2xl bg-accent/50 p-4">
+                <p className="text-xs text-muted-foreground">Active (from user list)</p>
+                <p className="text-2xl font-semibold mt-1">{loading ? "..." : activeFromList}</p>
+              </div>
+              <div className="rounded-2xl bg-accent/50 p-4">
+                <p className="text-xs text-muted-foreground">Inactive (from user list)</p>
+                <p className="text-2xl font-semibold mt-1">{loading ? "..." : inactiveFromList}</p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-muted-foreground border-b border-border">
+                    <th className="py-2 pr-4 font-medium">Name</th>
+                    <th className="py-2 pr-4 font-medium">Email</th>
+                    <th className="py-2 pr-4 font-medium">Last Login</th>
+                    <th className="py-2 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentLogins.length === 0 && !loading ? (
+                    <tr>
+                      <td colSpan={4} className="py-5 text-muted-foreground">
+                        No activity records available.
+                      </td>
+                    </tr>
+                  ) : null}
+                  {(loading ? [{ id: "loading" }] : recentLogins).map((row) => (
+                    <tr key={row.id} className="border-b border-border/60">
+                      <td className="py-3 pr-4">{loading ? "Loading..." : row.name}</td>
+                      <td className="py-3 pr-4 text-muted-foreground">
+                        {loading ? "Loading..." : row.email}
+                      </td>
+                      <td className="py-3 pr-4 text-muted-foreground">
+                        {loading ? "Loading..." : formatDate(row.lastLogin)}
+                      </td>
+                      <td className="py-3">
+                        <span className="inline-flex rounded-full border px-2.5 py-0.5 text-xs">
+                          {loading ? "Loading..." : row.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </section>
+
+        <section id="user-list" className="scroll-mt-24">
+          <Card className="rounded-3xl p-5">
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-semibold">User List</h3>
+                <p className="text-xs text-muted-foreground">All users for admin operations.</p>
+              </div>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name or email"
+                className="h-10 rounded-xl border border-input bg-background px-3 text-sm w-full sm:w-72"
+              />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-muted-foreground border-b border-border">
+                    <th className="py-2 pr-4 font-medium">Name</th>
+                    <th className="py-2 pr-4 font-medium">Email</th>
+                    <th className="py-2 pr-4 font-medium">Last Login</th>
+                    <th className="py-2 pr-4 font-medium">Status</th>
+                    <th className="py-2 font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.length === 0 && !loading ? (
+                    <tr>
+                      <td colSpan={5} className="py-5 text-muted-foreground">
+                        No users found for this search.
+                      </td>
+                    </tr>
+                  ) : null}
+                  {(loading ? [{ id: "loading" }] : filteredUsers).map((row) => (
+                    <tr key={row.id} className="border-b border-border/60">
+                      <td className="py-3 pr-4">{loading ? "Loading..." : row.name}</td>
+                      <td className="py-3 pr-4 text-muted-foreground">
+                        {loading ? "Loading..." : row.email}
+                      </td>
+                      <td className="py-3 pr-4 text-muted-foreground">
+                        {loading ? "Loading..." : formatDate(row.lastLogin)}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className="inline-flex rounded-full border px-2.5 py-0.5 text-xs">
+                          {loading ? "Loading..." : row.status}
+                        </span>
+                      </td>
+                      <td className="py-3">
+                        {!loading ? (
+                          <button
+                            type="button"
+                            className="text-xs font-medium text-primary hover:underline"
+                            onClick={() => setSelectedUserId(row.id)}
+                          >
+                            View activity
+                          </button>
+                        ) : (
+                          "Loading..."
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </section>
+
+        <section id="per-user-activity" className="scroll-mt-24">
+          <Card className="rounded-3xl p-5">
+            <h3 className="text-lg font-semibold">Per User Activity</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Quick profile and recent activity status for selected user.
+            </p>
+            {loading ? (
+              <p className="text-sm text-muted-foreground">Loading user activity...</p>
+            ) : selectedUser ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-2xl bg-accent/50 p-4">
+                  <p className="text-xs text-muted-foreground">Name</p>
+                  <p className="text-base font-semibold mt-1">{selectedUser.name}</p>
+                </div>
+                <div className="rounded-2xl bg-accent/50 p-4">
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="text-base font-semibold mt-1">{selectedUser.email}</p>
+                </div>
+                <div className="rounded-2xl bg-accent/50 p-4">
+                  <p className="text-xs text-muted-foreground">Current Status</p>
+                  <p className="text-base font-semibold mt-1">{selectedUser.status}</p>
+                </div>
+                <div className="rounded-2xl bg-accent/50 p-4">
+                  <p className="text-xs text-muted-foreground">Last Login</p>
+                  <p className="text-base font-semibold mt-1">{formatDate(selectedUser.lastLogin)}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No user selected.</p>
+            )}
+          </Card>
+        </section>
+      </div>
     </div>
+  );
+}
+
+function SidebarLink({ icon: Icon, href, label }) {
+  return (
+    <a
+      href={href}
+      className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+    >
+      <Icon className="h-4 w-4" />
+      <span>{label}</span>
+    </a>
   );
 }
 
