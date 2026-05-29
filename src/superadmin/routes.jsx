@@ -1,6 +1,7 @@
 import { Route } from "react-router-dom";
 import SuperAdminLayout from "@/superadmin/layout/SuperAdminLayout";
 import SuperAdminDashboard from "@/superadmin/pages/Dashboard";
+import SuperAdminUserProfile from "@/superadmin/pages/UserProfile";
 import SuperAdminLogin from "@/superadmin/pages/Login";
 import SuperAdminSignup from "@/superadmin/pages/Signup";
 
@@ -19,6 +20,10 @@ export function superAdminRouteElements(PageTransition) {
     />,
     <Route key="superadmin" path="/superadmin" element={<SuperAdminLayout />}>
       <Route index element={<PageTransition><SuperAdminDashboard /></PageTransition>} />
+      <Route
+        path="users/:id"
+        element={<PageTransition><SuperAdminUserProfile /></PageTransition>}
+      />
     </Route>,
   ];
 }
