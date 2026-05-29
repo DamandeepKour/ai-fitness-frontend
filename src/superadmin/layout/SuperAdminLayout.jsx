@@ -1,5 +1,15 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { getAuthToken, getStoredUser } from "@/lib/auth-token";
+import {
+  Activity,
+  BarChart3,
+  Globe,
+  LayoutDashboard,
+  Settings,
+  Sparkles,
+  Users,
+  WandSparkles,
+} from "lucide-react";
 
 /** Superadmin shell — extend with role checks when backend supports it. */
 export default function SuperAdminLayout() {
@@ -16,14 +26,63 @@ export default function SuperAdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border px-6 py-4">
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Superadmin</p>
-        <h1 className="text-lg font-semibold">Control panel</h1>
-      </header>
-      <main className="p-6 max-w-6xl mx-auto">
-        <Outlet />
-      </main>
+    <div className="min-h-screen bg-slate-100/70">
+      <div className="grid min-h-screen grid-cols-1 md:grid-cols-[255px_minmax(0,1fr)]">
+        <aside className="hidden md:flex flex-col border-r border-slate-800/70 bg-slate-950 text-slate-200">
+          <div className="px-5 py-5 border-b border-slate-800/70">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center">
+                <Sparkles className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">AIFitnova</p>
+                <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400">Super Admin</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-3 py-4">
+            <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Overview</p>
+            <div className="mt-2 space-y-1">
+              <SidebarItem label="Dashboard" icon={LayoutDashboard} active />
+              <SidebarItem label="Users" icon={Users} />
+              <SidebarItem label="Activity" icon={Activity} />
+              <SidebarItem label="Analytics" icon={BarChart3} />
+            </div>
+          </div>
+
+          <div className="px-3 py-3">
+            <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Configuration</p>
+            <div className="mt-2 space-y-1">
+              <SidebarItem label="Onboarding" icon={WandSparkles} />
+              <SidebarItem label="Regions" icon={Globe} />
+              <SidebarItem label="Languages" icon={Globe} />
+              <SidebarItem label="Settings" icon={Settings} />
+            </div>
+          </div>
+        </aside>
+
+        <main className="min-w-0 p-4 md:p-5 lg:p-6">
+          <Outlet />
+        </main>
+      </div>
     </div>
+  );
+}
+
+function SidebarItem({ label, icon: Icon, active = false }) {
+  return (
+    <button
+      type="button"
+      className={`w-full flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+        active
+          ? "bg-slate-900 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]"
+          : "text-slate-400 hover:bg-slate-900/80 hover:text-slate-200"
+      }`}
+    >
+      <Icon className="h-4 w-4" />
+      <span>{label}</span>
+      {active ? <span className="ml-auto h-1.5 w-1.5 rounded-full bg-orange-400" /> : null}
+    </button>
   );
 }
