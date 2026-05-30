@@ -2,6 +2,8 @@ import { Route } from "react-router-dom";
 import SuperAdminLayout from "@/superadmin/layout/SuperAdminLayout";
 import SuperAdminDashboard from "@/superadmin/pages/Dashboard";
 import SuperAdminUserProfile from "@/superadmin/pages/UserProfile";
+import SuperAdminMyProfile from "@/superadmin/pages/MyProfile";
+import SuperAdminNotifications from "@/superadmin/pages/Notifications";
 import SuperAdminLogin from "@/superadmin/pages/Login";
 import SuperAdminSignup from "@/superadmin/pages/Signup";
 
@@ -23,6 +25,14 @@ export function superAdminRouteElements(PageTransition) {
       <Route
         path="users/:id"
         element={<PageTransition><SuperAdminUserProfile /></PageTransition>}
+      />
+      <Route
+        path="profile"
+        element={<PageTransition><SuperAdminMyProfile /></PageTransition>}
+      />
+      <Route
+        path="notifications"
+        element={<PageTransition><SuperAdminNotifications /></PageTransition>}
       />
     </Route>,
   ];

@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { getAuthToken, getStoredUser } from "@/lib/auth-token";
+import AdminProfileMenu from "@/components/admin/AdminProfileMenu";
 import {
   Activity,
   BarChart3,
@@ -62,9 +63,14 @@ export default function SuperAdminLayout() {
           </div>
         </aside>
 
-        <main className="min-w-0 p-4 md:p-5 lg:p-6">
-          <Outlet />
-        </main>
+        <div className="min-w-0 flex flex-col min-h-screen">
+          <header className="sticky top-0 z-20 flex items-center justify-end gap-3 border-b border-slate-200 bg-white/90 backdrop-blur md:px-6">
+            <AdminProfileMenu />
+          </header>
+          <main className="flex-1 p-4 md:p-5 lg:p-6">
+            <Outlet />
+          </main>
+        </div>
       </div>
     </div>
   );
@@ -81,8 +87,8 @@ function SidebarItem({ label, icon: Icon, active = false }) {
       }`}
     >
       <Icon className="h-4 w-4" />
-      <span>{label}</span>
-      {active ? <span className="ml-auto h-1.5 w-1.5 rounded-full bg-orange-400" /> : null}
+      {/* <span>{label}</span> */}
+      {/* {active ? <span className="ml-auto h-1.5 w-1.5 rounded-full bg-orange-400" /> : null} */}
     </button>
   );
 }
