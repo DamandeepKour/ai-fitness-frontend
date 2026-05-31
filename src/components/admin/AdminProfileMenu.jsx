@@ -54,13 +54,10 @@ export default function AdminProfileMenu() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-full border border-slate-200 bg-white pl-1 pr-3 py-1 hover:bg-slate-50 transition-colors"
+          className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white pl-1 pr-2 py-1 hover:bg-slate-50 transition-colors"
         >
           <span className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 text-white text-sm font-semibold grid place-items-center">
             {initials}
-          </span>
-          <span className="hidden sm:block text-sm font-medium text-slate-800 max-w-[120px] truncate">
-            {user?.name || "Admin"}
           </span>
           <ChevronDown className="h-4 w-4 text-slate-500" />
         </button>
