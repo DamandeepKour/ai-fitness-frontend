@@ -1,9 +1,10 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation, Link } from "react-router-dom";
 import { getAuthToken, getStoredUser } from "@/lib/auth-token";
 import AdminProfileMenu from "@/components/admin/AdminProfileMenu";
 import {
   Activity,
   BarChart3,
+  Brain,
   Globe,
   LayoutDashboard,
   Settings,
@@ -26,6 +27,8 @@ export default function SuperAdminLayout() {
     return <Navigate to="/dashboard" replace />;
   }
 
+  const path = location.pathname;
+
   return (
     <div className="min-h-screen bg-slate-100/70">
       <div className="grid min-h-screen grid-cols-1 md:grid-cols-[255px_minmax(0,1fr)]">
@@ -45,26 +48,52 @@ export default function SuperAdminLayout() {
           <div className="px-3 py-4">
             <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Overview</p>
             <div className="mt-2 space-y-1">
-              <SidebarItem label="Dashboard" icon={LayoutDashboard} active />
-              <SidebarItem label="Users" icon={Users} />
-              <SidebarItem label="Activity" icon={Activity} />
-              <SidebarItem label="Analytics" icon={BarChart3} />
+              <SidebarItem
+                label="Dashboard"
+                icon={LayoutDashboard}
+                to="/superadmin"
+                active={path === "/superadmin"}
+              />
+              <SidebarItem
+                label="Users"
+                icon={Users}
+                to="/superadmin"
+                active={path.startsWith("/superadmin/users/")}
+              />
+              <SidebarItem
+                label="Activity"
+                icon={Activity}
+                to="/superadmin"
+                active={false}
+              />
+              <SidebarItem
+                label="Analytics"
+                icon={BarChart3}
+                to="/superadmin"
+                active={false}
+              />
+              <SidebarItem
+                label="AI Analytics"
+                icon={Brain}
+                to="/superadmin/ai"
+                active={path === "/superadmin/ai"}
+              />
             </div>
           </div>
 
           <div className="px-3 py-3">
             <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Configuration</p>
             <div className="mt-2 space-y-1">
-              <SidebarItem label="Onboarding" icon={WandSparkles} />
-              <SidebarItem label="Regions" icon={Globe} />
-              <SidebarItem label="Languages" icon={Globe} />
-              <SidebarItem label="Settings" icon={Settings} />
+              <SidebarItem label="Onboarding" icon={WandSparkles} to="/superadmin" active={false} />
+              <SidebarItem label="Regions" icon={Globe} to="/superadmin" active={false} />
+              <SidebarItem label="Languages" icon={Globe} to="/superadmin" active={false} />
+              <SidebarItem label="Settings" icon={Settings} to="/superadmin/profile" active={path === "/superadmin/profile"} />
             </div>
           </div>
         </aside>
 
         <div className="min-w-0 flex flex-col min-h-screen">
-          <header className="sticky top-0 z-20 flex items-center justify-end gap-3 border-b border-slate-200 bg-white/90 backdrop-blur md:px-6">
+          <header className="sticky top-0 z-20 flex items-center justify-end gap-3 border-b border-slate-200 bg-white/90 backdrop-blur px-4 py-3 md:px-6">
             <AdminProfileMenu />
           </header>
           <main className="flex-1 p-4 md:p-5 lg:p-6">
@@ -76,19 +105,19 @@ export default function SuperAdminLayout() {
   );
 }
 
-function SidebarItem({ label, icon: Icon, active = false }) {
+function SidebarItem({ label, icon: Icon, to, active = false }) {
   return (
-    <button
-      type="button"
+    <Link
+      to={to}
       className={`w-full flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors ${
         active
           ? "bg-slate-900 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]"
           : "text-slate-400 hover:bg-slate-900/80 hover:text-slate-200"
       }`}
     >
-      <Icon className="h-4 w-4" />
-      {/* <span>{label}</span> */}
-      {/* {active ? <span className="ml-auto h-1.5 w-1.5 rounded-full bg-orange-400" /> : null} */}
-    </button>
+      <Icon className="h-4 w-4 shrink-0" />
+      <span>{label}</span>
+      {active ? <span className="ml-auto h-1.5 w-1.5 rounded-full bg-orange-400" /> : null}
+    </Link>
   );
 }

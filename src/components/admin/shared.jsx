@@ -5,6 +5,7 @@ const toneIconClass = {
   success: "bg-emerald-50 text-emerald-600",
   accent: "bg-rose-50 text-rose-500",
   warning: "bg-amber-50 text-amber-600",
+  destructive: "bg-red-50 text-red-600",
 };
 
 export function PageHeader({ title, subtitle, action }) {
@@ -19,7 +20,7 @@ export function PageHeader({ title, subtitle, action }) {
   );
 }
 
-export function StatCard({ icon: Icon, label, value, trend, tone = "primary" }) {
+export function StatCard({ icon: Icon, label, value, suffix, trend, tone = "primary" }) {
   return (
     <Card className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className="flex items-center justify-between">
@@ -30,7 +31,10 @@ export function StatCard({ icon: Icon, label, value, trend, tone = "primary" }) 
           <Icon className="h-4 w-4" />
         </span>
       </div>
-      <p className="text-4xl font-semibold mt-2 tracking-tight text-slate-900">{value}</p>
+      <p className="text-4xl font-semibold mt-2 tracking-tight text-slate-900">
+        {value}
+        {suffix ? <span className="text-2xl text-slate-500">{suffix}</span> : null}
+      </p>
       {trend ? <p className="text-xs text-slate-500 mt-1">{trend}</p> : null}
     </Card>
   );
