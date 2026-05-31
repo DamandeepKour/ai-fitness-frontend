@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Card } from "@/components/ui/card";
 import { StatCard, BreakdownCard, PageHeader } from "@/components/admin/shared";
+import { getAIAnalyticsRequest, getAIGeneratedMealsRequest } from "@/api/ai";
 import {
   Brain,
   CheckCheck,
@@ -13,35 +14,77 @@ import {
   ThumbsUp,
 } from "lucide-react";
 
-const recent = [
-  { user: "Aarav S.", action: "Generated", plan: "Weight loss · 1800kcal", rating: 5, time: "2m ago" },
-  { user: "Sofia M.", action: "Regenerated", plan: "Vegan high-protein", rating: 3, time: "14m ago" },
-  { user: "Liam O.", action: "Edited", plan: "Bulk · 3000kcal", rating: 4, time: "38m ago" },
-  { user: "Priya P.", action: "Accepted", plan: "Maintenance", rating: 5, time: "1h ago" },
-  { user: "Yuki T.", action: "Regenerated", plan: "Keto · 1600kcal", rating: 2, time: "2h ago" },
-];
+function formatRelativeTime(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  const diffMs = Date.now() - date.getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export default function SuperAdminAIPage() {
+  const [analytics, setAnalytics] = useState(null);
+  const [generatedMeals, setGeneratedMeals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   useEffect(() => {
     document.title = "AI Analytics — AIFitnova Admin";
   }, []);
 
-  const totalGenerated = 12480;
-  const regenerated = 3210;
-  const accepted = 7140;
-  const edited = 2130;
-  const regenRate = Math.round((regenerated / totalGenerated) * 100);
-  const acceptedVsEdited = Math.round((accepted / (accepted + edited)) * 100);
-  const avgRating = 4.2;
+  useEffect(() => {
+    let ignore = false;
+
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const [analyticsData, meals] = await Promise.all([
+          getAIAnalyticsRequest(),
+          getAIGeneratedMealsRequest(50),
+        ]);
+        if (ignore) return;
+        setAnalytics(analyticsData);
+        setGeneratedMeals(meals);
+      } catch {
+        if (!ignore) setError("Unable to load AI analytics data.");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const totalGenerated = analytics?.totalGenerated ?? 0;
+  const regenerated = analytics?.regenerated ?? 0;
+  const regenRate = analytics?.regenRate ?? 0;
+  const goalsTotal = (analytics?.goalSplit ?? []).reduce((a, r) => a + r.count, 0);
 
   const feedback = [
-    { label: "5 — Loved it", count: 5240 },
-    { label: "4 — Good", count: 3810 },
-    { label: "3 — Okay", count: 1620 },
-    { label: "2 — Meh", count: 920 },
-    { label: "1 — Bad", count: 540 },
+    { label: "5 — Loved it", count: 0 },
+    { label: "4 — Good", count: 0 },
+    { label: "3 — Okay", count: 0 },
+    { label: "2 — Meh", count: 0 },
+    { label: "1 — Bad", count: 0 },
   ];
-  const feedbackTotal = feedback.reduce((a, r) => a + r.count, 0);
+  const feedbackTotal = 0;
 
   return (
     <AdminShell>
@@ -50,44 +93,54 @@ export default function SuperAdminAIPage() {
         subtitle="How the AI meal-plan engine is being used and rated."
       />
 
+      {error ? (
+        <Card className="rounded-2xl border border-destructive/30 p-4">
+          <p className="text-sm text-destructive">{error}</p>
+        </Card>
+      ) : null}
+
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
           icon={Sparkles}
           label="Plans generated"
-          value={totalGenerated}
-          trend="last 30 days"
+          value={loading ? "..." : totalGenerated}
+          trend={`${analytics?.last30Days ?? 0} in last 30 days`}
           tone="primary"
         />
         <StatCard
           icon={RefreshCcw}
           label="Regeneration rate"
-          value={regenRate}
+          value={loading ? "..." : regenRate}
           suffix="%"
           trend={`${regenerated.toLocaleString()} regens`}
           tone={regenRate > 30 ? "destructive" : "warning"}
         />
         <StatCard
           icon={Star}
-          label="Avg feedback score"
-          value={avgRating}
-          suffix="/ 5"
-          trend={`${feedbackTotal.toLocaleString()} ratings`}
+          label="Unique users"
+          value={loading ? "..." : analytics?.uniqueUsers ?? 0}
+          trend="with at least 1 plan"
           tone="success"
         />
         <StatCard
           icon={CheckCheck}
-          label="Accepted vs edited"
-          value={`${acceptedVsEdited}/${100 - acceptedVsEdited}`}
-          trend="higher = users trust output"
+          label="Meals generated"
+          value={loading ? "..." : generatedMeals.reduce((a, m) => a + (m.mealCount || 0), 0)}
+          trend="across recent plans"
           tone="accent"
         />
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <BreakdownCard
-          title="Feedback distribution"
+          title="Plans by goal"
           icon={ThumbsUp}
-          rows={feedback.map((r) => ({ ...r, total: feedbackTotal }))}
+          rows={(analytics?.goalSplit ?? []).map((r) => ({
+            label: r.label,
+            count: r.count,
+            total: goalsTotal,
+          }))}
+          emptyLabel="No generated plans yet"
         />
         <Card className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="flex items-center gap-2">
@@ -97,9 +150,19 @@ export default function SuperAdminAIPage() {
             <h3 className="font-semibold text-slate-900">Plan outcome split</h3>
           </div>
           <div className="mt-6 space-y-5">
-            <Donut label="Accepted as-is" value={accepted} total={totalGenerated} tone="success" />
-            <Donut label="Edited then saved" value={edited} total={totalGenerated} tone="warning" />
+            <Donut
+              label="First-time generated"
+              value={analytics?.uniqueUsers ?? 0}
+              total={totalGenerated}
+              tone="success"
+            />
             <Donut label="Regenerated" value={regenerated} total={totalGenerated} tone="destructive" />
+            <Donut
+              label="Total plans"
+              value={totalGenerated}
+              total={totalGenerated || 1}
+              tone="warning"
+            />
           </div>
         </Card>
         <Card className="rounded-2xl border border-slate-200 bg-white p-6">
@@ -107,24 +170,16 @@ export default function SuperAdminAIPage() {
             <div className="h-8 w-8 rounded-lg bg-orange-50 text-orange-500 grid place-items-center">
               <ThumbsDown className="h-4 w-4" />
             </div>
-            <h3 className="font-semibold text-slate-900">Common rejection reasons</h3>
+            <h3 className="font-semibold text-slate-900">Feedback</h3>
           </div>
-          <ul className="mt-5 space-y-3 text-sm">
-            {[
-              ["Too many repeat meals", 38],
-              ["Doesn't fit my cuisine", 27],
-              ["Macros off target", 18],
-              ["Too expensive ingredients", 11],
-              ["Other", 6],
-            ].map(([label, p]) => (
-              <li key={String(label)}>
-                <div className="flex justify-between">
-                  <span className="text-slate-700">{label}</span>
-                  <span className="text-muted-foreground tabular-nums">{p}%</span>
-                </div>
-                <div className="mt-1.5 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full bg-red-400/70" style={{ width: `${p}%` }} />
-                </div>
+          <p className="mt-5 text-sm text-muted-foreground">
+            User ratings are not tracked yet. Connect a feedback table to populate this section.
+          </p>
+          <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+            {feedback.map((item) => (
+              <li key={item.label} className="flex justify-between">
+                <span>{item.label}</span>
+                <span>{feedbackTotal ? item.count : "—"}</span>
               </li>
             ))}
           </ul>
@@ -134,33 +189,66 @@ export default function SuperAdminAIPage() {
       <Card className="rounded-2xl border border-slate-200 bg-white p-6">
         <div className="flex items-center gap-2 mb-5">
           <Pencil className="h-5 w-5 text-orange-500" />
-          <h2 className="text-base font-semibold text-slate-900">Recent AI activity</h2>
+          <h2 className="text-base font-semibold text-slate-900">User generated meals</h2>
         </div>
-        <div className="overflow-hidden rounded-xl border border-border">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-xl border border-border">
+          <table className="w-full text-sm min-w-[720px]">
             <thead className="bg-muted/50 text-muted-foreground">
               <tr className="text-left">
                 <th className="px-4 py-3 font-medium">User</th>
                 <th className="px-4 py-3 font-medium">Action</th>
                 <th className="px-4 py-3 font-medium hidden sm:table-cell">Plan</th>
-                <th className="px-4 py-3 font-medium">Rating</th>
+                <th className="px-4 py-3 font-medium">Generated meals</th>
                 <th className="px-4 py-3 font-medium text-right">When</th>
               </tr>
             </thead>
             <tbody>
-              {recent.map((r, i) => (
-                <tr key={i} className="border-t border-border">
-                  <td className="px-4 py-3 font-medium">{r.user}</td>
-                  <td className="px-4 py-3">{r.action}</td>
-                  <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{r.plan}</td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1 text-amber-600">
-                      <Star className="h-3.5 w-3.5 fill-current" /> {r.rating}
-                    </span>
+              {!loading && generatedMeals.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                    No AI generated meal plans yet.
                   </td>
-                  <td className="px-4 py-3 text-right text-muted-foreground">{r.time}</td>
                 </tr>
-              ))}
+              ) : (
+                (loading
+                  ? [{ id: "loading", user: "Loading...", action: "", plan: "", mealsSummary: "", createdAt: "" }]
+                  : generatedMeals
+                ).map((row) => (
+                  <tr key={row.id} className="border-t border-border align-top">
+                    <td className="px-4 py-3">
+                      <p className="font-medium">{row.user}</p>
+                      {!loading ? (
+                        <p className="text-xs text-muted-foreground mt-0.5">{row.email}</p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3">
+                      {!loading ? (
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            row.action === "Regenerated"
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-emerald-50 text-emerald-700"
+                          }`}
+                        >
+                          {row.action}
+                        </span>
+                      ) : (
+                        "..."
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{row.plan}</td>
+                    <td className="px-4 py-3 text-muted-foreground max-w-md">
+                      <p>{row.mealsSummary}</p>
+                      {!loading && row.mealCount ? (
+                        <p className="text-xs mt-1 text-slate-500">{row.mealCount} meals in plan</p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3 text-right text-muted-foreground whitespace-nowrap">
+                      {loading ? "..." : formatRelativeTime(row.createdAt)}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
