@@ -81,3 +81,18 @@ export function BreakdownCard({ title, icon: Icon, rows = [], emptyLabel = "No d
     </Card>
   );
 }
+
+export function ReasonBadge({ tone = "warning", children }) {
+  const toneClass = {
+    destructive: "bg-red-50 text-red-700 border-red-200",
+    warning: "bg-amber-50 text-amber-800 border-amber-200",
+  }[tone];
+
+  return (
+    <span
+      className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${toneClass || toneClass.warning}`}
+    >
+      {children}
+    </span>
+  );
+}

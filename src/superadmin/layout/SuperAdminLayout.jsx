@@ -5,7 +5,9 @@ import {
   Activity,
   BarChart3,
   Brain,
+  DollarSign,
   Globe,
+  HeartPulse,
   LayoutDashboard,
   Settings,
   Sparkles,
@@ -77,6 +79,18 @@ export default function SuperAdminLayout() {
                 icon={Brain}
                 to="/superadmin/ai"
                 active={path === "/superadmin/ai"}
+              />
+              <SidebarItem
+                label="Business"
+                icon={DollarSign}
+                to="/superadmin/business"
+                active={path === "/superadmin/business"}
+              />
+              <SidebarItem
+                label="Health"
+                icon={HeartPulse}
+                to="/superadmin/health"
+                active={path === "/superadmin/health"}
               />
             </div>
           </div>

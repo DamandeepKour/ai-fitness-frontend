@@ -5,6 +5,8 @@ import SuperAdminUserProfile from "@/superadmin/pages/UserProfile";
 import SuperAdminMyProfile from "@/superadmin/pages/MyProfile";
 import SuperAdminNotifications from "@/superadmin/pages/Notifications";
 import SuperAdminAIPage from "@/superadmin/pages/AI";
+import SuperAdminBusinessPage from "@/superadmin/pages/Business";
+import SuperAdminHealthPage from "@/superadmin/pages/Health";
 import SuperAdminLogin from "@/superadmin/pages/Login";
 import SuperAdminSignup from "@/superadmin/pages/Signup";
 
@@ -38,6 +40,14 @@ export function superAdminRouteElements(PageTransition) {
       <Route
         path="ai"
         element={<PageTransition><SuperAdminAIPage /></PageTransition>}
+      />
+      <Route
+        path="business"
+        element={<PageTransition><SuperAdminBusinessPage /></PageTransition>}
+      />
+      <Route
+        path="health"
+        element={<PageTransition><SuperAdminHealthPage /></PageTransition>}
       />
     </Route>,
   ];
