@@ -8,6 +8,7 @@ import SuperAdminAIPage from "@/superadmin/pages/AI";
 import SuperAdminBusinessPage from "@/superadmin/pages/Business";
 import SuperAdminHealthPage from "@/superadmin/pages/Health";
 import SuperAdminNutritionPage from "@/superadmin/pages/Nutrition";
+import SuperAdminRetentPage from "@/superadmin/pages/Retent";
 import SuperAdminLogin from "@/superadmin/pages/Login";
 import SuperAdminSignup from "@/superadmin/pages/Signup";
 
@@ -53,6 +54,10 @@ export function superAdminRouteElements(PageTransition) {
       <Route
         path="nutrition"
         element={<PageTransition><SuperAdminNutritionPage /></PageTransition>}
+      />
+      <Route
+        path="retent"
+        element={<PageTransition><SuperAdminRetentPage /></PageTransition>}
       />
     </Route>,
   ];

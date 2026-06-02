@@ -9,6 +9,7 @@ import {
   Globe,
   HeartPulse,
   LayoutDashboard,
+  RotateCcw,
   Settings,
   Sparkles,
   Utensils,
@@ -98,6 +99,12 @@ export default function SuperAdminLayout() {
                 icon={Utensils}
                 to="/superadmin/nutrition"
                 active={path === "/superadmin/nutrition"}
+              />
+              <SidebarItem
+                label="Retent"
+                icon={RotateCcw}
+                to="/superadmin/retent"
+                active={path === "/superadmin/retent"}
               />
             </div>
           </div>
