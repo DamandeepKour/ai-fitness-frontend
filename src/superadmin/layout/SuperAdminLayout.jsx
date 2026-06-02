@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   Settings,
   Sparkles,
+  Utensils,
   Users,
   WandSparkles,
 } from "lucide-react";
@@ -91,6 +92,12 @@ export default function SuperAdminLayout() {
                 icon={HeartPulse}
                 to="/superadmin/health"
                 active={path === "/superadmin/health"}
+              />
+              <SidebarItem
+                label="Nutrition"
+                icon={Utensils}
+                to="/superadmin/nutrition"
+                active={path === "/superadmin/nutrition"}
               />
             </div>
           </div>
