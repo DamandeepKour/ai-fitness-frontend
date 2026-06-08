@@ -75,7 +75,7 @@ export default function SuperAdminLayout() {
           </div>
 
           <div className="px-3 py-3">
-            <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Phase 2 Analytics</p>
+            <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Analytics</p>
             <div className="mt-2 space-y-1">
               <SidebarItem
                 label="Analytics hub"
