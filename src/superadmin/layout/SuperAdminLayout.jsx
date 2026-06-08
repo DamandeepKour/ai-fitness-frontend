@@ -61,20 +61,20 @@ export default function SuperAdminLayout() {
               <SidebarItem
                 label="Users"
                 icon={Users}
-                to="/superadmin"
-                active={path.startsWith("/superadmin/users/")}
+                to="/superadmin/users"
+                active={path === "/superadmin/users" || path.startsWith("/superadmin/users/")}
               />
               <SidebarItem
                 label="Activity"
                 icon={Activity}
-                to="/superadmin"
-                active={false}
+                to="/superadmin/activity"
+                active={path === "/superadmin/activity"}
               />
               <SidebarItem
                 label="Analytics"
                 icon={BarChart3}
-                to="/superadmin"
-                active={false}
+                to="/superadmin/analytics"
+                active={path === "/superadmin/analytics"}
               />
               <SidebarItem
                 label="AI Analytics"
