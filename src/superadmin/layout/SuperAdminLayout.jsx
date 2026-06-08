@@ -113,8 +113,8 @@ export default function SuperAdminLayout() {
             <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Configuration</p>
             <div className="mt-2 space-y-1">
               <SidebarItem label="Onboarding" icon={WandSparkles} to="/superadmin" active={false} />
-              <SidebarItem label="Regions" icon={Globe} to="/superadmin" active={false} />
-              <SidebarItem label="Languages" icon={Globe} to="/superadmin" active={false} />
+              {/* <SidebarItem label="Regions" icon={Globe} to="/superadmin" active={false} />
+              <SidebarItem label="Languages" icon={Globe} to="/superadmin" active={false} /> */}
               <SidebarItem label="Settings" icon={Settings} to="/superadmin/profile" active={path === "/superadmin/profile"} />
             </div>
           </div>
