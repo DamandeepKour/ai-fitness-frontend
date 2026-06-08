@@ -12,6 +12,8 @@ import SuperAdminBusinessPage from "@/superadmin/pages/Business";
 import SuperAdminHealthPage from "@/superadmin/pages/Health";
 import SuperAdminNutritionPage from "@/superadmin/pages/Nutrition";
 import SuperAdminRetentPage from "@/superadmin/pages/Retent";
+import SuperAdminFunnelPage from "@/superadmin/pages/Funnel";
+import SuperAdminSupportPage from "@/superadmin/pages/Support";
 import SuperAdminLogin from "@/superadmin/pages/Login";
 import SuperAdminSignup from "@/superadmin/pages/Signup";
 
@@ -73,6 +75,14 @@ export function superAdminRouteElements(PageTransition) {
       <Route
         path="retent"
         element={<PageTransition><SuperAdminRetentPage /></PageTransition>}
+      />
+      <Route
+        path="funnel"
+        element={<PageTransition><SuperAdminFunnelPage /></PageTransition>}
+      />
+      <Route
+        path="support"
+        element={<PageTransition><SuperAdminSupportPage /></PageTransition>}
       />
     </Route>,
   ];

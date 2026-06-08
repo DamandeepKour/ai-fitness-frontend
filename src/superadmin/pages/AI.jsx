@@ -3,6 +3,7 @@ import AdminShell from "@/components/admin/AdminShell";
 import { Card } from "@/components/ui/card";
 import { StatCard, BreakdownCard, PageHeader } from "@/components/admin/shared";
 import { getAIAnalyticsRequest, getAIGeneratedMealsRequest } from "@/api/ai";
+import { getAIQualityAnalyticsRequest } from "@/api/analytics";
 import {
   Brain,
   CheckCheck,
@@ -37,6 +38,7 @@ function formatRelativeTime(value) {
 
 export default function SuperAdminAIPage() {
   const [analytics, setAnalytics] = useState(null);
+  const [quality, setQuality] = useState(null);
   const [generatedMeals, setGeneratedMeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -52,12 +54,14 @@ export default function SuperAdminAIPage() {
       setLoading(true);
       setError("");
       try {
-        const [analyticsData, meals] = await Promise.all([
+        const [analyticsData, qualityData, meals] = await Promise.all([
           getAIAnalyticsRequest(),
+          getAIQualityAnalyticsRequest(),
           getAIGeneratedMealsRequest(50),
         ]);
         if (ignore) return;
         setAnalytics(analyticsData);
+        setQuality(qualityData);
         setGeneratedMeals(meals);
       } catch {
         if (!ignore) setError("Unable to load AI analytics data.");
@@ -77,20 +81,14 @@ export default function SuperAdminAIPage() {
   const regenRate = analytics?.regenRate ?? 0;
   const goalsTotal = (analytics?.goalSplit ?? []).reduce((a, r) => a + r.count, 0);
 
-  const feedback = [
-    { label: "5 — Loved it", count: 0 },
-    { label: "4 — Good", count: 0 },
-    { label: "3 — Okay", count: 0 },
-    { label: "2 — Meh", count: 0 },
-    { label: "1 — Bad", count: 0 },
-  ];
-  const feedbackTotal = 0;
+  const feedback = quality?.feedbackBuckets ?? [];
+  const feedbackTotal = quality?.feedbackTotal ?? 0;
 
   return (
     <AdminShell>
       <PageHeader
-        title="AI Analytics"
-        subtitle="How the AI meal-plan engine is being used and rated."
+        title="AI Quality & Analytics"
+        subtitle="How the AI meal-plan engine is used, adopted, and rated."
       />
 
       {error ? (
@@ -117,9 +115,10 @@ export default function SuperAdminAIPage() {
         />
         <StatCard
           icon={Star}
-          label="Unique users"
-          value={loading ? "..." : analytics?.uniqueUsers ?? 0}
-          trend="with at least 1 plan"
+          label="AI quality score"
+          value={loading ? "..." : quality?.qualityScore ?? 0}
+          suffix="/100"
+          trend={`${quality?.adoptedUsers ?? 0}/${quality?.planUsers ?? 0} adopted plans`}
           tone="success"
         />
         <StatCard
@@ -170,11 +169,31 @@ export default function SuperAdminAIPage() {
             <div className="h-8 w-8 rounded-lg bg-orange-50 text-orange-500 grid place-items-center">
               <ThumbsDown className="h-4 w-4" />
             </div>
-            <h3 className="font-semibold text-slate-900">Feedback</h3>
+            <h3 className="font-semibold text-slate-900">Quality signals</h3>
           </div>
-          <p className="mt-5 text-sm text-muted-foreground">
-            User ratings are not tracked yet. Connect a feedback table to populate this section.
-          </p>
+          <ul className="mt-5 space-y-3">
+            {(quality?.signals ?? []).map((signal) => (
+              <li key={signal.label} className="flex justify-between text-sm">
+                <span className="text-slate-700">{signal.label}</span>
+                <span className="font-semibold tabular-nums">
+                  {loading ? "..." : `${signal.value}${signal.suffix}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {!quality?.hasExplicitRatings ? (
+            <p className="mt-4 text-xs text-muted-foreground">
+              Explicit user ratings are not tracked yet. Score is derived from plan adoption and regeneration rate.
+            </p>
+          ) : null}
+        </Card>
+        <Card className="rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-orange-50 text-orange-500 grid place-items-center">
+              <Star className="h-4 w-4" />
+            </div>
+            <h3 className="font-semibold text-slate-900">User ratings</h3>
+          </div>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
             {feedback.map((item) => (
               <li key={item.label} className="flex justify-between">

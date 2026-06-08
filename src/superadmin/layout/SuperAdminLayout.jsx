@@ -6,13 +6,14 @@ import {
   BarChart3,
   Brain,
   DollarSign,
-  Globe,
+  Filter,
   HeartPulse,
   LayoutDashboard,
-  RotateCcw,
+  MessageSquare,
+  Repeat,
   Settings,
   Sparkles,
-  Utensils,
+  Target,
   Users,
   WandSparkles,
 } from "lucide-react";
@@ -70,18 +71,54 @@ export default function SuperAdminLayout() {
                 to="/superadmin/activity"
                 active={path === "/superadmin/activity"}
               />
+            </div>
+          </div>
+
+          <div className="px-3 py-3">
+            <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Phase 2 Analytics</p>
+            <div className="mt-2 space-y-1">
               <SidebarItem
-                label="Analytics"
+                label="Analytics hub"
                 icon={BarChart3}
                 to="/superadmin/analytics"
                 active={path === "/superadmin/analytics"}
               />
               <SidebarItem
-                label="AI Analytics"
+                label="Funnel"
+                icon={Filter}
+                to="/superadmin/funnel"
+                active={path === "/superadmin/funnel"}
+              />
+              <SidebarItem
+                label="Retention"
+                icon={Repeat}
+                to="/superadmin/retent"
+                active={path === "/superadmin/retent"}
+              />
+              <SidebarItem
+                label="Meal adherence"
+                icon={Target}
+                to="/superadmin/nutrition"
+                active={path === "/superadmin/nutrition"}
+              />
+              <SidebarItem
+                label="AI quality"
                 icon={Brain}
                 to="/superadmin/ai"
                 active={path === "/superadmin/ai"}
               />
+              <SidebarItem
+                label="Support tickets"
+                icon={MessageSquare}
+                to="/superadmin/support"
+                active={path === "/superadmin/support"}
+              />
+            </div>
+          </div>
+
+          <div className="px-3 py-3">
+            <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Business & Health</p>
+            <div className="mt-2 space-y-1">
               <SidebarItem
                 label="Business"
                 icon={DollarSign}
@@ -94,18 +131,6 @@ export default function SuperAdminLayout() {
                 to="/superadmin/health"
                 active={path === "/superadmin/health"}
               />
-              <SidebarItem
-                label="Nutrition"
-                icon={Utensils}
-                to="/superadmin/nutrition"
-                active={path === "/superadmin/nutrition"}
-              />
-              <SidebarItem
-                label="Retent"
-                icon={RotateCcw}
-                to="/superadmin/retent"
-                active={path === "/superadmin/retent"}
-              />
             </div>
           </div>
 
@@ -113,8 +138,6 @@ export default function SuperAdminLayout() {
             <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Configuration</p>
             <div className="mt-2 space-y-1">
               <SidebarItem label="Onboarding" icon={WandSparkles} to="/superadmin" active={false} />
-              {/* <SidebarItem label="Regions" icon={Globe} to="/superadmin" active={false} />
-              <SidebarItem label="Languages" icon={Globe} to="/superadmin" active={false} /> */}
               <SidebarItem label="Settings" icon={Settings} to="/superadmin/profile" active={path === "/superadmin/profile"} />
             </div>
           </div>
