@@ -263,10 +263,10 @@ export default function Features() {
           className="mt-16"
         >
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">India-first roadmap</p>
-          <h2 className="mt-2 text-2xl md:text-3xl font-bold tracking-tight">Phase 3 & 4 — built in</h2>
+          <h2 className="mt-2 text-2xl md:text-3xl font-bold tracking-tight">built in</h2>
           <div className="mt-6 grid md:grid-cols-2 gap-5">
             <div className="glass-card rounded-3xl p-6">
-              <h3 className="font-bold text-lg">Phase 3 — Smart layer</h3>
+              <h3 className="font-bold text-lg">Smart layer</h3>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
                 <li>Indian food swap engine (paneer → tofu, rice → millets)</li>
                 <li>Pantry mode — meals from what&apos;s in your kitchen</li>
@@ -301,7 +301,7 @@ export default function Features() {
           <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-10 text-center">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Ready to try it? 💪
+              Ready to try it?
             </h2>
             <p className="mt-2 text-muted-foreground max-w-lg mx-auto">
               Start free — your first AI plan, calorie log and progress chart are minutes away.

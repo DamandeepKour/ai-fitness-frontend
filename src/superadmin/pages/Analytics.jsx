@@ -60,7 +60,7 @@ export default function SuperAdminAnalyticsPage() {
   const [summary, setSummary] = useState({});
 
   useEffect(() => {
-    document.title = "Phase 2 Analytics — AIFitnova Admin";
+    document.title = "Analytics — AIFitnova Admin";
   }, []);
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export default function SuperAdminAnalyticsPage() {
           cohortAvg: cohort?.averages?.day7 ?? 0,
         });
       } catch {
-        if (!ignore) setError("Unable to load Phase 2 analytics summary.");
+        if (!ignore) setError("Unable to load analytics summary.");
       } finally {
         if (!ignore) setLoading(false);
       }
@@ -105,7 +105,7 @@ export default function SuperAdminAnalyticsPage() {
   return (
     <AdminShell>
       <PageHeader
-        title="Phase 2 Analytics"
+        title="Analytics"
         subtitle="Funnel, retention, meal adherence, AI quality, support tickets, and cohort analytics."
       />
 
@@ -192,7 +192,7 @@ export default function SuperAdminAnalyticsPage() {
             path="/superadmin"
             audience="Platform operators (user_type: superadmin)"
             points={[
-              "Phase 2 analytics: funnel, retention, cohorts, adherence",
+              "analytics: funnel, retention, cohorts, adherence",
               "AI quality signals, support ticket triage, business metrics",
               "Uses /api/superadmin/* — not available to regular users",
             ]}
