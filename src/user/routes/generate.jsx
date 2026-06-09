@@ -18,6 +18,8 @@ const INITIAL_FORM = {
   workout_type: "home",
   meal_preference: "north_indian",
   ai_prompt: "",
+  pantry_mode: false,
+  budget_tier: "standard",
 };
 
 const MEAL_EMOJI = {
@@ -160,6 +162,16 @@ function GeneratePage() {
             <Select label="Diet Type" value={form.diet_type} onChange={(value) => updateForm("diet_type", value)} options={["veg", "veg_egg", "non veg"]} />
             <Select label="Meal Preference" value={form.meal_preference} onChange={(value) => updateForm("meal_preference", value)} options={["north_indian", "south_indian"]} />
             <Select label="Workout Type" value={form.workout_type} onChange={(value) => updateForm("workout_type", value)} options={["home", "gym", "mix"]} />
+            <Select label="Budget tier (₹/day)" value={form.budget_tier} onChange={(value) => updateForm("budget_tier", value)} options={["budget", "standard", "premium"]} />
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.pantry_mode}
+                onChange={(e) => updateForm("pantry_mode", e.target.checked)}
+                className="rounded border-input"
+              />
+              Pantry mode — use ingredients from <a href="/pantry" className="text-primary underline">your pantry</a>
+            </label>
             <Button type="submit" className="w-full rounded-xl" disabled={generating}>
               {generating ? "Generating..." : "Generate meals"}
             </Button>

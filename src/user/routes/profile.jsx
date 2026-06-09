@@ -45,6 +45,7 @@ const defaultProfile = {
   goal: "",
   diet_type: "",
   activity_level: "",
+  language: "en",
   profileImageUrl: "",
   created_at: "",
 };
@@ -144,6 +145,7 @@ function ProfilePage() {
       goal: data.goal,
       diet_type: data.diet_type,
       activity_level: data.activity_level,
+      language: data.language,
       ...(data.password ? { password: data.password } : {}),
     };
 
@@ -451,6 +453,13 @@ function ProfilePage() {
                 onChange={(v) => setDraft({ ...draft, activity_level: v })}
                 options={["low", "medium", "high"]}
                 formatOption={(o) => activityLabel(o)}
+              />
+              <DraftSelect
+                label="Coaching language"
+                value={draft.language || "en"}
+                onChange={(v) => setDraft({ ...draft, language: v })}
+                options={["en", "hi", "hi-en"]}
+                formatOption={(o) => ({ en: "English", hi: "Hindi", "hi-en": "Hindi + English" }[o] || o)}
               />
             </div>
             <div>

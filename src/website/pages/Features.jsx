@@ -256,6 +256,37 @@ export default function Features() {
         </div>
 
         <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="mt-16"
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">India-first roadmap</p>
+          <h2 className="mt-2 text-2xl md:text-3xl font-bold tracking-tight">Phase 3 & 4 — built in</h2>
+          <div className="mt-6 grid md:grid-cols-2 gap-5">
+            <div className="glass-card rounded-3xl p-6">
+              <h3 className="font-bold text-lg">Phase 3 — Smart layer</h3>
+              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                <li>Indian food swap engine (paneer → tofu, rice → millets)</li>
+                <li>Pantry mode — meals from what&apos;s in your kitchen</li>
+                <li>Budget plans — ₹150 to ₹400/day tiers</li>
+                <li>Vernacular coaching in Hindi + English</li>
+              </ul>
+            </div>
+            <div className="glass-card rounded-3xl p-6">
+              <h3 className="font-bold text-lg">Phase 4 — Premium</h3>
+              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                <li>Live coach review of AI meal plans</li>
+                <li>Family plans for up to 6 members</li>
+                <li>WhatsApp meal reminders</li>
+                <li>Lab-report recommendations, wearables, grocery partners</li>
+              </ul>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
           variants={fadeUp}
           initial="hidden"
           whileInView="show"

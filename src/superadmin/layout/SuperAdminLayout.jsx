@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Repeat,
   Settings,
+  Stethoscope,
   Sparkles,
   Target,
   Users,
@@ -112,6 +113,18 @@ export default function SuperAdminLayout() {
                 icon={MessageSquare}
                 to="/superadmin/support"
                 active={path === "/superadmin/support"}
+              />
+            </div>
+          </div>
+
+          <div className="px-3 py-3">
+            <p className="px-3 text-[11px] uppercase tracking-[0.14em] text-slate-500">Phase 4 Premium</p>
+            <div className="mt-2 space-y-1">
+              <SidebarItem
+                label="Coach reviews"
+                icon={Stethoscope}
+                to="/superadmin/coach-reviews"
+                active={path === "/superadmin/coach-reviews"}
               />
             </div>
           </div>

@@ -9,6 +9,9 @@ import ProfilePage from "@/user/routes/profile";
 import MealHistoryPage from "@/user/routes/meal-history";
 import NotificationsPage from "@/user/routes/notifications";
 import PrivacyPage from "@/user/routes/privacy";
+import SmartFeaturesPage from "@/user/routes/smart";
+import PantryPage from "@/user/routes/pantry";
+import PremiumPage from "@/user/routes/premium";
 
 //User Routes
 export function userRouteElements(PageTransition) {
@@ -23,6 +26,9 @@ export function userRouteElements(PageTransition) {
       <Route path="/meal-history" element={<PageTransition><MealHistoryPage /></PageTransition>} />
       <Route path="/notifications" element={<PageTransition><NotificationsPage /></PageTransition>} />
       <Route path="/privacy" element={<PageTransition><PrivacyPage /></PageTransition>} />
+      <Route path="/smart" element={<PageTransition><SmartFeaturesPage /></PageTransition>} />
+      <Route path="/pantry" element={<PageTransition><PantryPage /></PageTransition>} />
+      <Route path="/premium" element={<PageTransition><PremiumPage /></PageTransition>} />
     </Route>,
   ];
 }
