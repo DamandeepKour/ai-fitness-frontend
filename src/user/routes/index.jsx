@@ -121,8 +121,8 @@ function Dashboard() {
           <h1 className="text-3xl md:text-4xl font-semibold mt-1">Welcome back, {userName}</h1>
         </div>
         <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <Button asChild size="lg" className="rounded-full">
+          <ThemeToggle className="max-md:hidden" />
+          <Button asChild size="lg" className="rounded-full max-md:hidden">
             <Link to="/add">Log food</Link>
           </Button>
         </div>

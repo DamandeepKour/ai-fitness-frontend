@@ -1,13 +1,17 @@
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
+import { MobileAppHeader } from "./MobileAppHeader";
 
 export function AppShell({ children }) {
   return (
-    <div className="min-h-screen flex w-full">
+    <div className="app-shell">
       <Sidebar />
-      <main className="flex-1 min-w-0 px-4 md:px-10 py-6 md:py-10 pb-28 md:pb-10">
-        <div className="max-w-7xl mx-auto">{children}</div>
-      </main>
+      <div className="app-shell-main">
+        <MobileAppHeader />
+        <main className="app-shell-content">
+          <div className="max-w-7xl mx-auto mobile-app-content">{children}</div>
+        </main>
+      </div>
       <MobileNav />
     </div>
   );

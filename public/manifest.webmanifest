@@ -1,0 +1,18 @@
+{
+  "name": "FitNova AI",
+  "short_name": "FitNova",
+  "description": "AI fitness & nutrition — train smart, eat smart",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#fafafc",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logos/fitnova-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
