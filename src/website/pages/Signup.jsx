@@ -7,6 +7,7 @@ import { AuthAmbientBackdrop } from "@/components/auth/AuthAmbientBackdrop";
 import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
 import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
+import { Mail, CheckCircle2 } from "lucide-react";
 import PhoneInput from "react-phone-number-input";
 
 const ROTATE_MS = 2000;
@@ -20,7 +21,7 @@ const Signup = () => {
     confirmPassword: "",
   });
 
-  const { signup, loading, error, clearError } = useSignup();
+  const { signup, loading, error, success, clearError } = useSignup();
   const [localError, setLocalError] = useState("");
 
   const slides = SIGNUP_MARKETING_SLIDES;
@@ -73,9 +74,38 @@ const Signup = () => {
             </p>
 
             <h2 className="mb-1 text-3xl font-semibold tracking-tight text-foreground">
-              Create account
+              {success ? "Check your email" : "Create account"}
             </h2>
 
+            {success ? (
+              <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-5 text-left">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-emerald-900">Account created!</p>
+                    <p className="text-sm text-emerald-800/90 mt-1 leading-relaxed">
+                      {success.message}
+                    </p>
+                    <p className="text-sm text-emerald-800/80 mt-3 inline-flex items-center gap-1.5">
+                      <Mail className="h-4 w-4" />
+                      <span>{success.email}</span>
+                    </p>
+                    {!success.emailSent ? (
+                      <p className="text-xs text-amber-700 mt-3">
+                        Email could not be sent (SMTP not configured). Use password login or check server logs for the link.
+                      </p>
+                    ) : null}
+                    <Link
+                      to="/login"
+                      className="inline-block mt-4 text-sm font-medium text-primary hover:underline"
+                    >
+                      Or log in with password →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
             <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
               Build better food and fitness habits with intelligent daily insights.
             </p>
@@ -204,6 +234,8 @@ const Signup = () => {
                 Login here
               </Link>
             </p>
+              </>
+            )}
           </div>
         </div>
 

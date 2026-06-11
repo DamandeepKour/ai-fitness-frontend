@@ -36,10 +36,28 @@ export async function loginRequestByType(body, userType = "user") {
 
 /**
  * POST /api/auth/signup — body: { name, email, password }
- * @returns {Promise<{ id?: number }>}
+ * @returns {Promise<{ id?: number, emailSent?: boolean, message?: string }>}
  */
 export async function signupRequest(body) {
-  return (await postAuth("/auth/signup", body)) ?? {};
+  const res = await API.post("/auth/signup", body);
+  if (res.data?.success === false) {
+    throw new Error(res.data?.message || "Signup failed");
+  }
+  return {
+    ...(res.data?.data ?? {}),
+    message: res.data?.message,
+  };
+}
+
+/**
+ * POST /api/auth/magic-login — body: { token }
+ */
+export async function magicLoginRequest(token) {
+  const data = await postAuth("/auth/magic-login", { token });
+  if (!data?.token) {
+    throw new Error("Invalid or expired login link");
+  }
+  return data;
 }
 
 /**

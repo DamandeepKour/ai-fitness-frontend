@@ -8,6 +8,7 @@ import { getAppRoutes } from "@/app-routes";
 const AUTH_PATHS = new Set([
   "/login",
   "/signup",
+  "/auth/magic-login",
   "/superadmin/login",
   "/superadmin/signup",
 ]);

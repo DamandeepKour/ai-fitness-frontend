@@ -3,6 +3,7 @@ import SiteLayout from "@/website/layout/SiteLayout";
 import Welcome from "@/website/pages/Welcome";
 import Login from "@/website/pages/Login";
 import Signup from "@/website/pages/Signup";
+import MagicLogin from "@/website/pages/MagicLogin";
 import SitePlaceholder from "@/website/pages/SitePlaceholder";
 import About from "@/website/pages/About";
 import Features from "@/website/pages/Features";
@@ -39,5 +40,6 @@ export function websiteRouteElements(PageWrap, StableWrap) {
     <Route key="website-signup-redirect" path="/website/signup" element={<Navigate to="/signup" replace />} />,
     <Route key="login" path="/login" element={<Stable><Login /></Stable>} />,
     <Route key="signup" path="/signup" element={<Stable><Signup /></Stable>} />,
+    <Route key="magic-login" path="/auth/magic-login" element={<Stable><MagicLogin /></Stable>} />,
   ];
 }

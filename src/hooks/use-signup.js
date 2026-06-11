@@ -15,14 +15,35 @@ export function useSignup(options = {}) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(null);
 
   const signup = useCallback(
-    async ({ name, email, password }) => {
+    async ({ name, email, password, phone }) => {
       setLoading(true);
       setError("");
+      setSuccess(null);
       try {
-        await signupRequestByType({ name, email, password }, userType);
-        navigate(redirectTo || (userType === "superadmin" ? "/superadmin/login" : "/login"), { replace: false });
+        const result = await signupRequestByType(
+          { name, email, password, phone },
+          userType,
+        );
+
+        if (userType === "user") {
+          setSuccess({
+            email,
+            emailSent: result.emailSent !== false,
+            message:
+              result.message ||
+              "Account created. Check your email for a one-time login link.",
+          });
+          return { ok: true, emailSent: result.emailSent };
+        }
+
+        if (redirectTo) {
+          navigate(redirectTo, { replace: false });
+        } else {
+          navigate(userType === "superadmin" ? "/superadmin/login" : "/login", { replace: false });
+        }
         return { ok: true };
       } catch (err) {
         setError(formatSignupError(err));
@@ -31,10 +52,11 @@ export function useSignup(options = {}) {
         setLoading(false);
       }
     },
-    [navigate, redirectTo, userType],
+    [redirectTo, userType, navigate],
   );
 
   const clearError = useCallback(() => setError(""), []);
+  const resetSuccess = useCallback(() => setSuccess(null), []);
 
-  return { signup, loading, error, clearError };
+  return { signup, loading, error, success, clearError, resetSuccess };
 }
