@@ -182,6 +182,41 @@
   }
 }
 
+/* Outlined phone input (auth forms) */
+.outlined-phone-input .PhoneInputCountry {
+  margin-right: 0.25rem;
+}
+
+.outlined-phone-input .PhoneInputCountrySelect {
+  font-size: 0.875rem;
+  background: transparent;
+  border: none;
+  color: rgb(var(--foreground) / 0.85);
+}
+
+.outlined-phone-input .PhoneInputInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.875rem;
+  color: rgb(var(--foreground) / 1);
+}
+
+.outlined-phone-input .PhoneInputInput::placeholder {
+  color: rgb(var(--muted-foreground) / 1);
+}
+
+.outlined-phone-input--error .PhoneInputInput,
+.outlined-phone-input--error .PhoneInputCountrySelect {
+  color: rgb(251 113 133 / 1);
+}
+
+.outlined-phone-input--error .PhoneInputInput::placeholder {
+  color: rgb(251 113 133 / 0.5);
+}
+
 /* ─── Native-style mobile app shell (user routes only; desktop unchanged) ─── */
 
 @layer components {

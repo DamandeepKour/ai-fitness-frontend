@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useRotatingIndex } from "@/hooks/use-rotating-index";
 import { useSignup } from "@/hooks/use-signup";
+import { useAuthFieldValidation } from "@/hooks/use-auth-field-validation";
+import {
+  validateConfirmPassword,
+  validateEmail,
+  validateName,
+  validatePassword,
+  validatePhone,
+} from "@/lib/auth-validation";
 import { SIGNUP_MARKETING_SLIDES } from "@/data/auth-visual-slides";
 import { AuthAmbientBackdrop } from "@/components/auth/AuthAmbientBackdrop";
 import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
 import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
 import { Mail, CheckCircle2 } from "lucide-react";
-import PhoneInput from "react-phone-number-input";
-import { PasswordField } from "@/components/auth/PasswordField";
+import { OutlinedField } from "@/components/auth/OutlinedField";
+import { OutlinedPasswordField } from "@/components/auth/OutlinedPasswordField";
+import { OutlinedPhoneField } from "@/components/auth/OutlinedPhoneField";
 
 const ROTATE_MS = 2000;
 
@@ -23,24 +32,43 @@ const Signup = () => {
   });
 
   const { signup, loading, error, success, clearError } = useSignup();
-  const [localError, setLocalError] = useState("");
+
+  const validators = useMemo(
+    () => ({
+      name: (v) => validateName(v),
+      email: (v) => validateEmail(v),
+      phone: (v) => validatePhone(v, { required: true }),
+      password: (v) => validatePassword(v),
+      confirmPassword: (v, all) => validateConfirmPassword(all.password, v),
+    }),
+    [],
+  );
+
+  const { touch, validateField, validateAll, getError } = useAuthFieldValidation(validators);
 
   const slides = SIGNUP_MARKETING_SLIDES;
   const bgSources = slides.map((s) => s.src);
   const activeIndex = useRotatingIndex(slides.length, ROTATE_MS);
 
-  const handleSubmit = async () => {
-    setLocalError("");
+  const updateField = (field, value) => {
+    clearError();
+    setForm((f) => {
+      const next = { ...f, [field]: value };
+      if (getError(field)) validateField(field, value, next);
+      if (field === "password" && getError("confirmPassword")) {
+        validateField("confirmPassword", next.confirmPassword, next);
+      }
+      return next;
+    });
+  };
 
-    if (form.password !== form.confirmPassword) {
-      setLocalError("Passwords do not match");
-      return;
-    }
+  const handleSubmit = async () => {
+    if (!validateAll(form)) return;
 
     await signup({
       name: form.name.trim(),
       email: form.email.trim(),
-      phone: form.phone.trim(),
+      phone: form.phone,
       password: form.password,
     });
   };
@@ -112,82 +140,69 @@ const Signup = () => {
             </p>
 
             <div className="space-y-3">
-              
-              {/* Name */}
-              <input
-                placeholder="Name"
+              <OutlinedField
+                label="Name"
                 autoComplete="name"
-                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                placeholder="Jane Smith"
                 value={form.name}
-                onChange={(e) => {
-                  clearError();
-                  setLocalError("");
-                  setForm((f) => ({
-                    ...f,
-                    name: e.target.value,
-                  }));
+                error={getError("name")}
+                onChange={(e) => updateField("name", e.target.value)}
+                onBlur={() => {
+                  touch("name");
+                  validateField("name", form.name, form);
                 }}
               />
 
-              {/* Email */}
-              <input
-                placeholder="Email"
+              <OutlinedField
+                label="Email"
                 type="email"
                 autoComplete="email"
-                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                placeholder="you@example.com"
                 value={form.email}
-                onChange={(e) => {
-                  clearError();
-                  setLocalError("");
-                  setForm((f) => ({
-                    ...f,
-                    email: e.target.value,
-                  }));
+                error={getError("email")}
+                onChange={(e) => updateField("email", e.target.value)}
+                onBlur={() => {
+                  touch("email");
+                  validateField("email", form.email, form);
                 }}
               />
 
-              {/* Phone */}
-              <div className="w-full">
-                <PhoneInput
-                  international
-                  defaultCountry="IN"
-                  value={form.phone}
-                  onChange={(phone) => {
-                    clearError();
-                    setLocalError("");
+              <OutlinedPhoneField
+                label="Phone number"
+                defaultCountry="IN"
+                placeholder="123-456-7890"
+                value={form.phone}
+                error={getError("phone")}
+                onChange={(phone) => updateField("phone", phone || "")}
+                onBlur={() => {
+                  touch("phone");
+                  validateField("phone", form.phone, form);
+                }}
+              />
 
-                    setForm((f) => ({
-                      ...f,
-                      phone: phone || "",
-                    }));
-                  }}
-                  className="flex h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm text-foreground"
-                />
-              </div>
-
-              {/* Password */}
-              <PasswordField
-                placeholder="Password"
+              <OutlinedPasswordField
+                label="Password"
                 autoComplete="new-password"
-                inputClassName="h-10 text-sm pl-3"
+                placeholder="Min. 8 characters"
                 value={form.password}
-                onChange={(e) => {
-                  clearError();
-                  setLocalError("");
-                  setForm((f) => ({ ...f, password: e.target.value }));
+                error={getError("password")}
+                onChange={(e) => updateField("password", e.target.value)}
+                onBlur={() => {
+                  touch("password");
+                  validateField("password", form.password, form);
                 }}
               />
 
-              {/* Confirm Password */}
-              <PasswordField
-                placeholder="Confirm Password"
+              <OutlinedPasswordField
+                label="Confirm password"
                 autoComplete="new-password"
-                inputClassName="h-10 text-sm pl-3"
+                placeholder="Re-enter password"
                 value={form.confirmPassword}
-                onChange={(e) => {
-                  clearError();
-                  setLocalError("");
-                  setForm((f) => ({ ...f, confirmPassword: e.target.value }));
+                error={getError("confirmPassword")}
+                onChange={(e) => updateField("confirmPassword", e.target.value)}
+                onBlur={() => {
+                  touch("confirmPassword");
+                  validateField("confirmPassword", form.confirmPassword, form);
                 }}
               />
             </div>
@@ -201,13 +216,6 @@ const Signup = () => {
             >
               {loading ? "Creating…" : "Create Account"}
             </button>
-
-            {/* ERRORS */}
-            {localError ? (
-              <p className="mt-2 text-sm text-destructive">
-                {localError}
-              </p>
-            ) : null}
 
             {error ? (
               <p className="mt-2 text-sm text-destructive">

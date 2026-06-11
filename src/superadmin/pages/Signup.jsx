@@ -1,12 +1,21 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useRotatingIndex } from "@/hooks/use-rotating-index";
 import { useSignup } from "@/hooks/use-signup";
+import { useAuthFieldValidation } from "@/hooks/use-auth-field-validation";
+import {
+  validateConfirmPassword,
+  validateEmail,
+  validateName,
+  validatePassword,
+} from "@/lib/auth-validation";
 import { SIGNUP_MARKETING_SLIDES } from "@/data/auth-visual-slides";
 import { AuthAmbientBackdrop } from "@/components/auth/AuthAmbientBackdrop";
 import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
 import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
+import { OutlinedField } from "@/components/auth/OutlinedField";
+import { OutlinedPasswordField } from "@/components/auth/OutlinedPasswordField";
 
 const ROTATE_MS = 2000;
 
@@ -21,18 +30,37 @@ export default function SuperAdminSignup() {
     userType: "superadmin",
     redirectTo: "/superadmin/login",
   });
-  const [localError, setLocalError] = useState("");
+
+  const validators = useMemo(
+    () => ({
+      name: (v) => validateName(v),
+      email: (v) => validateEmail(v),
+      password: (v) => validatePassword(v),
+      confirmPassword: (v, all) => validateConfirmPassword(all.password, v),
+    }),
+    [],
+  );
+
+  const { touch, validateField, validateAll, getError } = useAuthFieldValidation(validators);
 
   const slides = SIGNUP_MARKETING_SLIDES;
   const bgSources = slides.map((s) => s.src);
   const activeIndex = useRotatingIndex(slides.length, ROTATE_MS);
 
+  const updateField = (field, value) => {
+    clearError();
+    setForm((f) => {
+      const next = { ...f, [field]: value };
+      if (getError(field)) validateField(field, value, next);
+      if (field === "password" && getError("confirmPassword")) {
+        validateField("confirmPassword", next.confirmPassword, next);
+      }
+      return next;
+    });
+  };
+
   const handleSubmit = async () => {
-    setLocalError("");
-    if (form.password !== form.confirmPassword) {
-      setLocalError("Passwords do not match");
-      return;
-    }
+    if (!validateAll(form)) return;
     await signup({
       name: form.name.trim(),
       email: form.email.trim(),
@@ -53,50 +81,56 @@ export default function SuperAdminSignup() {
               Create Superadmin
             </h2>
             <p className="text-sm text-muted-foreground mb-5">
-              This page creates only `superadmin` accounts.
+              This page creates only superadmin accounts.
             </p>
             <div className="space-y-3">
-              <input
-                placeholder="Name"
-                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm"
+              <OutlinedField
+                label="Name"
+                autoComplete="name"
+                placeholder="Jane Smith"
                 value={form.name}
-                onChange={(e) => {
-                  clearError();
-                  setLocalError("");
-                  setForm((f) => ({ ...f, name: e.target.value }));
+                error={getError("name")}
+                onChange={(e) => updateField("name", e.target.value)}
+                onBlur={() => {
+                  touch("name");
+                  validateField("name", form.name, form);
                 }}
               />
-              <input
-                placeholder="Email"
+              <OutlinedField
+                label="Email"
                 type="email"
-                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm"
+                autoComplete="email"
+                placeholder="admin@example.com"
                 value={form.email}
-                onChange={(e) => {
-                  clearError();
-                  setLocalError("");
-                  setForm((f) => ({ ...f, email: e.target.value }));
+                error={getError("email")}
+                onChange={(e) => updateField("email", e.target.value)}
+                onBlur={() => {
+                  touch("email");
+                  validateField("email", form.email, form);
                 }}
               />
-              <input
-                placeholder="Password"
-                type="password"
-                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm"
+              <OutlinedPasswordField
+                label="Password"
+                autoComplete="new-password"
+                placeholder="Min. 8 characters"
                 value={form.password}
-                onChange={(e) => {
-                  clearError();
-                  setLocalError("");
-                  setForm((f) => ({ ...f, password: e.target.value }));
+                error={getError("password")}
+                onChange={(e) => updateField("password", e.target.value)}
+                onBlur={() => {
+                  touch("password");
+                  validateField("password", form.password, form);
                 }}
               />
-              <input
-                placeholder="Confirm Password"
-                type="password"
-                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm"
+              <OutlinedPasswordField
+                label="Confirm password"
+                autoComplete="new-password"
+                placeholder="Re-enter password"
                 value={form.confirmPassword}
-                onChange={(e) => {
-                  clearError();
-                  setLocalError("");
-                  setForm((f) => ({ ...f, confirmPassword: e.target.value }));
+                error={getError("confirmPassword")}
+                onChange={(e) => updateField("confirmPassword", e.target.value)}
+                onBlur={() => {
+                  touch("confirmPassword");
+                  validateField("confirmPassword", form.confirmPassword, form);
                 }}
               />
             </div>
@@ -108,7 +142,6 @@ export default function SuperAdminSignup() {
             >
               {loading ? "Creating..." : "Create Superadmin"}
             </button>
-            {localError ? <p className="mt-2 text-sm text-destructive">{localError}</p> : null}
             {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
             <p className="mt-3 text-sm text-muted-foreground">
               Already have superadmin access?{" "}
