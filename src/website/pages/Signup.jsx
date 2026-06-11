@@ -9,6 +9,7 @@ import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
 import { Mail, CheckCircle2 } from "lucide-react";
 import PhoneInput from "react-phone-number-input";
+import { PasswordField } from "@/components/auth/PasswordField";
 
 const ROTATE_MS = 2000;
 
@@ -165,38 +166,28 @@ const Signup = () => {
               </div>
 
               {/* Password */}
-              <input
+              <PasswordField
                 placeholder="Password"
-                type="password"
                 autoComplete="new-password"
-                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                inputClassName="h-10 text-sm pl-3"
                 value={form.password}
                 onChange={(e) => {
                   clearError();
                   setLocalError("");
-
-                  setForm((f) => ({
-                    ...f,
-                    password: e.target.value,
-                  }));
+                  setForm((f) => ({ ...f, password: e.target.value }));
                 }}
               />
 
               {/* Confirm Password */}
-              <input
+              <PasswordField
                 placeholder="Confirm Password"
-                type="password"
                 autoComplete="new-password"
-                className="h-10 w-full rounded-xl border border-input/80 bg-background/80 px-3 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
+                inputClassName="h-10 text-sm pl-3"
                 value={form.confirmPassword}
                 onChange={(e) => {
                   clearError();
                   setLocalError("");
-
-                  setForm((f) => ({
-                    ...f,
-                    confirmPassword: e.target.value,
-                  }));
+                  setForm((f) => ({ ...f, confirmPassword: e.target.value }));
                 }}
               />
             </div>

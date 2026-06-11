@@ -9,6 +9,7 @@ import { AuthAmbientBackdrop } from "@/components/auth/AuthAmbientBackdrop";
 import { AuthMarketingPanel } from "@/components/auth/AuthMarketingPanel";
 import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
+import { PasswordField } from "@/components/auth/PasswordField";
 
 const ROTATE_MS = 2000;
 
@@ -58,11 +59,9 @@ const Login = () => {
                 }}
               />
 
-              <input
+              <PasswordField
                 placeholder="Password"
-                type="password"
                 autoComplete="current-password"
-                className="h-12 w-full rounded-xl border border-input/80 bg-background/80 px-4 text-foreground shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground backdrop-blur-sm transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/25"
                 value={form.password}
                 onChange={(e) => {
                   clearError();
