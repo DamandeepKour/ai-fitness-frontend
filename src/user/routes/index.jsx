@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Flame, Footprints, Dumbbell, Apple, Beef, Wheat, Droplet, Sparkles } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserProfileMenu } from "@/components/UserProfileMenu";
 import API from "@/api/axios";
 import { getStoredUser } from "@/lib/auth-token";
 import { getLocalDateYmd } from "@/lib/local-date";
@@ -117,14 +118,15 @@ function Dashboard() {
     <AppShell>
       <header className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
-          <p className="text-sm text-muted-foreground">{formatDate()}</p>
           <h1 className="text-3xl md:text-4xl font-semibold mt-1">Welcome back, {userName}</h1>
+          <p className="text-sm text-muted-foreground">{formatDate()}</p>
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle className="max-md:hidden" />
           <Button asChild size="lg" className="rounded-full max-md:hidden">
             <Link to="/add">Log food</Link>
           </Button>
+          <UserProfileMenu />
         </div>
       </header>
 

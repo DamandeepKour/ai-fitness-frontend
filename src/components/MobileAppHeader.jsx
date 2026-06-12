@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { getMobileAppTitle } from "@/lib/mobile-app-routes";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserProfileMenu } from "@/components/UserProfileMenu";
 
 export function MobileAppHeader() {
   const { pathname } = useLocation();
@@ -23,7 +24,10 @@ export function MobileAppHeader() {
             <p className="text-sm font-semibold truncate leading-tight mt-0.5">{title}</p>
           </div>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <UserProfileMenu showName={false} />
+        </div>
       </div>
     </header>
   );
