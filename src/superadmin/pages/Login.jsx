@@ -92,16 +92,21 @@ export default function SuperAdminLogin() {
                 }}
               />
             </div>
-            <label className="mt-5 flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                aria-label="Remember me"
-                className="h-4 w-4 rounded border-border accent-primary"
-              />
-              <span>Remember me</span>
-            </label>
+            <div className="mt-5 flex items-center justify-between gap-3 text-sm">
+              <label className="flex items-center gap-2 text-muted-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  aria-label="Remember me"
+                  className="h-4 w-4 rounded border-border accent-primary"
+                />
+                <span>Remember me</span>
+              </label>
+              <Link to="/forgot-password" className="font-medium text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             <button
               type="button"
               onClick={handleSubmit}

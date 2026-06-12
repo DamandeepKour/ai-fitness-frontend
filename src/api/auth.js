@@ -61,6 +61,24 @@ export async function magicLoginRequest(token) {
 }
 
 /**
+ * POST /api/auth/forgot-password — body: { email }
+ */
+export async function forgotPasswordRequest(email) {
+  const data = await postAuth("/auth/forgot-password", { email });
+  if (!data?.resetToken) {
+    throw new Error("Password reset could not be started");
+  }
+  return data;
+}
+
+/**
+ * POST /api/auth/reset-password — body: { token, password, confirmPassword }
+ */
+export async function resetPasswordRequest(body) {
+  return (await postAuth("/auth/reset-password", body)) ?? {};
+}
+
+/**
  * POST /api/auth/{userType}/signup — creates role-specific account.
  */
 export async function signupRequestByType(body, userType = "user") {
