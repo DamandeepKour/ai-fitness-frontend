@@ -16,6 +16,7 @@ const ROTATE_MS = 2000;
 
 export default function SuperAdminLogin() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [rememberMe, setRememberMe] = useState(false);
   const { login, loading, error, clearError } = useLogin({
     userType: "superadmin",
     defaultRedirect: "/superadmin",
@@ -91,6 +92,16 @@ export default function SuperAdminLogin() {
                 }}
               />
             </div>
+            <label className="mt-5 flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                aria-label="Remember me"
+                className="h-4 w-4 rounded border-border accent-primary"
+              />
+              <span>Remember me</span>
+            </label>
             <button
               type="button"
               onClick={handleSubmit}
