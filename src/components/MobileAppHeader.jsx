@@ -12,10 +12,9 @@ export function MobileAppHeader() {
       <div className="flex items-center justify-between gap-3 px-4 h-14">
         <div className="flex items-center gap-2.5 min-w-0">
           <img
-            src="/logos/fitnova-mark.svg"
+            src="/logos/fitnova-logo-light.png"
             alt=""
             className="h-8 w-8 object-contain shrink-0"
-            style={{ filter: "saturate(1.15) drop-shadow(0 2px 6px rgba(6,182,212,0.3))" }}
           />
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground leading-none">

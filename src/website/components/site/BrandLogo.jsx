@@ -2,15 +2,14 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const LOGO = {
-  mark: "/logos/fitnova-mark.svg",
-  full: "/logos/fitnova-logo.svg",
-  wide: "/logos/fitnova-logo-wide.svg",
+  mark: "/logos/fitnova-logo-light.png",
+  full: "/logos/fitnova-logo-dark.png",
+  wide: "/logos/fitnova-logo-dark.png",
 };
 
 export function BrandLogo({
   variant = "header",
   showText = true,
-  tagline,
   className,
   iconClassName,
   to = "/welcome",
@@ -20,7 +19,7 @@ export function BrandLogo({
   const isFooter = size === "footer";
   const isAuth = variant === "auth";
 
-  let image = null;
+  let image;
 
   if (variant === "auth" || variant === "full") {
     image = (
@@ -29,10 +28,9 @@ export function BrandLogo({
         alt="FitNova AI — Intelligent Fitness & Nutrition"
         className={cn(
           "object-contain shrink-0",
-          isAuth ? "h-28 md:h-32 w-auto max-w-full" : "h-14 md:h-16 w-auto",
+          isAuth ? "h-32 md:h-40 w-auto max-w-full" : "h-16 md:h-20 w-auto",
           iconClassName,
         )}
-        style={{ filter: "saturate(1.25) contrast(1.08)" }}
       />
     );
   } else if (variant === "wide" || (showText && variant === "header")) {
@@ -42,10 +40,9 @@ export function BrandLogo({
         alt="FitNova AI"
         className={cn(
           "object-contain shrink-0",
-          isFooter ? "h-11 w-auto max-w-[200px]" : "h-9 w-auto max-w-[180px]",
+          isFooter ? "h-16 w-auto max-w-[220px]" : "h-12 w-auto max-w-[190px]",
           iconClassName,
         )}
-        style={{ filter: "saturate(1.2) contrast(1.06)" }}
       />
     );
   } else {
@@ -54,7 +51,6 @@ export function BrandLogo({
         src={LOGO.mark}
         alt="FitNova AI"
         className={cn("object-contain shrink-0 h-10 w-10", iconClassName)}
-        style={{ filter: "saturate(1.15)" }}
       />
     );
   }
