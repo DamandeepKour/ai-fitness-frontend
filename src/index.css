@@ -231,144 +231,143 @@
   .app-shell-content {
     @apply flex-1 min-w-0 px-4 md:px-8 py-2;
   }
+}
 
-  @media (max-width: 767px) {
-    body.mobile-app {
-      overscroll-behavior: none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
+@media (max-width: 767px) {
+  body.mobile-app {
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
 
-    body.mobile-app {
-      background-image: none !important;
-      background-attachment: scroll !important;
-      animation: none !important;
-      background-color: rgb(var(--background) / 1);
-    }
+  body.mobile-app {
+    background-image: none !important;
+    background-attachment: scroll !important;
+    animation: none !important;
+    background-color: rgb(var(--background) / 1);
+  }
 
-    .app-shell {
-      position: fixed;
-      inset: 0;
-      height: 100dvh;
-      max-height: 100dvh;
-      overflow: hidden;
-      flex-direction: column;
-    }
+  .app-shell {
+    position: fixed;
+    inset: 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    flex-direction: column;
+  }
 
-    .app-shell-main {
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
-    }
+  .app-shell-main {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
 
-    .app-shell-content {
-      flex: 1;
-      overflow-x: hidden;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
-    }
+  .app-shell-content {
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+  }
 
-    .mobile-app-header {
-      padding-top: env(safe-area-inset-top, 0px);
-      background-color: rgb(var(--card) / 0.92);
-      backdrop-filter: saturate(180%) blur(20px);
-      border-bottom: 1px solid rgb(var(--border) / 0.7);
-    }
+  .mobile-app-header {
+    padding-top: env(safe-area-inset-top, 0px);
+    background-color: rgb(var(--card) / 0.92);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgb(var(--border) / 0.7);
+  }
 
-    .mobile-app-tabbar {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 50;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-      background-color: rgb(var(--card) / 0.96);
-      backdrop-filter: saturate(180%) blur(24px);
-      border-top: 1px solid rgb(var(--border) / 0.85);
-      box-shadow: 0 -4px 24px rgb(0 0 0 / 0.06);
-    }
+  .mobile-app-tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background-color: rgb(var(--card) / 0.96);
+    backdrop-filter: saturate(180%) blur(24px);
+    border-top: 1px solid rgb(var(--border) / 0.85);
+    box-shadow: 0 -4px 24px rgb(0 0 0 / 0.06);
+  }
 
-    .dark .mobile-app-tabbar {
-      box-shadow: 0 -4px 24px rgb(0 0 0 / 0.35);
-    }
+  .dark .mobile-app-tabbar {
+    box-shadow: 0 -4px 24px rgb(0 0 0 / 0.35);
+  }
 
-    .mobile-app-tabbar-inner {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-around;
-      height: 3.75rem;
-      padding: 0 0.25rem;
-    }
+  .mobile-app-tabbar-inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    height: 3.75rem;
+    padding: 0 0.25rem;
+  }
 
-    .mobile-app-tab {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.2rem;
-      min-width: 0;
-      padding: 0.35rem 0.25rem;
-      color: rgb(var(--muted-foreground) / 1);
-      text-decoration: none;
-      -webkit-tap-highlight-color: transparent;
-      transition: color 0.15s ease, transform 0.1s ease;
-    }
+  .mobile-app-tab {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    min-width: 0;
+    padding: 0.35rem 0.25rem;
+    color: rgb(var(--muted-foreground) / 1);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s ease, transform 0.1s ease;
+  }
 
-    .mobile-app-tab:active:not(.fab) {
-      transform: scale(0.94);
-    }
+  .mobile-app-tab:active:not(.fab) {
+    transform: scale(0.94);
+  }
 
-    .mobile-app-tab.active {
-      color: rgb(var(--primary) / 1);
-    }
+  .mobile-app-tab.active {
+    color: rgb(var(--primary) / 1);
+  }
 
-    .mobile-app-tab-icon {
-      display: grid;
-      place-items: center;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 0.75rem;
-      transition: background-color 0.15s ease;
-    }
+  .mobile-app-tab-icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.15s ease;
+  }
 
-    .mobile-app-tab-icon.active {
-      background-color: rgb(var(--primary) / 0.12);
-    }
+  .mobile-app-tab-icon.active {
+    background-color: rgb(var(--primary) / 0.12);
+  }
 
-    .mobile-app-tab-label {
-      font-size: 0.625rem;
-      font-weight: 600;
-      line-height: 1;
-      letter-spacing: 0.01em;
-    }
+  .mobile-app-tab-label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
 
-    .mobile-app-fab {
-      display: grid;
-      place-items: center;
-      width: 3.25rem;
-      height: 3.25rem;
-      border-radius: 9999px;
-      background: var(--gradient-hero);
-      color: white;
-      box-shadow:
-        0 4px 14px rgb(37 99 235 / 0.45),
-        0 2px 6px rgb(0 0 0 / 0.12);
-    }
+  .mobile-app-fab {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 9999px;
+    background: var(--gradient-hero);
+    color: white;
+    box-shadow:
+      0 4px 14px rgb(37 99 235 / 0.45),
+      0 2px 6px rgb(0 0 0 / 0.12);
+  }
 
-    .mobile-app-tab.fab:active .mobile-app-fab {
-      transform: scale(0.92);
-    }
+  .mobile-app-tab.fab:active .mobile-app-fab {
+    transform: scale(0.92);
+  }
 
-    .mobile-app-content > header h1 {
-      font-size: 1.625rem;
-      line-height: 1.2;
-    }
+  .mobile-app-content > header h1 {
+    font-size: 1.625rem;
+    line-height: 1.2;
+  }
 
-    .mobile-app-content .glass-card {
-      border-radius: 1.25rem;
-    }
-
+  .mobile-app-content .glass-card {
+    border-radius: 1.25rem;
   }
 }
