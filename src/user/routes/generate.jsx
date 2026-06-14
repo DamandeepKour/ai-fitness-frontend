@@ -8,6 +8,7 @@ import API from "@/api/axios";
 import { Flame, Sparkles } from "lucide-react";
 import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
 import { getLocalDateYmd } from "@/lib/local-date";
+import { getStoredUser, updateStoredUser } from "@/lib/auth-token";
 
 const INITIAL_FORM = {
   weight: 72,
@@ -21,6 +22,32 @@ const INITIAL_FORM = {
   pantry_mode: false,
   budget_tier: "standard",
 };
+
+const GENERATE_GOALS = ["weight_loss", "maintenance", "muscle_gain"];
+
+function valueOrDefault(value, fallback) {
+  return value === undefined || value === null || value === "" ? fallback : value;
+}
+
+function normalizeGoal(goal) {
+  if (goal === "fat_loss") return "weight_loss";
+  return GENERATE_GOALS.includes(goal) ? goal : INITIAL_FORM.goal;
+}
+
+function normalizeDietType(dietType) {
+  if (dietType === "non_veg") return "non veg";
+  return ["veg", "veg_egg", "non veg"].includes(dietType) ? dietType : INITIAL_FORM.diet_type;
+}
+
+function buildInitialForm(user = getStoredUser()) {
+  return {
+    ...INITIAL_FORM,
+    weight: valueOrDefault(user?.weight, INITIAL_FORM.weight),
+    height: valueOrDefault(user?.height, INITIAL_FORM.height),
+    goal: normalizeGoal(user?.goal),
+    diet_type: normalizeDietType(user?.diet_type),
+  };
+}
 
 const MEAL_EMOJI = {
   breakfast: "🥣",
@@ -39,7 +66,7 @@ function formatMealType(type = "Meal") {
 }
 
 function GeneratePage() {
-  const [form, setForm] = useState(INITIAL_FORM);
+  const [form, setForm] = useState(() => buildInitialForm());
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -65,10 +92,28 @@ function GeneratePage() {
   useEffect(() => {
     let ignore = false;
 
-    async function fetchGeneratedMeals() {
+    async function fetchInitialData() {
       try {
-        const res = await API.get("/dashboard/show", { params: { date: getLocalDateYmd() } });
-        if (!ignore) setDashboard(res.data.data);
+        const [dashboardRes, profileRes] = await Promise.all([
+          API.get("/dashboard/show", { params: { date: getLocalDateYmd() } }),
+          API.get("/user/me"),
+        ]);
+
+        if (ignore) return;
+
+        const user = profileRes.data?.data;
+        setDashboard(dashboardRes.data.data);
+
+        if (user) {
+          updateStoredUser(user);
+          setForm((prev) => ({
+            ...prev,
+            weight: valueOrDefault(user.weight, prev.weight),
+            height: valueOrDefault(user.height, prev.height),
+            goal: normalizeGoal(user.goal),
+            diet_type: normalizeDietType(user.diet_type),
+          }));
+        }
       } catch {
         if (!ignore) setMessage("Unable to load generated meals right now.");
       } finally {
@@ -76,7 +121,7 @@ function GeneratePage() {
       }
     }
 
-    fetchGeneratedMeals();
+    fetchInitialData();
 
     return () => {
       ignore = true;
@@ -93,11 +138,18 @@ function GeneratePage() {
     setMessage("");
 
     try {
-      await API.post("/plan/generate-plan", {
-        ...form,
+      const nextProfile = {
         weight: Number(form.weight),
         height: Number(form.height),
+        goal: form.goal,
+        diet_type: form.diet_type,
+      };
+
+      await API.post("/plan/generate-plan", {
+        ...form,
+        ...nextProfile,
       });
+      updateStoredUser(nextProfile);
       await loadDashboard();
       setMessage("Customized meals generated successfully.");
     } catch {
