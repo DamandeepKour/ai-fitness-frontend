@@ -245,6 +245,12 @@ export default function About() {
                 text: "Compound lifts, smart deloads, RPE-based load picks.",
               },
               {
+                icon: <Heart className="h-5 w-5" />,
+                tint: "bg-rose-500/15 text-rose-500",
+                title: "Cardio",
+                text: "3× zone-2 + 1× intervals tailored to your HR.",
+              },
+              {
                 icon: <Footprints className="h-5 w-5" />,
                 tint: "bg-sky-500/15 text-sky-500",
                 title: "Daily steps",
