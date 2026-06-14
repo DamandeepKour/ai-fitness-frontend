@@ -23,6 +23,7 @@ import {
   Target,
   Camera,
   History,
+  PlusCircle,
   Sparkles,
   HeartPulse,
   ChevronDown,
@@ -201,147 +202,157 @@ function ProfilePage() {
 
   return (
     <AppShell>
-      <header className="mb-6">
-        <p className="text-sm text-muted-foreground">Account</p>
-        <h1 className="text-3xl md:text-4xl font-semibold mt-1">Profile</h1>
-        {profileMessage ? (
-          <p className="text-sm text-muted-foreground mt-2">{profileMessage}</p>
-        ) : null}
-      </header>
+      <MobileProfileView
+        profile={profile}
+        initials={initials}
+        message={profileMessage}
+        onEdit={openEdit}
+        onLogout={logout}
+      />
 
-      <Card
-        className="rounded-3xl border-0 p-6 md:p-8 mb-5 text-white relative overflow-hidden"
-        style={{ background: "var(--gradient-hero)" }}
-      >
-        <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute -left-8 -bottom-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-        <div className="relative">
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-white/15 backdrop-blur rounded-full px-3 py-1">
-            <Sparkles className="h-3.5 w-3.5" /> Personal wellness profile
-          </span>
-          <h2 className="text-2xl md:text-3xl font-semibold mt-3 max-w-md">
-            Stay committed to your healthiest self.
-          </h2>
-          <p className="opacity-85 text-sm mt-2 inline-flex items-center gap-2">
-            <HeartPulse className="h-4 w-4" />
-            Keep your goals updated and track your daily discipline.
-          </p>
-        </div>
-      </Card>
+      <div className="hidden md:block">
+        <header className="mb-6">
+          <p className="text-sm text-muted-foreground">Account</p>
+          <h1 className="text-3xl md:text-4xl font-semibold mt-1">Profile</h1>
+          {profileMessage ? (
+            <p className="text-sm text-muted-foreground mt-2">{profileMessage}</p>
+          ) : null}
+        </header>
 
-      <Card className="glass-card rounded-3xl border-0 p-6 mb-5">
-        <div className="flex items-center gap-5 flex-wrap">
-          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-2xl font-semibold overflow-hidden text-primary">
-            {profile.profileImageUrl ? (
-              <img
-                src={profile.profileImageUrl}
-                alt={profile.name || "Profile"}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              initials
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-xl font-semibold truncate">{profile.name || "Your name"}</h2>
-            <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5 mt-0.5">
-              <Mail className="h-3.5 w-3.5" /> {profile.email || "—"}
-            </p>
-            {profile.mobile_number ? (
-              <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5 mt-0.5">
-                <Phone className="h-3.5 w-3.5" /> {profile.country_code} {profile.mobile_number}
-              </p>
-            ) : null}
-            <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5 mt-1">
-              <Calendar className="h-3 w-3" /> {memberSinceText(profile.created_at)}
-            </p>
-          </div>
-          <Button type="button" onClick={openEdit} className="rounded-full">
-            Edit profile
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-          <Stat label="Weight" value={profile.weight ? `${profile.weight} kg` : "—"} />
-          <Stat label="Height" value={profile.height ? `${profile.height} cm` : "—"} />
-          <Stat label="Age" value={profile.age ? String(profile.age) : "—"} />
-          <Stat label="Gender" value={profile.gender || "—"} />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-          <Tag label="Goal" value={goalLabel(profile.goal)} />
-          <Tag label="Diet" value={dietLabel(profile.diet_type)} />
-          <Tag label="Activity" value={activityLabel(profile.activity_level)} />
-        </div>
-      </Card>
-
-      <Card className="glass-card rounded-3xl border-0 mb-5 overflow-hidden">
-        <button
-          type="button"
-          onClick={() => setGoalsOpen((v) => !v)}
-          className="w-full flex items-center gap-4 p-5 text-left hover:bg-accent/40 transition-colors"
+        <Card
+          className="rounded-3xl border-0 p-6 md:p-8 mb-5 text-white relative overflow-hidden"
+          style={{ background: "var(--gradient-hero)" }}
         >
-          <div className="h-10 w-10 rounded-xl bg-accent flex items-center justify-center text-primary">
-            <Target className="h-5 w-5" />
+          <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+          <div className="absolute -left-8 -bottom-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-white/15 backdrop-blur rounded-full px-3 py-1">
+              <Sparkles className="h-3.5 w-3.5" /> Personal wellness profile
+            </span>
+            <h2 className="text-2xl md:text-3xl font-semibold mt-3 max-w-md">
+              Stay committed to your healthiest self.
+            </h2>
+            <p className="opacity-85 text-sm mt-2 inline-flex items-center gap-2">
+              <HeartPulse className="h-4 w-4" />
+              Keep your goals updated and track your daily discipline.
+            </p>
           </div>
-          <div className="flex-1">
-            <p className="font-medium">Daily goals</p>
-            <p className="text-xs text-muted-foreground">Calories, protein, steps & water</p>
-          </div>
-          <ChevronDown
-            className={`h-5 w-5 text-muted-foreground transition-transform shrink-0 ${goalsOpen ? "rotate-180" : ""}`}
-          />
-        </button>
-        {goalsOpen ? (
-          <div className="px-5 pb-5 pt-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <Field label="Calorie target (kcal)" defaultValue="2200" />
-              <Field label="Protein (g)" defaultValue="140" />
-              <Field label="Steps" defaultValue="10000" />
-              <Field label="Water (L)" defaultValue="2.5" />
+        </Card>
+
+        <Card className="glass-card rounded-3xl border-0 p-6 mb-5">
+          <div className="flex items-center gap-5 flex-wrap">
+            <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-2xl font-semibold overflow-hidden text-primary">
+              {profile.profileImageUrl ? (
+                <img
+                  src={profile.profileImageUrl}
+                  alt={profile.name || "Profile"}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                initials
+              )}
             </div>
-            <Button type="button" className="rounded-xl mt-4 w-full md:w-auto">
-              Save goals
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl font-semibold truncate">{profile.name || "Your name"}</h2>
+              <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5 mt-0.5">
+                <Mail className="h-3.5 w-3.5" /> {profile.email || "—"}
+              </p>
+              {profile.mobile_number ? (
+                <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5 mt-0.5">
+                  <Phone className="h-3.5 w-3.5" /> {profile.country_code} {profile.mobile_number}
+                </p>
+              ) : null}
+              <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5 mt-1">
+                <Calendar className="h-3 w-3" /> {memberSinceText(profile.created_at)}
+              </p>
+            </div>
+            <Button type="button" onClick={openEdit} className="rounded-full">
+              Edit profile
             </Button>
           </div>
-        ) : null}
-      </Card>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        <ActionTile
-          to="/meal-history"
-          icon={<History className="h-5 w-5" />}
-          title="Meal history"
-          desc="Today, 7 days, or monthly views"
-          accent="from-amber-500/15 to-orange-500/5"
-          iconClass="bg-amber-500/15 text-amber-600 dark:text-amber-400"
-        />
-        <ActionTile
-          to="/notifications"
-          icon={<Bell className="h-5 w-5" />}
-          title="Notifications"
-          desc="Meal reminders & coaching"
-          accent="from-sky-500/15 to-blue-500/5"
-          iconClass="bg-sky-500/15 text-sky-600 dark:text-sky-400"
-        />
-        <ActionTile
-          to="/privacy"
-          icon={<Lock className="h-5 w-5" />}
-          title="Privacy"
-          desc="Data and sharing controls"
-          accent="from-emerald-500/15 to-teal-500/5"
-          iconClass="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-        />
-        <ActionTile
-          icon={<LogOut className="h-5 w-5" />}
-          title="Sign out"
-          desc="End session on this device"
-          accent="from-rose-500/15 to-red-500/5"
-          iconClass="bg-rose-500/15 text-rose-600 dark:text-rose-400"
-          destructive
-          footerLabel="Sign out"
-          onActivate={logout}
-        />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+            <Stat label="Weight" value={profile.weight ? `${profile.weight} kg` : "—"} />
+            <Stat label="Height" value={profile.height ? `${profile.height} cm` : "—"} />
+            <Stat label="Age" value={profile.age ? String(profile.age) : "—"} />
+            <Stat label="Gender" value={profile.gender || "—"} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+            <Tag label="Goal" value={goalLabel(profile.goal)} />
+            <Tag label="Diet" value={dietLabel(profile.diet_type)} />
+            <Tag label="Activity" value={activityLabel(profile.activity_level)} />
+          </div>
+        </Card>
+
+        <Card className="glass-card rounded-3xl border-0 mb-5 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setGoalsOpen((v) => !v)}
+            className="w-full flex items-center gap-4 p-5 text-left hover:bg-accent/40 transition-colors"
+          >
+            <div className="h-10 w-10 rounded-xl bg-accent flex items-center justify-center text-primary">
+              <Target className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium">Daily goals</p>
+              <p className="text-xs text-muted-foreground">Calories, protein, steps & water</p>
+            </div>
+            <ChevronDown
+              className={`h-5 w-5 text-muted-foreground transition-transform shrink-0 ${goalsOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          {goalsOpen ? (
+            <div className="px-5 pb-5 pt-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Field label="Calorie target (kcal)" defaultValue="2200" />
+                <Field label="Protein (g)" defaultValue="140" />
+                <Field label="Steps" defaultValue="10000" />
+                <Field label="Water (L)" defaultValue="2.5" />
+              </div>
+              <Button type="button" className="rounded-xl mt-4 w-full md:w-auto">
+                Save goals
+              </Button>
+            </div>
+          ) : null}
+        </Card>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+          <ActionTile
+            to="/meal-history"
+            icon={<History className="h-5 w-5" />}
+            title="Meal history"
+            desc="Today, 7 days, or monthly views"
+            accent="from-amber-500/15 to-orange-500/5"
+            iconClass="bg-amber-500/15 text-amber-600 dark:text-amber-400"
+          />
+          <ActionTile
+            to="/notifications"
+            icon={<Bell className="h-5 w-5" />}
+            title="Notifications"
+            desc="Meal reminders & coaching"
+            accent="from-sky-500/15 to-blue-500/5"
+            iconClass="bg-sky-500/15 text-sky-600 dark:text-sky-400"
+          />
+          <ActionTile
+            to="/privacy"
+            icon={<Lock className="h-5 w-5" />}
+            title="Privacy"
+            desc="Data and sharing controls"
+            accent="from-emerald-500/15 to-teal-500/5"
+            iconClass="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+          />
+          <ActionTile
+            icon={<LogOut className="h-5 w-5" />}
+            title="Sign out"
+            desc="End session on this device"
+            accent="from-rose-500/15 to-red-500/5"
+            iconClass="bg-rose-500/15 text-rose-600 dark:text-rose-400"
+            destructive
+            footerLabel="Sign out"
+            onActivate={logout}
+          />
+        </div>
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -484,6 +495,140 @@ function ProfilePage() {
         </DialogContent>
       </Dialog>
     </AppShell>
+  );
+}
+
+function MobileProfileView({ profile, initials, message, onEdit, onLogout }) {
+  return (
+    <section className="md:hidden -mx-4 -mt-2 min-h-[calc(100dvh-9rem)] bg-slate-50 dark:bg-slate-950">
+      <div className="relative overflow-hidden rounded-b-[2rem] bg-[#15171f] px-5 pb-8 pt-6 text-white shadow-xl">
+        <div className="absolute -right-12 -top-10 h-36 w-36 rounded-full bg-primary/25 blur-2xl" />
+        <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-violet-500/20 blur-2xl" />
+        <div className="relative flex flex-col items-center text-center">
+          <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-white/10 bg-white/10 shadow-2xl">
+            {profile.profileImageUrl ? (
+              <img
+                src={profile.profileImageUrl}
+                alt={profile.name || "Profile"}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="grid h-full w-full place-items-center bg-gradient-to-br from-primary to-violet-500 text-3xl font-semibold">
+                {initials}
+              </div>
+            )}
+          </div>
+
+          <h1 className="mt-4 max-w-full truncate text-xl font-semibold">{profile.name || "Your profile"}</h1>
+          <p className="mt-1 max-w-full truncate text-sm text-white/65">{profile.email || "Manage your account"}</p>
+          {profile.mobile_number ? (
+            <p className="mt-1 text-xs text-white/55">
+              {profile.country_code} {profile.mobile_number}
+            </p>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={onEdit}
+            className="mt-5 rounded-full border border-white/20 bg-white px-5 py-2 text-sm font-semibold text-slate-950 shadow-sm"
+          >
+            Edit Profile
+          </button>
+        </div>
+      </div>
+
+      <div className="px-4 pb-6 pt-5">
+        {message ? (
+          <p className="mb-3 rounded-2xl bg-white px-4 py-3 text-sm text-muted-foreground shadow-sm dark:bg-slate-900">
+            {message}
+          </p>
+        ) : null}
+
+        <div className="rounded-[1.75rem] bg-white p-2 shadow-sm ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
+          <MobileMenuRow
+            to="/add"
+            icon={<PlusCircle className="h-5 w-5" />}
+            title="Log"
+            subtitle="Add today's meal"
+            iconClass="bg-primary/10 text-primary"
+          />
+          <MobileMenuRow
+            to="/meal-history"
+            icon={<History className="h-5 w-5" />}
+            title="Log history"
+            subtitle="Review meals and nutrition"
+            iconClass="bg-amber-500/15 text-amber-600 dark:text-amber-300"
+          />
+          <MobileMenuRow
+            to="/notifications"
+            icon={<Bell className="h-5 w-5" />}
+            title="Notifications"
+            subtitle="Reminders and coaching alerts"
+            iconClass="bg-sky-500/15 text-sky-600 dark:text-sky-300"
+          />
+          <MobileMenuRow
+            to="/privacy"
+            icon={<Lock className="h-5 w-5" />}
+            title="Privacy"
+            subtitle="Data and account controls"
+            iconClass="bg-emerald-500/15 text-emerald-600 dark:text-emerald-300"
+          />
+          <MobileMenuRow
+            asButton
+            icon={<LogOut className="h-5 w-5" />}
+            title="Logout"
+            subtitle="Sign out from this device"
+            iconClass="bg-rose-500/15 text-rose-600 dark:text-rose-300"
+            titleClass="text-destructive"
+            onClick={onLogout}
+          />
+        </div>
+
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <MobileStat label="Weight" value={profile.weight ? `${profile.weight}kg` : "—"} />
+          <MobileStat label="Goal" value={goalLabel(profile.goal)} />
+          <MobileStat label="Activity" value={activityLabel(profile.activity_level)} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MobileMenuRow({ asButton, to, icon, title, subtitle, iconClass, titleClass = "", onClick }) {
+  const content = (
+    <>
+      <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${iconClass}`}>{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className={`block truncate text-sm font-semibold ${titleClass}`}>{title}</span>
+        <span className="mt-0.5 block truncate text-xs text-muted-foreground">{subtitle}</span>
+      </span>
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+    </>
+  );
+
+  const className = "flex w-full items-center gap-3 rounded-3xl px-3 py-3 text-left transition-colors hover:bg-accent/70";
+
+  if (asButton) {
+    return (
+      <button type="button" className={className} onClick={onClick}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link to={to} className={className}>
+      {content}
+    </Link>
+  );
+}
+
+function MobileStat({ label, value }) {
+  return (
+    <div className="rounded-2xl bg-white px-3 py-3 text-center shadow-sm ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-800">
+      <p className="truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-1 truncate text-sm font-semibold capitalize">{value}</p>
+    </div>
   );
 }
 
