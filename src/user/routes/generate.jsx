@@ -88,7 +88,15 @@ const MEAL_LABELS = {
   cheat_meal: "Cheat Meal",
 };
 
-const LOGGABLE_MEAL_TYPES = ["breakfast", "lunch", "mid_morning_snack", "evening_snack", "dinner"];
+const LOGGABLE_MEAL_TYPES = [
+  "morning_drink",
+  "breakfast",
+  "mid_morning_snack",
+  "lunch",
+  "evening_snack",
+  "dinner",
+  "after_dinner",
+];
 
 const NUTRITION_FIELDS = [
   ["energy", "Energy", "kcal"],
@@ -127,6 +135,10 @@ function getMealNutrition(meal) {
   };
 }
 
+function normalizeFoodName(foodName = "") {
+  return foodName.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
 function GeneratePage() {
   const [form, setForm] = useState(() => buildInitialForm());
   const [dashboard, setDashboard] = useState(null);
@@ -146,6 +158,19 @@ function GeneratePage() {
       return acc;
     }, {});
   }, [dashboard?.generated_meals]);
+
+  const loggedMealKeys = useMemo(() => {
+    const logs = dashboard?.meals || [];
+
+    return new Set(
+      logs.map((meal) => `${meal.meal_type}:${normalizeFoodName(meal.food_name)}`)
+    );
+  }, [dashboard?.meals]);
+
+  const isMealLoggedToday = (meal) => {
+    const mealType = toDailyLogMealType(meal.meal_type);
+    return loggedMealKeys.has(`${mealType}:${normalizeFoodName(meal.food_name)}`);
+  };
 
   async function loadDashboard() {
     const res = await API.get("/dashboard/show", { params: { date: getLocalDateYmd() } });
@@ -307,6 +332,7 @@ function GeneratePage() {
                   {meals.map((meal, index) => {
                     const nutrition = getMealNutrition(meal);
                     const canLogMeal = LOGGABLE_MEAL_TYPES.includes(meal.meal_type);
+                    const alreadyLogged = isMealLoggedToday(meal);
 
                     return (
                     <div key={`${meal.meal_type}-${meal.food_name}`} className="rounded-2xl bg-accent/50 p-4">
@@ -337,7 +363,7 @@ function GeneratePage() {
                           </div>
                         ))}
                       </div>
-                      {canLogMeal ? (
+                      {canLogMeal && !alreadyLogged ? (
                         <Button
                           type="button"
                           variant="secondary"

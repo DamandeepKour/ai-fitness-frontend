@@ -10,15 +10,44 @@ import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator
 import { getLocalDateYmd } from "@/lib/local-date";
 
 const MEAL_EMOJI = {
+  morning_drink: "💧",
   breakfast: "🥣",
   lunch: "🥗",
   dinner: "🍽️",
   mid_morning_snack: "🍌",
   evening_snack: "🍎",
+  after_dinner: "🍵",
   cheat_meal: "✨",
 };
 
+const LOGGABLE_MEAL_TYPES = [
+  "morning_drink",
+  "breakfast",
+  "mid_morning_snack",
+  "lunch",
+  "evening_snack",
+  "dinner",
+  "after_dinner",
+];
+
+const MEAL_LABELS = {
+  morning_drink: "Early Morning Drink",
+  breakfast: "Breakfast",
+  mid_morning_snack: "Mid Morning Snack",
+  lunch: "Lunch",
+  evening_snack: "Evening Snack",
+  dinner: "Dinner",
+  after_dinner: "After Dinner",
+  cheat_meal: "Cheat Meal",
+};
+
+function normalizeFoodName(foodName = "") {
+  return foodName.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
 function formatMealType(type = "Meal") {
+  if (MEAL_LABELS[type]) return MEAL_LABELS[type];
+
   return type
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -40,6 +69,9 @@ function MealsPage() {
   const total = dashboard?.today?.consumed_calories ?? meals.reduce((acc, meal) => acc + (meal.calories || 0), 0);
   const targetsFromApi = dashboard?.targets || {};
   const macros = dashboard?.today?.macros || {};
+  const loggedMealKeys = new Set(
+    meals.map((m) => `${m.meal_type}:${normalizeFoodName(m.food_name)}`)
+  );
 
   const targets = [
     { label: "Calories", value: `${total} / ${targetsFromApi.calories || 2200}kcal`, pct: Math.round((total / (targetsFromApi.calories || 2200)) * 100), color: "oklch(0.62 0.19 255)", icon: Flame },
@@ -48,9 +80,14 @@ function MealsPage() {
     { label: "Fats", value: `${macros.fat || 0} / ${targetsFromApi.fat || 70}g`, pct: Math.round(((macros.fat || 0) / (targetsFromApi.fat || 70)) * 100), color: "oklch(0.7 0.17 145)", icon: Apple },
   ];
 
-  // ✅ Filter out meals that have already been logged this session
+  // Hide generated meals that are already logged today, including after refresh.
   const visibleGeneratedMeals = generatedMeals.filter(
-    (m) => !loggedKeys.has(`${m.day}-${m.meal_type}-${m.food_name}`)
+    (m) => {
+      const mealType = toDailyLogMealType(m.meal_type);
+      const loggedToday = loggedMealKeys.has(`${mealType}:${normalizeFoodName(m.food_name)}`);
+      const loggedThisSession = loggedKeys.has(`${m.day}-${m.meal_type}-${m.food_name}`);
+      return !loggedToday && !loggedThisSession;
+    }
   );
 
   useEffect(() => {
@@ -191,16 +228,6 @@ function MealsPage() {
               <Macro label="C" value={m.carbs || 0} color="oklch(0.78 0.16 75)" />
               <Macro label="F" value={m.fat || 0} color="oklch(0.7 0.17 145)" />
             </div>
-            {/* ✅ Wired up — logs meal and removes from generated list */}
-            <Button
-              variant="secondary"
-              className="w-full mt-4 rounded-xl"
-              onClick={() => handleLogMeal(m, "today")}
-              disabled={loggingKey === `today-${m.meal_type}-${m.food_name}`}
-            >
-              <Plus className="h-4 w-4" />
-              {loggingKey === `today-${m.meal_type}-${m.food_name}` ? "Logging..." : "Add to log"}
-            </Button>
           </Card>
         )) : (
           <Card className="glass-card rounded-3xl p-6 border-0 sm:col-span-2">
@@ -236,7 +263,7 @@ function MealsPage() {
                   <p className="text-sm text-muted-foreground mt-1">{m.calories || 0} kcal</p>
                 </div>
               </div>
-              {["breakfast", "lunch", "evening_snack", "dinner"].includes(m.meal_type) ? (
+              {LOGGABLE_MEAL_TYPES.includes(m.meal_type) ? (
                 <Button
                   type="button"
                   variant="secondary"

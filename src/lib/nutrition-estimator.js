@@ -67,6 +67,9 @@ export function estimateNutrition(foodName, grams = 250, knownCalories) {
 
 export function toDailyLogMealType(mealType) {
   const normalized = mealType.toLowerCase().replace(/\s+/g, "_");
+  if (normalized === "early_morning_drink") return "morning_drink";
+  if (normalized === "morning_drink") return "morning_drink";
+  if (normalized === "after_dinner") return "after_dinner";
   if (normalized === "snack") return "evening_snack";
   if (normalized === "cheat_meal") return "dinner";
   return normalized;
