@@ -66,6 +66,28 @@ const MEAL_EMOJI = {
   cheat_meal: "✨",
 };
 
+const MEAL_SEQUENCE = [
+  "morning_drink",
+  "breakfast",
+  "mid_morning_snack",
+  "lunch",
+  "evening_snack",
+  "dinner",
+  "after_dinner",
+  "cheat_meal",
+];
+
+const MEAL_LABELS = {
+  morning_drink: "Early Morning Drink",
+  breakfast: "Breakfast",
+  mid_morning_snack: "Mid Morning Snack",
+  lunch: "Lunch",
+  evening_snack: "Evening Snack",
+  dinner: "Dinner",
+  after_dinner: "After Dinner",
+  cheat_meal: "Cheat Meal",
+};
+
 const LOGGABLE_MEAL_TYPES = ["breakfast", "lunch", "mid_morning_snack", "evening_snack", "dinner"];
 
 const NUTRITION_FIELDS = [
@@ -77,10 +99,17 @@ const NUTRITION_FIELDS = [
 ];
 
 function formatMealType(type = "Meal") {
+  if (MEAL_LABELS[type]) return MEAL_LABELS[type];
+
   return type
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function getMealOrder(mealType) {
+  const index = MEAL_SEQUENCE.indexOf(mealType);
+  return index === -1 ? MEAL_SEQUENCE.length : index;
 }
 
 function getMealNutrition(meal) {
@@ -113,6 +142,7 @@ function GeneratePage() {
       const day = meal.day || "Plan";
       acc[day] = acc[day] || [];
       acc[day].push(meal);
+      acc[day].sort((a, b) => getMealOrder(a.meal_type) - getMealOrder(b.meal_type));
       return acc;
     }, {});
   }, [dashboard?.generated_meals]);
@@ -274,7 +304,7 @@ function GeneratePage() {
               <Card key={day} className="glass-card rounded-3xl p-5 border-0">
                 <h2 className="text-xl font-semibold mb-3">{day}</h2>
                 <div className="space-y-3">
-                  {meals.map((meal) => {
+                  {meals.map((meal, index) => {
                     const nutrition = getMealNutrition(meal);
                     const canLogMeal = LOGGABLE_MEAL_TYPES.includes(meal.meal_type);
 
@@ -286,7 +316,9 @@ function GeneratePage() {
                             {MEAL_EMOJI[meal.meal_type] || "🍽️"}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-xs text-primary font-medium">{formatMealType(meal.meal_type)}</p>
+                            <p className="text-xs text-primary font-medium">
+                              {String(index + 1).padStart(2, "0")} · {formatMealType(meal.meal_type)}
+                            </p>
                             <h3 className="font-medium mt-1">{meal.food_name}</h3>
                           </div>
                         </div>
