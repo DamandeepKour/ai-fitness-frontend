@@ -15,7 +15,7 @@ const INITIAL_FORM = {
   height: 170,
   goal: "weight_loss",
   diet_type: "veg",
-  plan_type: "weekly",
+  plan_type: "daily",
   workout_type: "home",
   meal_preference: "north_indian",
   ai_prompt: "",
@@ -40,29 +40,62 @@ function normalizeDietType(dietType) {
 }
 
 function buildInitialForm(user = getStoredUser()) {
+  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const pantryMode = params?.get("pantry") === "1" || params?.get("pantry_mode") === "true";
+  const requestedPlanType = params?.get("plan_type");
+
   return {
     ...INITIAL_FORM,
     weight: valueOrDefault(user?.weight, INITIAL_FORM.weight),
     height: valueOrDefault(user?.height, INITIAL_FORM.height),
     goal: normalizeGoal(user?.goal),
     diet_type: normalizeDietType(user?.diet_type),
+    plan_type: requestedPlanType === "weekly" || requestedPlanType === "daily" ? requestedPlanType : INITIAL_FORM.plan_type,
+    pantry_mode: pantryMode,
   };
 }
 
 const MEAL_EMOJI = {
+  morning_drink: "💧",
   breakfast: "🥣",
   lunch: "🥗",
   dinner: "🍽️",
   mid_morning_snack: "🍌",
   evening_snack: "🍎",
+  after_dinner: "🍵",
   cheat_meal: "✨",
 };
+
+const LOGGABLE_MEAL_TYPES = ["breakfast", "lunch", "mid_morning_snack", "evening_snack", "dinner"];
+
+const NUTRITION_FIELDS = [
+  ["energy", "Energy", "kcal"],
+  ["protein", "Protein", "g"],
+  ["carbs", "Carbs", "g"],
+  ["fibre", "Fibre", "g"],
+  ["sugar", "Sugar", "g"],
+];
 
 function formatMealType(type = "Meal") {
   return type
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function getMealNutrition(meal) {
+  const estimated = estimateNutrition(meal.food_name, 250, meal.calories);
+  const calories = Math.round(Number(meal.calories || meal.energy || estimated.calories || 0));
+
+  return {
+    calories,
+    energy: Math.round(Number(meal.energy || calories)),
+    protein: Math.round(Number(meal.protein || estimated.protein || 0)),
+    carbs: Math.round(Number(meal.carbs || estimated.carbs || 0)),
+    fibre: Math.round(Number(meal.fibre || meal.fiber || 0)),
+    sugar: Math.round(Number(meal.sugar || 0)),
+    fat: Math.round(Number(meal.fat || estimated.fat || 0)),
+  };
 }
 
 function GeneratePage() {
@@ -161,7 +194,7 @@ function GeneratePage() {
 
   const handleLogGeneratedMeal = async (meal) => {
     const key = `${meal.day}-${meal.meal_type}-${meal.food_name}`;
-    const nutrition = estimateNutrition(meal.food_name, 250, meal.calories);
+    const nutrition = getMealNutrition(meal);
 
     setLoggingKey(key);
     setMessage("");
@@ -194,7 +227,7 @@ function GeneratePage() {
         </p>
         <h1 className="text-3xl md:text-4xl font-semibold mt-1">Generate Customized Meals</h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
-          Create a weekly plan, then review every generated meal here.
+          Create a daily or weekly plan, then review every generated meal with nutrition here.
         </p>
       </header>
 
@@ -241,7 +274,11 @@ function GeneratePage() {
               <Card key={day} className="glass-card rounded-3xl p-5 border-0">
                 <h2 className="text-xl font-semibold mb-3">{day}</h2>
                 <div className="space-y-3">
-                  {meals.map((meal) => (
+                  {meals.map((meal) => {
+                    const nutrition = getMealNutrition(meal);
+                    const canLogMeal = LOGGABLE_MEAL_TYPES.includes(meal.meal_type);
+
+                    return (
                     <div key={`${meal.meal_type}-${meal.food_name}`} className="rounded-2xl bg-accent/50 p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3 min-w-0">
@@ -249,16 +286,26 @@ function GeneratePage() {
                             {MEAL_EMOJI[meal.meal_type] || "🍽️"}
                           </div>
                           <div className="min-w-0">
-                          <p className="text-xs text-primary font-medium">{formatMealType(meal.meal_type)}</p>
-                          <h3 className="font-medium mt-1">{meal.food_name}</h3>
+                            <p className="text-xs text-primary font-medium">{formatMealType(meal.meal_type)}</p>
+                            <h3 className="font-medium mt-1">{meal.food_name}</h3>
                           </div>
                         </div>
                         <p className="text-sm font-semibold tabular-nums inline-flex items-center gap-1">
                           <Flame className="h-4 w-4" />
-                          {meal.calories || 0} kcal
+                          {nutrition.calories} kcal
                         </p>
                       </div>
-                      {["breakfast", "lunch", "evening_snack", "dinner"].includes(meal.meal_type) ? (
+                      <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-2">
+                        {NUTRITION_FIELDS.map(([key, label, unit]) => (
+                          <div key={key} className="rounded-xl bg-background/80 px-3 py-2">
+                            <p className="text-[11px] text-muted-foreground">{label}</p>
+                            <p className="text-sm font-semibold tabular-nums">
+                              {nutrition[key]} {unit}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      {canLogMeal ? (
                         <Button
                           type="button"
                           variant="secondary"
@@ -270,7 +317,8 @@ function GeneratePage() {
                         </Button>
                       ) : null}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </Card>
             ))

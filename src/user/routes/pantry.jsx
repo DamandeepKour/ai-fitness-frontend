@@ -114,7 +114,7 @@ export default function PantryPage() {
           </ul>
         )}
         <Button className="w-full mt-6 rounded-xl" asChild>
-          <Link to="/generate">Generate with pantry mode →</Link>
+          <Link to="/generate?pantry=1&plan_type=daily">Generate daily meals with pantry mode →</Link>
         </Button>
       </Card>
     </AppShell>
