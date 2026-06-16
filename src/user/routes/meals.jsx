@@ -222,7 +222,6 @@ function MealsPage() {
         {message ? <p className="mt-2 text-sm text-muted-foreground">{message}</p> : null}
       </header>
 
-      {/* ── Nutrition Breakdown ── */}
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
