@@ -14,9 +14,34 @@ const items = [
   { to: "/profile", label: "Profile", icon: User },
 ];
 
+function limitText(text = "", maxLength = 85) {
+  const clean = text.trim().replace(/\s+/g, " ");
+  return clean.length > maxLength ? `${clean.slice(0, maxLength).trim()}...` : clean;
+}
+
+function parseBilingualCoachTip(text = "") {
+  const fallback = {
+    english: "Log one meal today and stay close to your calorie target.",
+    hindi: "Aaj ek meal log karein aur target ke kareeb rahein.",
+  };
+
+  if (!text.trim()) return fallback;
+
+  const english = text.match(/(?:^|\n)\s*English\s*:\s*([\s\S]*?)(?=\n\s*(?:हिंदी|Hindi)\s*:|$)/i)?.[1];
+  const hindi = text.match(/(?:^|\n)\s*(?:हिंदी|Hindi)\s*:\s*([\s\S]*?)(?=\n\s*English\s*:|$)/i)?.[1];
+
+  return {
+    english: limitText(english || text.split("\n").find((line) => line.trim()) || fallback.english),
+    hindi: limitText(hindi || fallback.hindi),
+  };
+}
+
 export function Sidebar() {
   const { pathname } = useLocation();
-  const [coachTip, setCoachTip] = useState("Loading coaching tip...");
+  const [coachTip, setCoachTip] = useState({
+    english: "Loading coaching tip...",
+    hindi: "Coaching tip load ho rahi hai...",
+  });
 
   useEffect(() => {
     let ignore = false;
@@ -24,11 +49,15 @@ export function Sidebar() {
       .then((data) => {
         if (ignore) return;
         const text = data?.coaching || "";
-        const snippet = text.split("\n").find((l) => l.trim()) || text;
-        setCoachTip(snippet.slice(0, 120) + (snippet.length > 120 ? "…" : ""));
+        setCoachTip(parseBilingualCoachTip(text));
       })
       .catch(() => {
-        if (!ignore) setCoachTip("Log a meal today — chhote kadam, bade badlav!");
+        if (!ignore) {
+          setCoachTip({
+            english: "Log a meal today and keep your routine on track.",
+            hindi: "Aaj meal log karein — chhote kadam, bade badlav.",
+          });
+        }
       });
     return () => {
       ignore = true;
@@ -69,8 +98,11 @@ export function Sidebar() {
         })}
       </nav>
       <div className="mt-auto rounded-2xl p-4 text-white" style={{ background: "var(--gradient-hero)" }}>
-        <p className="text-xs opacity-80">AI Coach · Hindi + English</p>
-        <p className="text-sm font-semibold mt-1 leading-snug">{coachTip}</p>
+        <p className="text-xs opacity-80">AI Coach · English + Hindi</p>
+        <div className="mt-2 space-y-2">
+          <p className="text-sm font-semibold leading-snug">{coachTip.english}</p>
+          <p className="text-xs font-medium leading-snug text-white/85">{coachTip.hindi}</p>
+        </div>
       </div>
     </aside>
   );
