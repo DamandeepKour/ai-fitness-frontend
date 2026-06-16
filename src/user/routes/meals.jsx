@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Clock3, Flame, Beef, Wheat, Apple } from "lucide-react";
+import { Plus, Clock3, Flame } from "lucide-react";
 import API from "@/api/axios";
 import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
 import { getLocalDateYmd } from "@/lib/local-date";
@@ -41,6 +41,27 @@ const MEAL_LABELS = {
   cheat_meal: "Cheat Meal",
 };
 
+const CHANGE_STYLES = {
+  up: {
+    label: "More",
+    text: "text-emerald-700",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+  },
+  down: {
+    label: "Less",
+    text: "text-rose-700",
+    bg: "bg-rose-50",
+    border: "border-rose-200",
+  },
+  same: {
+    label: "Same",
+    text: "text-blue-700",
+    bg: "bg-blue-50",
+    border: "border-blue-200",
+  },
+};
+
 function normalizeFoodName(foodName = "") {
   return foodName.trim().replace(/\s+/g, " ").toLowerCase();
 }
@@ -52,6 +73,18 @@ function formatMealType(type = "Meal") {
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function getChangeState(today, previous) {
+  if (today > previous) return "up";
+  if (today < previous) return "down";
+  return "same";
+}
+
+function formatSignedChange(today, previous, unit) {
+  const diff = Math.round(today - previous);
+  if (diff === 0) return `0${unit}`;
+  return `${diff > 0 ? "+" : ""}${diff}${unit}`;
 }
 
 function MealsPage() {
@@ -69,15 +102,41 @@ function MealsPage() {
   const total = dashboard?.today?.consumed_calories ?? meals.reduce((acc, meal) => acc + (meal.calories || 0), 0);
   const targetsFromApi = dashboard?.targets || {};
   const macros = dashboard?.today?.macros || {};
+  const previous = dashboard?.yesterday || {};
+  const previousMacros = previous.macros || {};
   const loggedMealKeys = new Set(
     meals.map((m) => `${m.meal_type}:${normalizeFoodName(m.food_name)}`)
   );
 
-  const targets = [
-    { label: "Calories", value: `${total} / ${targetsFromApi.calories || 2200}kcal`, pct: Math.round((total / (targetsFromApi.calories || 2200)) * 100), color: "oklch(0.62 0.19 255)", icon: Flame },
-    { label: "Protein", value: `${macros.protein || 0} / ${targetsFromApi.protein || 140}g`, pct: Math.round(((macros.protein || 0) / (targetsFromApi.protein || 140)) * 100), color: "oklch(0.7 0.2 25)", icon: Beef },
-    { label: "Carbs", value: `${macros.carbs || 0} / ${targetsFromApi.carbs || 250}g`, pct: Math.round(((macros.carbs || 0) / (targetsFromApi.carbs || 250)) * 100), color: "oklch(0.78 0.16 75)", icon: Wheat },
-    { label: "Fats", value: `${macros.fat || 0} / ${targetsFromApi.fat || 70}g`, pct: Math.round(((macros.fat || 0) / (targetsFromApi.fat || 70)) * 100), color: "oklch(0.7 0.17 145)", icon: Apple },
+  const nutritionRows = [
+    {
+      label: "Energy",
+      today: total,
+      previous: previous.consumed_calories || 0,
+      target: targetsFromApi.calories || 2200,
+      unit: "kcal",
+    },
+    {
+      label: "Protein",
+      today: macros.protein || 0,
+      previous: previousMacros.protein || 0,
+      target: targetsFromApi.protein || 140,
+      unit: "g",
+    },
+    {
+      label: "Carbohydrate",
+      today: macros.carbs || 0,
+      previous: previousMacros.carbs || 0,
+      target: targetsFromApi.carbs || 250,
+      unit: "g",
+    },
+    {
+      label: "Total Fat",
+      today: macros.fat || 0,
+      previous: previousMacros.fat || 0,
+      target: targetsFromApi.fat || 70,
+      unit: "g",
+    },
   ];
 
   // Hide generated meals that are already logged today, including after refresh.
@@ -170,33 +229,63 @@ function MealsPage() {
         transition={{ duration: 0.35 }}
         className="mb-5"
       >
-        <Card className="glass-card rounded-3xl p-6 border-0">
-          <div className="flex items-center justify-between mb-5">
+        <Card className="glass-card rounded-3xl p-0 border-0 overflow-hidden">
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b-4 border-foreground px-6 py-5">
             <div>
-              <h2 className="text-2xl font-semibold">Nutrition Breakdown</h2>
-              <p className="text-sm text-muted-foreground">Today's totals vs. daily targets</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Daily Nutrition</p>
+              <h2 className="text-3xl font-black leading-none mt-1">Nutrition Facts</h2>
+              <p className="text-sm text-muted-foreground mt-2">Today compared with previous day</p>
             </div>
-            <p className="text-4xl font-semibold tabular-nums">
-              {total}
-              <span className="text-3xl font-medium text-muted-foreground"> / 2200 kcal</span>
-            </p>
+            <div className="rounded-2xl bg-foreground px-4 py-3 text-background text-right">
+              <p className="text-xs opacity-80">Energy today</p>
+              <p className="text-3xl font-black tabular-nums">{total}<span className="text-base font-semibold"> kcal</span></p>
+            </div>
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            {targets.map((item) => (
-              <div key={item.label} className="rounded-2xl bg-accent/50 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="inline-flex items-center gap-2 text-lg font-medium" style={{ color: item.color }}>
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                  </p>
-                  <p className="text-2xl tabular-nums">{item.value}</p>
-                </div>
-                <div className="h-2 rounded-full bg-border overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${Math.min(item.pct, 100)}%`, background: item.color }} />
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">{item.pct}% of target</p>
+          <div className="px-6 py-5">
+            <div className="overflow-hidden rounded-2xl border border-border bg-background">
+              <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] border-b border-border bg-accent/50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <span>Nutrient</span>
+                <span className="text-right">Today</span>
+                <span className="text-right">Previous</span>
+                <span className="text-right">Change</span>
               </div>
-            ))}
+              {nutritionRows.map((row) => {
+                const state = getChangeState(row.today, row.previous);
+                const style = CHANGE_STYLES[state];
+                const pct = Math.round((row.today / Math.max(row.target, 1)) * 100);
+
+                return (
+                  <div key={row.label} className="grid grid-cols-[1.2fr_1fr_1fr_1fr] items-center border-b border-border/70 px-4 py-4 last:border-b-0">
+                    <div>
+                      <p className="font-black">{row.label}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{pct}% of daily target</p>
+                    </div>
+                    <p className="text-right text-lg font-black tabular-nums">
+                      {Math.round(row.today)}<span className="ml-1 text-xs font-semibold text-muted-foreground">{row.unit}</span>
+                    </p>
+                    <p className="text-right text-sm font-semibold tabular-nums text-muted-foreground">
+                      {Math.round(row.previous)} {row.unit}
+                    </p>
+                    <div className="flex justify-end">
+                      <span className={`rounded-full border px-3 py-1 text-xs font-bold tabular-nums ${style.bg} ${style.border} ${style.text}`}>
+                        {formatSignedChange(row.today, row.previous, row.unit)} · {style.label}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              {[
+                { label: "Green", text: "More than previous day", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+                { label: "Red", text: "Less than previous day", className: "bg-rose-50 text-rose-700 border-rose-200" },
+                { label: "Blue", text: "Same as previous day", className: "bg-blue-50 text-blue-700 border-blue-200" },
+              ].map((item) => (
+                <div key={item.label} className={`rounded-xl border px-3 py-2 text-xs ${item.className}`}>
+                  <span className="font-bold">{item.label}:</span> {item.text}
+                </div>
+              ))}
+            </div>
           </div>
         </Card>
       </motion.div>
