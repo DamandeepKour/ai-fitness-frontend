@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import API from "@/api/axios";
-import { Flame, Sparkles } from "lucide-react";
+import { Dumbbell, Flame, HeartPulse, ShieldCheck, Sparkles, Timer } from "lucide-react";
 import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
 import { getLocalDateYmd } from "@/lib/local-date";
 import { getStoredUser, updateStoredUser } from "@/lib/auth-token";
@@ -21,6 +21,8 @@ const INITIAL_FORM = {
   ai_prompt: "",
   pantry_mode: false,
   budget_tier: "standard",
+  workout_focus: "balanced",
+  injury_notes: "",
 };
 
 const GENERATE_GOALS = ["weight_loss", "maintenance", "muscle_gain"];
@@ -106,6 +108,17 @@ const NUTRITION_FIELDS = [
   ["sugar", "Sugar", "g"],
 ];
 
+const WORKOUT_TYPE_OPTIONS = ["home", "gym", "cardio", "yoga", "mix"];
+
+const WORKOUT_FOCUS_OPTIONS = [
+  "balanced",
+  "strength",
+  "cardio",
+  "yoga_mobility",
+  "injury_safe",
+  "weight_loss",
+];
+
 function formatMealType(type = "Meal") {
   if (MEAL_LABELS[type]) return MEAL_LABELS[type];
 
@@ -137,6 +150,10 @@ function getMealNutrition(meal) {
 
 function normalizeFoodName(foodName = "") {
   return foodName.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function formatWorkoutText(value) {
+  return String(value || "Not specified").replace(/_/g, " ");
 }
 
 function GeneratePage() {
@@ -171,6 +188,8 @@ function GeneratePage() {
     const mealType = toDailyLogMealType(meal.meal_type);
     return loggedMealKeys.has(`${mealType}:${normalizeFoodName(meal.food_name)}`);
   };
+
+  const workoutPlan = dashboard?.plan?.workout_plan || [];
 
   async function loadDashboard() {
     const res = await API.get("/dashboard/show", { params: { date: getLocalDateYmd() } });
@@ -301,7 +320,14 @@ function GeneratePage() {
             <Select label="Goal" value={form.goal} onChange={(value) => updateForm("goal", value)} options={["weight_loss", "maintenance", "muscle_gain"]} />
             <Select label="Diet Type" value={form.diet_type} onChange={(value) => updateForm("diet_type", value)} options={["veg", "veg_egg", "non veg"]} />
             <Select label="Meal Preference" value={form.meal_preference} onChange={(value) => updateForm("meal_preference", value)} options={["north_indian", "south_indian"]} />
-            <Select label="Workout Type" value={form.workout_type} onChange={(value) => updateForm("workout_type", value)} options={["home", "gym", "mix"]} />
+            <Select label="Workout Type" value={form.workout_type} onChange={(value) => updateForm("workout_type", value)} options={WORKOUT_TYPE_OPTIONS} />
+            <Select label="Workout Focus" value={form.workout_focus} onChange={(value) => updateForm("workout_focus", value)} options={WORKOUT_FOCUS_OPTIONS} />
+            <Field
+              label="Injury / limitation notes"
+              value={form.injury_notes}
+              onChange={(value) => updateForm("injury_notes", value)}
+              placeholder="e.g. knee pain, back pain, shoulder injury, beginner yoga"
+            />
             <Select label="Budget tier (₹/day)" value={form.budget_tier} onChange={(value) => updateForm("budget_tier", value)} options={["budget", "standard", "premium"]} />
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input
@@ -320,6 +346,60 @@ function GeneratePage() {
         </Card>
 
         <div className="lg:col-span-3 space-y-4">
+          <Card className="glass-card rounded-3xl p-5 border-0">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+              <div>
+                <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
+                  <Dumbbell className="h-3.5 w-3.5" />
+                  Workout coach
+                </p>
+                <h2 className="text-xl font-semibold mt-1">Exercise Plan</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Home, gym, cardio, yoga and injury-aware balance work from your latest generated plan.
+                </p>
+              </div>
+              <div className="rounded-2xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary capitalize">
+                {formatWorkoutText(form.workout_type)} · {formatWorkoutText(form.workout_focus)}
+              </div>
+            </div>
+
+            {workoutPlan.length ? (
+              <div className="grid gap-3">
+                {workoutPlan.map((workout) => (
+                  <div key={`${workout.day}-${workout.type}-${workout.exercise}`} className="rounded-2xl bg-accent/50 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs text-primary font-medium">{workout.day} · {formatWorkoutText(workout.type)}</p>
+                        <h3 className="font-semibold mt-1 capitalize">{formatWorkoutText(workout.focus || form.workout_focus)} plan</h3>
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
+                          <Timer className="h-3.5 w-3.5" />
+                          {workout.duration || 0} min
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
+                          <Flame className="h-3.5 w-3.5" />
+                          {workout.calories_burned || 0} kcal
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid gap-3">
+                      <WorkoutLine icon={<HeartPulse className="h-4 w-4" />} label="Warmup" value={workout.warmup} />
+                      <WorkoutLine icon={<Dumbbell className="h-4 w-4" />} label="Main workout" value={workout.exercise} />
+                      <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Yoga + balance" value={workout.yoga_balance} />
+                      <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Injury-safe note" value={workout.injury_notes} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Generate a plan to see your exercise routine here. Add injury notes for safer modifications.
+              </p>
+            )}
+          </Card>
+
           {loading ? (
             <Card className="glass-card rounded-3xl p-6 border-0">
               <p className="text-sm text-muted-foreground">Loading generated meals...</p>
@@ -388,6 +468,18 @@ function GeneratePage() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+function WorkoutLine({ icon, label, value }) {
+  return (
+    <div className="rounded-xl bg-background/80 px-3 py-2">
+      <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+        {icon}
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-medium leading-relaxed">{value || "Coach will add this after generation."}</p>
+    </div>
   );
 }
 
