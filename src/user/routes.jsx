@@ -20,6 +20,7 @@ export function userRouteElements(PageTransition) {
       <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
       <Route path="/meals" element={<PageTransition><MealsPage /></PageTransition>} />
       <Route path="/generate" element={<PageTransition><GeneratePage /></PageTransition>} />
+      <Route path="/workout" element={<PageTransition><GeneratePage /></PageTransition>} />
       <Route path="/add" element={<PageTransition><AddPage /></PageTransition>} />
       <Route path="/progress" element={<PageTransition><ProgressPage /></PageTransition>} />
       <Route path="/profile" element={<PageTransition><ProfilePage /></PageTransition>} />

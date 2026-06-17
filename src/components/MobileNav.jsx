@@ -21,7 +21,7 @@ function isActive(pathname, to) {
     );
   }
   if (to === "/generate") {
-    return pathname === "/generate" || pathname.startsWith("/smart") || pathname.startsWith("/pantry") || pathname.startsWith("/premium");
+    return pathname === "/generate" || pathname === "/workout" || pathname.startsWith("/smart") || pathname.startsWith("/pantry") || pathname.startsWith("/premium");
   }
   return pathname === to || pathname.startsWith(`${to}/`);
 }

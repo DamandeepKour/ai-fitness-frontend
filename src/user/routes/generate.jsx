@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -157,6 +158,8 @@ function formatWorkoutText(value) {
 }
 
 function GeneratePage() {
+  const { pathname } = useLocation();
+  const isWorkoutPage = pathname === "/workout";
   const [form, setForm] = useState(() => buildInitialForm());
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -296,12 +299,16 @@ function GeneratePage() {
     <AppShell>
       <header className="mb-8">
         <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
-          <Sparkles className="h-3.5 w-3.5" />
-          AI meal planner
+          {isWorkoutPage ? <Dumbbell className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
+          {isWorkoutPage ? "AI workout coach" : "AI meal planner"}
         </p>
-        <h1 className="text-3xl md:text-4xl font-semibold mt-1">Generate Customized Meals</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold mt-1">
+          {isWorkoutPage ? "Workout Coach" : "Generate Customized Meals"}
+        </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
-          Create a daily or weekly plan, then review every generated meal with nutrition here.
+          {isWorkoutPage
+            ? "Create home, gym, cardio, yoga and injury-aware workout plans with balanced coaching."
+            : "Create a daily or weekly plan, then review every generated meal with nutrition here."}
         </p>
       </header>
 
@@ -339,7 +346,7 @@ function GeneratePage() {
               Pantry mode — use ingredients from <a href="/pantry" className="text-primary underline">your pantry</a>
             </label>
             <Button type="submit" className="w-full rounded-xl" disabled={generating}>
-              {generating ? "Generating..." : "Generate meals"}
+              {generating ? "Generating..." : isWorkoutPage ? "Generate workout plan" : "Generate meals"}
             </Button>
             {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
           </form>

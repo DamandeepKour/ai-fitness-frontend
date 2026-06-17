@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Utensils, PlusCircle, LineChart, User, Sparkles, Crown } from "lucide-react";
+import { Dumbbell, LayoutDashboard, Utensils, PlusCircle, LineChart, User, Sparkles, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCoachingRequest } from "@/api/pantry";
 
@@ -8,6 +8,7 @@ const items = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/meals", label: "Today's Meals", icon: Utensils },
   { to: "/generate", label: "Generate Meals", icon: Sparkles },
+  { to: "/workout", label: "Workout Coach", icon: Dumbbell },
   { to: "/smart", label: "Smart Features", icon: Crown },
   { to: "/add", label: "Log Food", icon: PlusCircle },
   { to: "/progress", label: "Progress", icon: LineChart },
