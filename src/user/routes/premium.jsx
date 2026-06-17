@@ -118,7 +118,7 @@ export default function PremiumPage() {
         </Button>
         <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
           <Crown className="h-3.5 w-3.5" />
-          Phase 4 — Premium
+          Premium
         </p>
         <h1 className="text-3xl md:text-4xl font-semibold mt-1">Premium Features</h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-2xl">

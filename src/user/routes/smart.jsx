@@ -106,7 +106,7 @@ export default function SmartFeaturesPage() {
         <FeatureCard
           to="/premium"
           icon={Sparkles}
-          title="Premium (Phase 4)"
+          title="Premium"
           desc="Coach review, family, WhatsApp, labs, wearables"
         />
         <FeatureCard

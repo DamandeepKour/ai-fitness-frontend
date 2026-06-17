@@ -275,7 +275,7 @@ export default function Features() {
               </ul>
             </div>
             <div className="glass-card rounded-3xl p-6">
-              <h3 className="font-bold text-lg">Phase 4 — Premium</h3>
+              <h3 className="font-bold text-lg">Premium</h3>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
                 <li>Live coach review of AI meal plans</li>
                 <li>Family plans for up to 6 members</li>

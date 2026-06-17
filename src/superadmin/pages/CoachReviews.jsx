@@ -53,7 +53,7 @@ export default function SuperAdminCoachReviewsPage() {
     <AdminShell>
       <PageHeader
         title="Coach Reviews"
-        subtitle="Premium Phase 4 — human coach review queue for AI meal plans."
+        subtitle="Premium human coach review queue for AI meal plans."
       />
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
