@@ -1,14 +1,12 @@
 import { GoogleLogin } from "@react-oauth/google";
 
-export function GoogleSignInButton({ onSuccess, onError, disabled = false, text = "signup_with" }) {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+export function isGoogleSignInEnabled() {
+  return Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+}
 
-  if (!clientId) {
-    return (
-      <p className="text-xs text-muted-foreground text-center">
-        Google sign-in is not configured (missing VITE_GOOGLE_CLIENT_ID).
-      </p>
-    );
+export function GoogleSignInButton({ onSuccess, onError, disabled = false, text = "signup_with" }) {
+  if (!isGoogleSignInEnabled()) {
+    return null;
   }
 
   return (

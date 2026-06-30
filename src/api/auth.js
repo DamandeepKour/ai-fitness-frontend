@@ -50,6 +50,20 @@ export async function signupRequest(body) {
 }
 
 /**
+ * POST /api/auth/signup/send-code — sends OTP before account creation
+ */
+export async function sendSignupCodeRequest(body) {
+  const res = await API.post("/auth/signup/send-code", body);
+  if (res.data?.success === false) {
+    throw new Error(res.data?.message || "Could not send verification code");
+  }
+  return {
+    ...(res.data?.data ?? {}),
+    message: res.data?.message,
+  };
+}
+
+/**
  * POST /api/auth/verify-email — body: { email }
  */
 export async function verifyEmailRequest(email) {

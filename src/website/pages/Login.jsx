@@ -12,7 +12,7 @@ import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
 import { OutlinedField } from "@/components/auth/OutlinedField";
 import { OutlinedPasswordField } from "@/components/auth/OutlinedPasswordField";
-import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { AuthDivider, GoogleSignInButton, isGoogleSignInEnabled } from "@/components/auth/GoogleSignInButton";
 
 const ROTATE_MS = 2000;
 
@@ -41,6 +41,8 @@ const Login = () => {
   const slides = LOGIN_MARKETING_SLIDES;
   const bgSources = slides.map((s) => s.src);
   const activeIndex = useRotatingIndex(slides.length, ROTATE_MS);
+
+  const googleEnabled = isGoogleSignInEnabled();
 
   const updateField = (field, value) => {
     clearError();
@@ -74,18 +76,6 @@ const Login = () => {
             <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
               Intelligent fitness and nutrition tracking for your healthy progress every day.
             </p>
-
-            <GoogleSignInButton
-              text="signin_with"
-              disabled={loading || googleLoading}
-              onSuccess={(response) => signInWithGoogle(response.credential)}
-              onError={onGoogleError}
-            />
-            {googleError ? (
-              <p className="mt-2 text-sm text-destructive">{googleError}</p>
-            ) : null}
-
-            <AuthDivider label="or continue with email" />
 
             <div className="space-y-4">
               <OutlinedField
@@ -141,6 +131,22 @@ const Login = () => {
               {loading ? "Signing in…" : "Login"}
             </button>
             {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
+
+            {googleEnabled ? (
+              <>
+                <AuthDivider label="or" />
+                <GoogleSignInButton
+                  text="signin_with"
+                  disabled={loading || googleLoading}
+                  onSuccess={(response) => signInWithGoogle(response.credential)}
+                  onError={onGoogleError}
+                />
+                {googleError ? (
+                  <p className="mt-2 text-sm text-destructive">{googleError}</p>
+                ) : null}
+              </>
+            ) : null}
+
             <p className="mt-4 text-sm text-muted-foreground">
               New user?{" "}
               <Link to="/signup" className="font-medium text-primary hover:underline">

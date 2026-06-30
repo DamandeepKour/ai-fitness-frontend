@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupRequestByType } from "@/api/auth";
+import { persistAuth } from "@/lib/auth-token";
 
 function formatSignupError(err) {
   return (
@@ -15,28 +16,21 @@ export function useSignup(options = {}) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(null);
 
   const signup = useCallback(
     async ({ name, email, password, phone }) => {
       setLoading(true);
       setError("");
-      setSuccess(null);
       try {
         const result = await signupRequestByType(
-          { name, email, password, phone },
+          { name, email, password, phone: phone || undefined },
           userType,
         );
 
-        if (userType === "user") {
-          setSuccess({
-            email,
-            emailSent: result.emailSent !== false,
-            message:
-              result.message ||
-              "Account created. Check your email for a one-time login link.",
-          });
-          return { ok: true, emailSent: result.emailSent };
+        if (userType === "user" && result.token) {
+          persistAuth({ token: result.token, user: result.user });
+          navigate(redirectTo || "/dashboard", { replace: true });
+          return { ok: true };
         }
 
         if (redirectTo) {
@@ -56,7 +50,6 @@ export function useSignup(options = {}) {
   );
 
   const clearError = useCallback(() => setError(""), []);
-  const resetSuccess = useCallback(() => setSuccess(null), []);
 
-  return { signup, loading, error, success, clearError, resetSuccess };
+  return { signup, loading, error, clearError };
 }
