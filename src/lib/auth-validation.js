@@ -1,11 +1,44 @@
 import { isValidPhoneNumber } from "react-phone-number-input";
 
+const EMAIL_REGEX =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
+const DISPOSABLE_DOMAINS = new Set([
+  "mailinator.com",
+  "guerrillamail.com",
+  "guerrillamail.net",
+  "tempmail.com",
+  "temp-mail.org",
+  "10minutemail.com",
+  "yopmail.com",
+  "throwaway.email",
+  "fakeinbox.com",
+  "trashmail.com",
+  "getnada.com",
+  "maildrop.cc",
+  "dispostable.com",
+  "sharklasers.com",
+  "grr.la",
+  "mailnesia.com",
+  "mintemail.com",
+  "emailondeck.com",
+  "tempail.com",
+  "moakt.com",
+]);
+
 export function validateEmail(value) {
-  const email = String(value || "").trim();
+  const email = String(value || "").trim().toLowerCase();
   if (!email) return "Email is required";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (email.length > 254) return "Email is too long";
+  if (!EMAIL_REGEX.test(email)) {
     return "Not a valid email address";
   }
+
+  const domain = email.split("@")[1];
+  if (DISPOSABLE_DOMAINS.has(domain)) {
+    return "Temporary or disposable email addresses are not allowed";
+  }
+
   return "";
 }
 

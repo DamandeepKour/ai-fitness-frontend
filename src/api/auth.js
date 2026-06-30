@@ -50,6 +50,28 @@ export async function signupRequest(body) {
 }
 
 /**
+ * POST /api/auth/verify-email — body: { email }
+ */
+export async function verifyEmailRequest(email) {
+  const res = await API.post("/auth/verify-email", { email });
+  if (res.data?.success === false) {
+    throw new Error(res.data?.message || "Invalid email");
+  }
+  return res.data?.data ?? {};
+}
+
+/**
+ * POST /api/auth/google — body: { credential }
+ */
+export async function googleAuthRequest(credential) {
+  const data = await postAuth("/auth/google", { credential });
+  if (!data?.token) {
+    throw new Error("Google sign-in failed: invalid response");
+  }
+  return data;
+}
+
+/**
  * POST /api/auth/magic-login — body: { token }
  */
 export async function magicLoginRequest(token) {

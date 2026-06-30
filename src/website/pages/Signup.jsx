@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useRotatingIndex } from "@/hooks/use-rotating-index";
 import { useSignup } from "@/hooks/use-signup";
 import { useAuthFieldValidation } from "@/hooks/use-auth-field-validation";
+import { useEmailVerification } from "@/hooks/use-email-verification";
+import { useGoogleAuth } from "@/hooks/use-google-auth";
 import {
   validateConfirmPassword,
   validateEmail,
@@ -19,6 +21,7 @@ import { Mail, CheckCircle2 } from "lucide-react";
 import { OutlinedField } from "@/components/auth/OutlinedField";
 import { OutlinedPasswordField } from "@/components/auth/OutlinedPasswordField";
 import { OutlinedPhoneField } from "@/components/auth/OutlinedPhoneField";
+import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 const ROTATE_MS = 2000;
 
@@ -32,6 +35,20 @@ const Signup = () => {
   });
 
   const { signup, loading, error, success, clearError } = useSignup();
+  const {
+    verifying: emailVerifying,
+    verified: emailVerified,
+    serverError: emailServerError,
+    verifyEmail: verifyEmailOnServer,
+    reset: resetEmailVerification,
+  } = useEmailVerification();
+  const {
+    signInWithGoogle,
+    loading: googleLoading,
+    error: googleError,
+    clearError: clearGoogleError,
+    onGoogleError,
+  } = useGoogleAuth();
 
   const validators = useMemo(
     () => ({
@@ -52,6 +69,8 @@ const Signup = () => {
 
   const updateField = (field, value) => {
     clearError();
+    clearGoogleError();
+    if (field === "email") resetEmailVerification();
     setForm((f) => {
       const next = { ...f, [field]: value };
       if (getError(field)) validateField(field, value, next);
@@ -65,13 +84,19 @@ const Signup = () => {
   const handleSubmit = async () => {
     if (!validateAll(form)) return;
 
+    const emailCheck = await verifyEmailOnServer(form.email);
+    if (!emailCheck.ok) return;
+
     await signup({
       name: form.name.trim(),
-      email: form.email.trim(),
+      email: form.email.trim().toLowerCase(),
       phone: form.phone,
       password: form.password,
     });
   };
+
+  const emailFieldError = getError("email") || emailServerError;
+  const isBusy = loading || googleLoading || emailVerifying;
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 md:p-5">
@@ -139,6 +164,18 @@ const Signup = () => {
               Build better food and fitness habits with intelligent daily insights.
             </p>
 
+            <GoogleSignInButton
+              text="signup_with"
+              disabled={isBusy}
+              onSuccess={(response) => signInWithGoogle(response.credential)}
+              onError={onGoogleError}
+            />
+            {googleError ? (
+              <p className="mt-2 text-sm text-destructive">{googleError}</p>
+            ) : null}
+
+            <AuthDivider label="or sign up with email" />
+
             <div className="space-y-3">
               <OutlinedField
                 label="Name"
@@ -159,13 +196,20 @@ const Signup = () => {
                 autoComplete="email"
                 placeholder="you@example.com"
                 value={form.email}
-                error={getError("email")}
+                error={emailFieldError}
                 onChange={(e) => updateField("email", e.target.value)}
-                onBlur={() => {
+                onBlur={async () => {
                   touch("email");
-                  validateField("email", form.email, form);
+                  const formatOk = !validateField("email", form.email, form);
+                  if (formatOk) await verifyEmailOnServer(form.email);
                 }}
               />
+              {emailVerifying ? (
+                <p className="text-xs text-muted-foreground -mt-1">Checking email…</p>
+              ) : null}
+              {!emailVerifying && emailVerified && !emailFieldError ? (
+                <p className="text-xs text-emerald-600 -mt-1">Valid email address</p>
+              ) : null}
 
               <OutlinedPhoneField
                 label="Phone number"
@@ -211,10 +255,10 @@ const Signup = () => {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={loading}
+              disabled={isBusy}
               className="mt-4 w-full rounded-xl bg-gradient-to-r from-primary to-primary/90 py-2.5 text-sm font-medium text-primary-foreground shadow-md shadow-primary/25 transition-all hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
             >
-              {loading ? "Creating…" : "Create Account"}
+              {loading ? "Creating…" : emailVerifying ? "Verifying email…" : "Create Account"}
             </button>
 
             {error ? (

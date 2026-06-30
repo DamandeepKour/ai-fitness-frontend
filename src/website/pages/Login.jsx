@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useRotatingIndex } from "@/hooks/use-rotating-index";
 import { useLogin } from "@/hooks/use-login";
+import { useGoogleAuth } from "@/hooks/use-google-auth";
 import { useAuthFieldValidation } from "@/hooks/use-auth-field-validation";
 import { validateEmail, validatePassword } from "@/lib/auth-validation";
 import { LOGIN_MARKETING_SLIDES } from "@/data/auth-visual-slides";
@@ -11,6 +12,7 @@ import { AuthMobileHeroStrip } from "@/components/auth/AuthMobileHeroStrip";
 import { FitnovaAuthLogo } from "@/website/components/site/BrandLogo";
 import { OutlinedField } from "@/components/auth/OutlinedField";
 import { OutlinedPasswordField } from "@/components/auth/OutlinedPasswordField";
+import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 const ROTATE_MS = 2000;
 
@@ -18,6 +20,13 @@ const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [rememberMe, setRememberMe] = useState(false);
   const { login, loading, error, clearError } = useLogin();
+  const {
+    signInWithGoogle,
+    loading: googleLoading,
+    error: googleError,
+    clearError: clearGoogleError,
+    onGoogleError,
+  } = useGoogleAuth();
 
   const validators = useMemo(
     () => ({
@@ -35,6 +44,7 @@ const Login = () => {
 
   const updateField = (field, value) => {
     clearError();
+    clearGoogleError();
     setForm((f) => {
       const next = { ...f, [field]: value };
       if (getError(field)) validateField(field, value, next);
@@ -64,6 +74,18 @@ const Login = () => {
             <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
               Intelligent fitness and nutrition tracking for your healthy progress every day.
             </p>
+
+            <GoogleSignInButton
+              text="signin_with"
+              disabled={loading || googleLoading}
+              onSuccess={(response) => signInWithGoogle(response.credential)}
+              onError={onGoogleError}
+            />
+            {googleError ? (
+              <p className="mt-2 text-sm text-destructive">{googleError}</p>
+            ) : null}
+
+            <AuthDivider label="or continue with email" />
 
             <div className="space-y-4">
               <OutlinedField
@@ -113,7 +135,7 @@ const Login = () => {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={loading}
+              disabled={loading || googleLoading}
               className="mt-6 w-full rounded-xl bg-gradient-to-r from-primary to-primary/90 py-3 font-medium text-primary-foreground shadow-md shadow-primary/25 transition-[transform,box-shadow] hover:shadow-lg active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
             >
               {loading ? "Signing in…" : "Login"}

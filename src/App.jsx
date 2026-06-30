@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes } from "react-router-dom";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { getAppRoutes } from "@/app-routes";
@@ -54,9 +55,17 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
-  return (
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+
+  const routes = (
     <BrowserRouter>
       <AnimatedRoutes />
     </BrowserRouter>
   );
+
+  if (!googleClientId) {
+    return routes;
+  }
+
+  return <GoogleOAuthProvider clientId={googleClientId}>{routes}</GoogleOAuthProvider>;
 }
