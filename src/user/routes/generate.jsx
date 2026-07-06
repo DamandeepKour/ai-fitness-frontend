@@ -192,6 +192,17 @@ function GeneratePage() {
     return loggedMealKeys.has(`${mealType}:${normalizeFoodName(meal.food_name)}`);
   };
 
+  const filteredWorkoutPlan = useMemo(() => {
+    const plan = dashboard?.plan?.workout_plan || [];
+    if (!plan.length) return [];
+
+    if (form.plan_type === "daily") {
+      return plan.slice(0, 1);
+    }
+
+    return plan.slice(0, 7);
+  }, [dashboard?.plan?.workout_plan, form.plan_type]);
+
   const workoutPlan = dashboard?.plan?.workout_plan || [];
 
   async function loadDashboard() {
@@ -261,9 +272,17 @@ function GeneratePage() {
       });
       updateStoredUser(nextProfile);
       await loadDashboard();
-      setMessage("Customized meals generated successfully.");
+      setMessage(
+        isWorkoutPage
+          ? `${form.plan_type === "weekly" ? "Weekly" : "Daily"} workout plan generated successfully.`
+          : "Customized meals generated successfully.",
+      );
     } catch {
-      setMessage("Unable to generate customized meals right now.");
+      setMessage(
+        isWorkoutPage
+          ? "Unable to generate workout plan right now."
+          : "Unable to generate customized meals right now.",
+      );
     } finally {
       setGenerating(false);
     }
@@ -307,7 +326,7 @@ function GeneratePage() {
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
           {isWorkoutPage
-            ? "Create home, gym, cardio, yoga and injury-aware workout plans with balanced coaching."
+            ? "Create home, gym, cardio, yoga and injury-aware workout plans. Choose daily or weekly to match your training schedule."
             : "Create a daily or weekly plan, then review every generated meal with nutrition here."}
         </p>
       </header>
@@ -318,15 +337,29 @@ function GeneratePage() {
             <Field label="Weight (kg)" value={form.weight} onChange={(value) => updateForm("weight", value)} type="number" />
             <Field label="Height (cm)" value={form.height} onChange={(value) => updateForm("height", value)} type="number" />
             <Select label="Generate For" value={form.plan_type} onChange={(value) => updateForm("plan_type", value)} options={["daily", "weekly"]} />
-            <Field
-              label="Meal request"
-              value={form.ai_prompt}
-              onChange={(value) => updateForm("ai_prompt", value)}
-              placeholder="e.g. high protein daily meals with paneer, no rice"
-            />
-            <Select label="Goal" value={form.goal} onChange={(value) => updateForm("goal", value)} options={["weight_loss", "maintenance", "muscle_gain"]} />
-            <Select label="Diet Type" value={form.diet_type} onChange={(value) => updateForm("diet_type", value)} options={["veg", "veg_egg", "non veg"]} />
-            <Select label="Meal Preference" value={form.meal_preference} onChange={(value) => updateForm("meal_preference", value)} options={["north_indian", "south_indian"]} />
+            {!isWorkoutPage ? (
+              <>
+                <Field
+                  label="Meal request"
+                  value={form.ai_prompt}
+                  onChange={(value) => updateForm("ai_prompt", value)}
+                  placeholder="e.g. high protein daily meals with paneer, no rice"
+                />
+                <Select label="Goal" value={form.goal} onChange={(value) => updateForm("goal", value)} options={["weight_loss", "maintenance", "muscle_gain"]} />
+                <Select label="Diet Type" value={form.diet_type} onChange={(value) => updateForm("diet_type", value)} options={["veg", "veg_egg", "non veg"]} />
+                <Select label="Meal Preference" value={form.meal_preference} onChange={(value) => updateForm("meal_preference", value)} options={["north_indian", "south_indian"]} />
+              </>
+            ) : (
+              <>
+                <Select label="Goal" value={form.goal} onChange={(value) => updateForm("goal", value)} options={["weight_loss", "maintenance", "muscle_gain"]} />
+                <Field
+                  label="Workout request"
+                  value={form.ai_prompt}
+                  onChange={(value) => updateForm("ai_prompt", value)}
+                  placeholder="e.g. low impact knee-friendly home workouts, 30 min sessions"
+                />
+              </>
+            )}
             <Select label="Workout Type" value={form.workout_type} onChange={(value) => updateForm("workout_type", value)} options={WORKOUT_TYPE_OPTIONS} />
             <Select label="Workout Focus" value={form.workout_focus} onChange={(value) => updateForm("workout_focus", value)} options={WORKOUT_FOCUS_OPTIONS} />
             <Field
@@ -335,16 +368,20 @@ function GeneratePage() {
               onChange={(value) => updateForm("injury_notes", value)}
               placeholder="e.g. knee pain, back pain, shoulder injury, beginner yoga"
             />
-            <Select label="Budget tier (₹/day)" value={form.budget_tier} onChange={(value) => updateForm("budget_tier", value)} options={["budget", "standard", "premium"]} />
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.pantry_mode}
-                onChange={(e) => updateForm("pantry_mode", e.target.checked)}
-                className="rounded border-input"
-              />
-              Pantry mode — use ingredients from <a href="/pantry" className="text-primary underline">your pantry</a>
-            </label>
+            {!isWorkoutPage ? (
+              <>
+                <Select label="Budget tier (₹/day)" value={form.budget_tier} onChange={(value) => updateForm("budget_tier", value)} options={["budget", "standard", "premium"]} />
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.pantry_mode}
+                    onChange={(e) => updateForm("pantry_mode", e.target.checked)}
+                    className="rounded border-input"
+                  />
+                  Pantry mode — use ingredients from <a href="/pantry" className="text-primary underline">your pantry</a>
+                </label>
+              </>
+            ) : null}
             <Button type="submit" className="w-full rounded-xl" disabled={generating}>
               {generating ? "Generating..." : isWorkoutPage ? "Generate workout plan" : "Generate meals"}
             </Button>
@@ -353,6 +390,73 @@ function GeneratePage() {
         </Card>
 
         <div className="lg:col-span-3 space-y-4">
+          {isWorkoutPage ? (
+            <Card className="glass-card rounded-3xl p-5 border-0">
+              <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                <div>
+                  <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
+                    <Dumbbell className="h-3.5 w-3.5" />
+                    Workout coach
+                  </p>
+                  <h2 className="text-xl font-semibold mt-1">
+                    {form.plan_type === "weekly" ? "Weekly Exercise Plan" : "Daily Exercise Plan"}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {form.plan_type === "weekly"
+                      ? "Your full week of home, gym, cardio, yoga and injury-aware workouts."
+                      : "Today's focused workout from your latest generated plan."}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <div className="rounded-2xl bg-muted px-3 py-2 text-xs font-semibold capitalize">
+                    {form.plan_type}
+                  </div>
+                  <div className="rounded-2xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary capitalize">
+                    {formatWorkoutText(form.workout_type)} · {formatWorkoutText(form.workout_focus)}
+                  </div>
+                </div>
+              </div>
+
+              {loading ? (
+                <p className="text-sm text-muted-foreground">Loading workout plan...</p>
+              ) : filteredWorkoutPlan.length ? (
+                <div className="grid gap-3">
+                  {filteredWorkoutPlan.map((workout) => (
+                    <div key={`${workout.day}-${workout.type}-${workout.exercise}`} className="rounded-2xl bg-accent/50 p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs text-primary font-medium">{workout.day} · {formatWorkoutText(workout.type)}</p>
+                          <h3 className="font-semibold mt-1 capitalize">{formatWorkoutText(workout.focus || form.workout_focus)} plan</h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2 text-xs">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
+                            <Timer className="h-3.5 w-3.5" />
+                            {workout.duration || 0} min
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
+                            <Flame className="h-3.5 w-3.5" />
+                            {workout.calories_burned || 0} kcal
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid gap-3">
+                        <WorkoutLine icon={<HeartPulse className="h-4 w-4" />} label="Warmup" value={workout.warmup} />
+                        <WorkoutLine icon={<Dumbbell className="h-4 w-4" />} label="Main workout" value={workout.exercise} />
+                        <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Yoga + balance" value={workout.yoga_balance} />
+                        <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Injury-safe note" value={workout.injury_notes} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Generate a {form.plan_type} workout plan to see your exercise routine here. Add injury notes for safer modifications.
+                </p>
+              )}
+            </Card>
+          ) : (
+            <>
           <Card className="glass-card rounded-3xl p-5 border-0">
             <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
               <div>
@@ -471,6 +575,8 @@ function GeneratePage() {
             <Card className="glass-card rounded-3xl p-6 border-0">
               <p className="text-sm text-muted-foreground">No generated meal plan found yet. Generate one to show all meals here.</p>
             </Card>
+          )}
+            </>
           )}
         </div>
       </div>
