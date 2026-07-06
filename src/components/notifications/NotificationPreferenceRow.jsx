@@ -8,6 +8,7 @@ export function NotificationPreferenceRow({
   checked,
   onCheckedChange,
   showDivider = true,
+  disabled = false,
 }) {
   return (
     <div
@@ -23,7 +24,7 @@ export function NotificationPreferenceRow({
         <p className="font-medium text-sm">{title}</p>
         <p className="text-xs text-muted-foreground">{description}</p>
       </div>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} />
+      <Switch checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
     </div>
   );
 }

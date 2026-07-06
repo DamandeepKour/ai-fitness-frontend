@@ -5,15 +5,10 @@ export async function getPremiumOverviewRequest() {
   return res.data?.data;
 }
 
-export async function getNotificationPrefsRequest() {
-  const res = await API.get("/premium/notifications");
-  return res.data?.data;
-}
-
-export async function updateNotificationPrefsRequest(payload) {
-  const res = await API.put("/premium/notifications", payload);
-  return res.data?.data;
-}
+export {
+  getNotificationPrefsRequest,
+  updateNotificationPrefsRequest,
+} from "./notifications.js";
 
 export async function sendWhatsAppDemoRequest() {
   const res = await API.post("/premium/whatsapp/demo");

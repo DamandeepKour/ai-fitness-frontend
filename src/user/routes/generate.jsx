@@ -10,6 +10,7 @@ import { Dumbbell, Flame, HeartPulse, ShieldCheck, Sparkles, Timer } from "lucid
 import { estimateNutrition, toDailyLogMealType } from "@/lib/nutrition-estimator";
 import { getLocalDateYmd } from "@/lib/local-date";
 import { getStoredUser, updateStoredUser } from "@/lib/auth-token";
+import { getNotificationPrefsRequest } from "@/api/notifications";
 
 const INITIAL_FORM = {
   weight: 72,
@@ -215,10 +216,16 @@ function GeneratePage() {
 
     async function fetchInitialData() {
       try {
-        const [dashboardRes, profileRes] = await Promise.all([
+        const requests = [
           API.get("/dashboard/show", { params: { date: getLocalDateYmd() } }),
           API.get("/user/me"),
-        ]);
+        ];
+
+        if (isWorkoutPage) {
+          requests.push(getNotificationPrefsRequest());
+        }
+
+        const [dashboardRes, profileRes, notificationPrefs] = await Promise.all(requests);
 
         if (ignore) return;
 
@@ -233,6 +240,9 @@ function GeneratePage() {
             height: valueOrDefault(user.height, prev.height),
             goal: normalizeGoal(user.goal),
             diet_type: normalizeDietType(user.diet_type),
+            ...(isWorkoutPage && notificationPrefs?.workout_plan_type
+              ? { plan_type: notificationPrefs.workout_plan_type }
+              : {}),
           }));
         }
       } catch {
@@ -247,7 +257,7 @@ function GeneratePage() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [isWorkoutPage]);
 
   const updateForm = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
