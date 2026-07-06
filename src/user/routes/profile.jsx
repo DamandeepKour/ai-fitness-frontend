@@ -32,6 +32,8 @@ import {
   Phone,
   Calendar,
 } from "lucide-react";
+import { ProfileCoverBackground } from "@/components/profile/ProfileCoverBackground";
+import { getProfileAvatarUrl, normalizeProfileUser } from "@/lib/profile-cover";
 
 const defaultProfile = {
   name: "",
@@ -110,7 +112,7 @@ function ProfilePage() {
       try {
         const res = await API.get("/user/me");
         if (ignore || !res.data?.data) return;
-        const user = res.data.data;
+        const user = normalizeProfileUser(res.data.data);
         setProfile((prev) => ({ ...prev, ...user }));
         updateStoredUser(user);
       } catch {
@@ -152,10 +154,14 @@ function ProfilePage() {
 
     try {
       const res = await API.put("/user/update", payload);
-      const updated = res.data?.data || payload;
+      const updated = normalizeProfileUser(res.data?.data || payload);
 
       setProfile((prev) => {
-        const next = { ...prev, ...updated, profileImageUrl: data.profileImageUrl };
+        const next = {
+          ...prev,
+          ...updated,
+          profileImageUrl: data.profileImageUrl || updated.profileImageUrl,
+        };
         if (
           prev.profileImageUrl?.startsWith("blob:") &&
           prev.profileImageUrl !== next.profileImageUrl
@@ -242,9 +248,9 @@ function ProfilePage() {
         <Card className="glass-card rounded-3xl border-0 p-6 mb-5">
           <div className="flex items-center gap-5 flex-wrap">
             <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-2xl font-semibold overflow-hidden text-primary">
-              {profile.profileImageUrl ? (
+              {getProfileAvatarUrl(profile) ? (
                 <img
-                  src={profile.profileImageUrl}
+                  src={getProfileAvatarUrl(profile)}
                   alt={profile.name || "Profile"}
                   className="h-full w-full object-cover"
                 />
@@ -499,16 +505,19 @@ function ProfilePage() {
 }
 
 function MobileProfileView({ profile, initials, message, onEdit, onLogout }) {
+  const avatarUrl = getProfileAvatarUrl(profile);
+
   return (
     <section className="md:hidden -mx-4 -mt-2 min-h-[calc(100dvh-9rem)] bg-slate-50 dark:bg-slate-950">
-      <div className="relative overflow-hidden rounded-b-[2rem] bg-[#15171f] px-5 pb-8 pt-6 text-white shadow-xl">
-        <div className="absolute -right-12 -top-10 h-36 w-36 rounded-full bg-primary/25 blur-2xl" />
-        <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-violet-500/20 blur-2xl" />
-        <div className="relative flex flex-col items-center text-center">
-          <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-white/10 bg-white/10 shadow-2xl">
-            {profile.profileImageUrl ? (
+      <ProfileCoverBackground
+        user={profile}
+        className="rounded-b-[2rem] px-5 pb-8 pt-6 text-white shadow-xl"
+      >
+        <div className="flex flex-col items-center text-center">
+          <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-white/20 bg-white/10 shadow-2xl ring-2 ring-white/10">
+            {avatarUrl ? (
               <img
-                src={profile.profileImageUrl}
+                src={avatarUrl}
                 alt={profile.name || "Profile"}
                 className="h-full w-full object-cover"
               />
@@ -519,10 +528,12 @@ function MobileProfileView({ profile, initials, message, onEdit, onLogout }) {
             )}
           </div>
 
-          <h1 className="mt-4 max-w-full truncate text-xl font-semibold">{profile.name || "Your profile"}</h1>
-          <p className="mt-1 max-w-full truncate text-sm text-white/65">{profile.email || "Manage your account"}</p>
+          <h1 className="mt-4 max-w-full truncate text-xl font-semibold drop-shadow-sm">
+            {profile.name || "Your profile"}
+          </h1>
+          <p className="mt-1 max-w-full truncate text-sm text-white/80">{profile.email || "Manage your account"}</p>
           {profile.mobile_number ? (
-            <p className="mt-1 text-xs text-white/55">
+            <p className="mt-1 text-xs text-white/65">
               {profile.country_code} {profile.mobile_number}
             </p>
           ) : null}
@@ -530,12 +541,12 @@ function MobileProfileView({ profile, initials, message, onEdit, onLogout }) {
           <button
             type="button"
             onClick={onEdit}
-            className="mt-5 rounded-full border border-white/20 bg-white px-5 py-2 text-sm font-semibold text-slate-950 shadow-sm"
+            className="mt-5 rounded-full border border-white/25 bg-white px-5 py-2 text-sm font-semibold text-slate-950 shadow-sm"
           >
             Edit Profile
           </button>
         </div>
-      </div>
+      </ProfileCoverBackground>
 
       <div className="px-4 pb-6 pt-5">
         {message ? (
