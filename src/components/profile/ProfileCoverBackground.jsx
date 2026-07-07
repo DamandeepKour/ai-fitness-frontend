@@ -17,7 +17,6 @@ export function ProfileCoverBackground({ user, className, children }) {
           onError={() => setImageFailed(true)}
         />
       ) : null}
-
       <div
         className={cn(
           "absolute inset-0",
