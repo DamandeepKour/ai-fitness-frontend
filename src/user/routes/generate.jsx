@@ -341,199 +341,292 @@ function GeneratePage() {
         </p>
       </header>
 
-      <div className="grid lg:grid-cols-5 gap-5">
+      <div className="grid lg:grid-cols-5 gap-6">
 
-        <div className="lg:col-span-3 space-y-4">
-          {isWorkoutPage ? (
-            <Card className="glass-card rounded-3xl p-5 border-0">
-              <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                <div>
-                  <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
-                    <Dumbbell className="h-3.5 w-3.5" />
-                    Workout coach
-                  </p>
-                  <h2 className="text-xl font-semibold mt-1">
-                    {form.plan_type === "weekly" ? "Weekly Exercise Plan" : "Daily Exercise Plan"}
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {form.plan_type === "weekly"
-                      ? "Your full week of home, gym, cardio, yoga and injury-aware workouts."
-                      : "Today's focused workout from your latest generated plan."}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <div className="rounded-2xl bg-muted px-3 py-2 text-xs font-semibold capitalize">
-                    {form.plan_type}
-                  </div>
-                  <div className="rounded-2xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary capitalize">
-                    {formatWorkoutText(form.workout_type)} · {formatWorkoutText(form.workout_focus)}
-                  </div>
-                </div>
-              </div>
-
-              {loading ? (
-                <p className="text-sm text-muted-foreground">Loading workout plan...</p>
-              ) : filteredWorkoutPlan.length ? (
-                <div className="grid gap-3">
-                  {filteredWorkoutPlan.map((workout) => (
-                    <div key={`${workout.day}-${workout.type}-${workout.exercise}`} className="rounded-2xl bg-accent/50 p-4">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <p className="text-xs text-primary font-medium">{workout.day} · {formatWorkoutText(workout.type)}</p>
-                          <h3 className="font-semibold mt-1 capitalize">{formatWorkoutText(workout.focus || form.workout_focus)} plan</h3>
-                        </div>
-                        <div className="flex flex-wrap gap-2 text-xs">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
-                            <Timer className="h-3.5 w-3.5" />
-                            {workout.duration || 0} min
-                          </span>
-                          <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
-                            <Flame className="h-3.5 w-3.5" />
-                            {workout.calories_burned || 0} kcal
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 grid gap-3">
-                        <WorkoutLine icon={<HeartPulse className="h-4 w-4" />} label="Warmup" value={workout.warmup} />
-                        <WorkoutLine icon={<Dumbbell className="h-4 w-4" />} label="Main workout" value={workout.exercise} />
-                        <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Yoga + balance" value={workout.yoga_balance} />
-                        <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Injury-safe note" value={workout.injury_notes} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Generate a {form.plan_type} workout plan to see your exercise routine here. Add injury notes for safer modifications.
-                </p>
-              )}
-            </Card>
-          ) : (
-            <>
-          <Card className="glass-card rounded-3xl p-5 border-0">
-            <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-              <div>
-                <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
-                  <Dumbbell className="h-3.5 w-3.5" />
-                  Workout coach
-                </p>
-                <h2 className="text-xl font-semibold mt-1">Exercise Plan</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Home, gym, cardio, yoga and injury-aware balance work from your latest generated plan.
-                </p>
-              </div>
-              <div className="rounded-2xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary capitalize">
-                {formatWorkoutText(form.workout_type)} · {formatWorkoutText(form.workout_focus)}
-              </div>
-            </div>
-
-            {workoutPlan.length ? (
-              <div className="grid gap-3">
-                {workoutPlan.map((workout) => (
-                  <div key={`${workout.day}-${workout.type}-${workout.exercise}`} className="rounded-2xl bg-accent/50 p-4">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xs text-primary font-medium">{workout.day} · {formatWorkoutText(workout.type)}</p>
-                        <h3 className="font-semibold mt-1 capitalize">{formatWorkoutText(workout.focus || form.workout_focus)} plan</h3>
-                      </div>
-                      <div className="flex flex-wrap gap-2 text-xs">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
-                          <Timer className="h-3.5 w-3.5" />
-                          {workout.duration || 0} min
-                        </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
-                          <Flame className="h-3.5 w-3.5" />
-                          {workout.calories_burned || 0} kcal
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 grid gap-3">
-                      <WorkoutLine icon={<HeartPulse className="h-4 w-4" />} label="Warmup" value={workout.warmup} />
-                      <WorkoutLine icon={<Dumbbell className="h-4 w-4" />} label="Main workout" value={workout.exercise} />
-                      <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Yoga + balance" value={workout.yoga_balance} />
-                      <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Injury-safe note" value={workout.injury_notes} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Generate a plan to see your exercise routine here. Add injury notes for safer modifications.
-              </p>
-            )}
-          </Card>
-
-          {loading ? (
-            <Card className="glass-card rounded-3xl p-6 border-0">
-              <p className="text-sm text-muted-foreground">Loading generated meals...</p>
-            </Card>
-          ) : Object.keys(groupedMeals).length ? (
-            Object.entries(groupedMeals).map(([day, meals]) => (
-              <Card key={day} className="glass-card rounded-3xl p-5 border-0">
-                <h2 className="text-xl font-semibold mb-3">{day}</h2>
-                <div className="space-y-3">
-                  {meals.map((meal, index) => {
-                    const nutrition = getMealNutrition(meal);
-                    const canLogMeal = LOGGABLE_MEAL_TYPES.includes(meal.meal_type);
-                    const alreadyLogged = isMealLoggedToday(meal);
-
-                    return (
-                    <div key={`${meal.meal_type}-${meal.food_name}`} className="rounded-2xl bg-accent/50 p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3 min-w-0">
-                          <div className="h-11 w-11 rounded-2xl bg-background flex items-center justify-center text-xl shrink-0">
-                            {MEAL_EMOJI[meal.meal_type] || "🍽️"}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs text-primary font-medium">
-                              {String(index + 1).padStart(2, "0")} · {formatMealType(meal.meal_type)}
-                            </p>
-                            <h3 className="font-medium mt-1">{meal.food_name}</h3>
-                          </div>
-                        </div>
-                        <p className="text-sm font-semibold tabular-nums inline-flex items-center gap-1">
-                          <Flame className="h-4 w-4" />
-                          {nutrition.calories} kcal
-                        </p>
-                      </div>
-                      <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-2">
-                        {NUTRITION_FIELDS.map(([key, label, unit]) => (
-                          <div key={key} className="rounded-xl bg-background/80 px-3 py-2">
-                            <p className="text-[11px] text-muted-foreground">{label}</p>
-                            <p className="text-sm font-semibold tabular-nums">
-                              {nutrition[key]} {unit}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                      {canLogMeal && !alreadyLogged ? (
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          className="w-full mt-3 rounded-xl"
-                          onClick={() => handleLogGeneratedMeal(meal)}
-                          disabled={loggingKey === `${meal.day}-${meal.meal_type}-${meal.food_name}`}
-                        >
-                          {loggingKey === `${meal.day}-${meal.meal_type}-${meal.food_name}` ? "Logging..." : `Log ${formatMealType(meal.meal_type)}`}
-                        </Button>
-                      ) : null}
-                    </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            ))
-          ) : (
-            <Card className="glass-card rounded-3xl p-6 border-0">
-              <p className="text-sm text-muted-foreground">No generated meal plan found yet. Generate one to show all meals here.</p>
-            </Card>
-          )}
-            </>
-          )}
+{/* LEFT SIDE */}
+<div className="lg:col-span-3 space-y-4">
+  {isWorkoutPage ? (
+    <Card className="glass-card rounded-3xl p-5 border-0">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+        <div>
+          <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
+            <Dumbbell className="h-3.5 w-3.5" />
+            Workout coach
+          </p>
+          <h2 className="text-xl font-semibold mt-1">
+            {form.plan_type === "weekly" ? "Weekly Exercise Plan" : "Daily Exercise Plan"}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {form.plan_type === "weekly"
+              ? "Your full week of home, gym, cardio, yoga and injury-aware workouts."
+              : "Today's focused workout from your latest generated plan."}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <div className="rounded-2xl bg-muted px-3 py-2 text-xs font-semibold capitalize">
+            {form.plan_type}
+          </div>
+          <div className="rounded-2xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary capitalize">
+            {formatWorkoutText(form.workout_type)} · {formatWorkoutText(form.workout_focus)}
+          </div>
         </div>
       </div>
+
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading workout plan...</p>
+      ) : filteredWorkoutPlan.length ? (
+        <div className="grid gap-3">
+          {filteredWorkoutPlan.map((workout) => (
+            <div key={`${workout.day}-${workout.type}-${workout.exercise}`} className="rounded-2xl bg-accent/50 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs text-primary font-medium">{workout.day} · {formatWorkoutText(workout.type)}</p>
+                  <h3 className="font-semibold mt-1 capitalize">{formatWorkoutText(workout.focus || form.workout_focus)} plan</h3>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
+                    <Timer className="h-3.5 w-3.5" />
+                    {workout.duration || 0} min
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
+                    <Flame className="h-3.5 w-3.5" />
+                    {workout.calories_burned || 0} kcal
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3">
+                <WorkoutLine icon={<HeartPulse className="h-4 w-4" />} label="Warmup" value={workout.warmup} />
+                <WorkoutLine icon={<Dumbbell className="h-4 w-4" />} label="Main workout" value={workout.exercise} />
+                <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Yoga + balance" value={workout.yoga_balance} />
+                <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Injury-safe note" value={workout.injury_notes} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Generate a {form.plan_type} workout plan to see your exercise routine here. Add injury notes for safer modifications.
+        </p>
+      )}
+    </Card>
+  ) : (
+    <>
+      <Card className="glass-card rounded-3xl p-5 border-0">
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+          <div>
+            <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
+              <Dumbbell className="h-3.5 w-3.5" />
+              Workout coach
+            </p>
+            <h2 className="text-xl font-semibold mt-1">Exercise Plan</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Home, gym, cardio, yoga and injury-aware balance work from your latest generated plan.
+            </p>
+          </div>
+          <div className="rounded-2xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary capitalize">
+            {formatWorkoutText(form.workout_type)} · {formatWorkoutText(form.workout_focus)}
+          </div>
+        </div>
+
+        {workoutPlan.length ? (
+          <div className="grid gap-3">
+            {workoutPlan.map((workout) => (
+              <div key={`${workout.day}-${workout.type}-${workout.exercise}`} className="rounded-2xl bg-accent/50 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-primary font-medium">{workout.day} · {formatWorkoutText(workout.type)}</p>
+                    <h3 className="font-semibold mt-1 capitalize">{formatWorkoutText(workout.focus || form.workout_focus)} plan</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
+                      <Timer className="h-3.5 w-3.5" />
+                      {workout.duration || 0} min
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 font-semibold">
+                      <Flame className="h-3.5 w-3.5" />
+                      {workout.calories_burned || 0} kcal
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3">
+                  <WorkoutLine icon={<HeartPulse className="h-4 w-4" />} label="Warmup" value={workout.warmup} />
+                  <WorkoutLine icon={<Dumbbell className="h-4 w-4" />} label="Main workout" value={workout.exercise} />
+                  <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Yoga + balance" value={workout.yoga_balance} />
+                  <WorkoutLine icon={<ShieldCheck className="h-4 w-4" />} label="Injury-safe note" value={workout.injury_notes} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Generate a plan to see your exercise routine here. Add injury notes for safer modifications.
+          </p>
+        )}
+      </Card>
+
+      {loading ? (
+        <Card className="glass-card rounded-3xl p-6 border-0">
+          <p className="text-sm text-muted-foreground">Loading generated meals...</p>
+        </Card>
+      ) : Object.keys(groupedMeals).length ? (
+        Object.entries(groupedMeals).map(([day, meals]) => (
+          <Card key={day} className="glass-card rounded-3xl p-5 border-0">
+            <h2 className="text-xl font-semibold mb-3">{day}</h2>
+            <div className="space-y-3">
+              {meals.map((meal, index) => {
+                const nutrition = getMealNutrition(meal);
+                const canLogMeal = LOGGABLE_MEAL_TYPES.includes(meal.meal_type);
+                const alreadyLogged = isMealLoggedToday(meal);
+
+                return (
+                  <div key={`${meal.meal_type}-${meal.food_name}`} className="rounded-2xl bg-accent/50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="h-11 w-11 rounded-2xl bg-background flex items-center justify-center text-xl shrink-0">
+                          {MEAL_EMOJI[meal.meal_type] || "🍽️"}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs text-primary font-medium">
+                            {String(index + 1).padStart(2, "0")} · {formatMealType(meal.meal_type)}
+                          </p>
+                          <h3 className="font-medium mt-1">{meal.food_name}</h3>
+                        </div>
+                      </div>
+                      <p className="text-sm font-semibold tabular-nums inline-flex items-center gap-1">
+                        <Flame className="h-4 w-4" />
+                        {nutrition.calories} kcal
+                      </p>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-2">
+                      {NUTRITION_FIELDS.map(([key, label, unit]) => (
+                        <div key={key} className="rounded-xl bg-background/80 px-3 py-2">
+                          <p className="text-[11px] text-muted-foreground">{label}</p>
+                          <p className="text-sm font-semibold tabular-nums">
+                            {nutrition[key]} {unit}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    {canLogMeal && !alreadyLogged ? (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="w-full mt-3 rounded-xl"
+                        onClick={() => handleLogGeneratedMeal(meal)}
+                        disabled={loggingKey === `${meal.day}-${meal.meal_type}-${meal.food_name}`}
+                      >
+                        {loggingKey === `${meal.day}-${meal.meal_type}-${meal.food_name}` ? "Logging..." : `Log ${formatMealType(meal.meal_type)}`}
+                      </Button>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        ))
+      ) : (
+        <Card className="glass-card rounded-3xl p-6 border-0">
+          <p className="text-sm text-muted-foreground">No generated meal plan found yet. Generate one to show all meals here.</p>
+        </Card>
+      )}
+    </>
+  )}
+</div>
+
+{/* RIGHT SIDE */}
+<div className="lg:col-span-2 space-y-5">
+
+  {/* Hero Image */}
+  <Card className="glass-card rounded-3xl overflow-hidden border-0">
+    <img
+      src="/images/workout/home-workout.jpg"
+      alt="Workout"
+      className="w-full h-72 object-cover"
+    />
+
+    <div className="p-5">
+      <h2 className="text-xl font-bold">Today's Goal</h2>
+      <p className="text-sm text-muted-foreground mt-1">
+        Stay consistent and complete your workout.
+      </p>
+
+      <div className="grid grid-cols-2 gap-3 mt-5">
+        <div className="rounded-2xl bg-accent/60 p-4">
+          <Flame className="text-orange-500 h-6 w-6 mb-2" />
+          <p className="text-xs text-muted-foreground">Calories</p>
+          <p className="font-bold text-lg">{filteredWorkoutPlan?.[0]?.calories_burned || 0}</p>
+        </div>
+
+        <div className="rounded-2xl bg-accent/60 p-4">
+          <Timer className="text-blue-500 h-6 w-6 mb-2" />
+          <p className="text-xs text-muted-foreground">Duration</p>
+          <p className="font-bold text-lg">{filteredWorkoutPlan?.[0]?.duration || 0} min</p>
+        </div>
+
+        <div className="rounded-2xl bg-accent/60 p-4">
+          <Dumbbell className="text-violet-500 h-6 w-6 mb-2" />
+          <p className="text-xs text-muted-foreground">Workout</p>
+          <p className="font-bold capitalize">{formatWorkoutText(form.workout_type)}</p>
+        </div>
+
+        <div className="rounded-2xl bg-accent/60 p-4">
+          <HeartPulse className="text-red-500 h-6 w-6 mb-2" />
+          <p className="text-xs text-muted-foreground">Focus</p>
+          <p className="font-bold capitalize">{formatWorkoutText(form.workout_focus)}</p>
+        </div>
+      </div>
+    </div>
+  </Card>
+
+  {/* Motivation Card */}
+  <Card className="glass-card rounded-3xl p-6 border-0">
+    <div className="flex items-center gap-3 mb-4">
+      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+        💪
+      </div>
+      <div>
+        <h3 className="font-semibold">Motivation</h3>
+        <p className="text-sm text-muted-foreground">One workout at a time.</p>
+      </div>
+    </div>
+
+    <blockquote className="italic text-muted-foreground leading-7">
+      "The body achieves what the mind believes. Stay disciplined and keep moving."
+    </blockquote>
+  </Card>
+
+  {/* Tips Card */}
+  <Card className="glass-card rounded-3xl p-6 border-0">
+    <h3 className="font-semibold mb-4">Workout Tips</h3>
+
+    <div className="space-y-4 text-sm">
+      <div className="flex gap-3">
+        <span>💧</span>
+        <p>Drink water before and after your workout.</p>
+      </div>
+
+      <div className="flex gap-3">
+        <span>🥗</span>
+        <p>Eat a protein-rich meal after training.</p>
+      </div>
+
+      <div className="flex gap-3">
+        <span>😴</span>
+        <p>Sleep 7–8 hours for better recovery.</p>
+      </div>
+
+      <div className="flex gap-3">
+        <span>🔥</span>
+        <p>Always complete your warm-up before exercising.</p>
+      </div>
+    </div>
+  </Card>
+
+</div>
+
+</div>
     </AppShell>
   );
 }
