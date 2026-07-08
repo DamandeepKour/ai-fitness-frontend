@@ -342,62 +342,6 @@ function GeneratePage() {
       </header>
 
       <div className="grid lg:grid-cols-5 gap-5">
-        <Card className="glass-card lg:col-span-2 rounded-3xl p-6 border-0">
-          <form onSubmit={handleGenerate} className="space-y-4">
-            <Field label="Weight (kg)" value={form.weight} onChange={(value) => updateForm("weight", value)} type="number" />
-            <Field label="Height (cm)" value={form.height} onChange={(value) => updateForm("height", value)} type="number" />
-            <Select label="Generate For" value={form.plan_type} onChange={(value) => updateForm("plan_type", value)} options={["daily", "weekly"]} />
-            {!isWorkoutPage ? (
-              <>
-                <Field
-                  label="Meal request"
-                  value={form.ai_prompt}
-                  onChange={(value) => updateForm("ai_prompt", value)}
-                  placeholder="e.g. high protein daily meals with paneer, no rice"
-                />
-                <Select label="Goal" value={form.goal} onChange={(value) => updateForm("goal", value)} options={["weight_loss", "maintenance", "muscle_gain"]} />
-                <Select label="Diet Type" value={form.diet_type} onChange={(value) => updateForm("diet_type", value)} options={["veg", "veg_egg", "non veg"]} />
-                <Select label="Meal Preference" value={form.meal_preference} onChange={(value) => updateForm("meal_preference", value)} options={["north_indian", "south_indian"]} />
-              </>
-            ) : (
-              <>
-                <Select label="Goal" value={form.goal} onChange={(value) => updateForm("goal", value)} options={["weight_loss", "maintenance", "muscle_gain"]} />
-                <Field
-                  label="Workout request"
-                  value={form.ai_prompt}
-                  onChange={(value) => updateForm("ai_prompt", value)}
-                  placeholder="e.g. low impact knee-friendly home workouts, 30 min sessions"
-                />
-              </>
-            )}
-            <Select label="Workout Type" value={form.workout_type} onChange={(value) => updateForm("workout_type", value)} options={WORKOUT_TYPE_OPTIONS} />
-            <Select label="Workout Focus" value={form.workout_focus} onChange={(value) => updateForm("workout_focus", value)} options={WORKOUT_FOCUS_OPTIONS} />
-            <Field
-              label="Injury / limitation notes"
-              value={form.injury_notes}
-              onChange={(value) => updateForm("injury_notes", value)}
-              placeholder="e.g. knee pain, back pain, shoulder injury, beginner yoga"
-            />
-            {!isWorkoutPage ? (
-              <>
-                <Select label="Budget tier (₹/day)" value={form.budget_tier} onChange={(value) => updateForm("budget_tier", value)} options={["budget", "standard", "premium"]} />
-                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.pantry_mode}
-                    onChange={(e) => updateForm("pantry_mode", e.target.checked)}
-                    className="rounded border-input"
-                  />
-                  Pantry mode — use ingredients from <a href="/pantry" className="text-primary underline">your pantry</a>
-                </label>
-              </>
-            ) : null}
-            <Button type="submit" className="w-full rounded-xl" disabled={generating}>
-              {generating ? "Generating..." : isWorkoutPage ? "Generate workout plan" : "Generate meals"}
-            </Button>
-            {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
-          </form>
-        </Card>
 
         <div className="lg:col-span-3 space-y-4">
           {isWorkoutPage ? (
