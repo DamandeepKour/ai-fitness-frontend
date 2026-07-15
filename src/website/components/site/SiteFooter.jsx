@@ -55,14 +55,14 @@ export function SiteFooter() {
                 </Link>
               </li>
 
-              <li>
+              {/* <li>
                 <Link
                   to="/pricing"
                   className="hover:text-foreground transition"
                 >
                   Pricing
                 </Link>
-              </li>
+              </li> */}
 
               <li>
                 <Link
