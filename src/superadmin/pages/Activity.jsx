@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,14 @@ import {
   getTrafficSummaryRequest,
   getUserActivityRequest,
 } from "@/api/traffic";
+import { connectActivitySocket, disconnectActivitySocket } from "@/lib/activity-socket";
 import {
   Activity,
   AlertTriangle,
   Clock3,
   Globe,
   History,
+  Radio,
   Server,
   TrendingUp,
   UserCheck,
@@ -76,6 +78,78 @@ function trendLabel(pct, suffix = "vs yesterday") {
   return `${sign}${pct}% ${suffix}`;
 }
 
+function logMatchesFilters(log, filters) {
+  if (filters.method && log.method?.toUpperCase() !== filters.method.toUpperCase()) return false;
+  if (filters.status && String(log.statusCode) !== String(filters.status)) return false;
+  if (filters.path && !String(log.path || "").toLowerCase().includes(filters.path.toLowerCase())) {
+    return false;
+  }
+  return true;
+}
+
+function applySummaryPatch(summary, patch, activeUsersRef) {
+  if (!summary) return summary;
+
+  const apiRequestsToday = summary.apiRequestsToday + (patch.apiRequestsDelta || 0);
+  const eventsToday = summary.eventsToday + (patch.eventsDelta || 0);
+  const prevApiCount = summary.apiRequestsToday || 0;
+  const nextApiCount = Math.max(apiRequestsToday, 1);
+  const prevErrorCount = Math.round((summary.errorRatePct / 100) * prevApiCount);
+  const nextErrorCount = prevErrorCount + (patch.isError ? 1 : 0);
+
+  let avgResponseTimeMs = summary.avgResponseTimeMs;
+  if (patch.apiRequestsDelta && patch.durationMs != null) {
+    avgResponseTimeMs = Math.round(
+      (summary.avgResponseTimeMs * prevApiCount + patch.durationMs) / nextApiCount,
+    );
+  }
+
+  if (patch.userId) {
+    activeUsersRef.current.set(patch.userId, Date.now());
+    const cutoff = Date.now() - 15 * 60 * 1000;
+    for (const [id, ts] of activeUsersRef.current) {
+      if (ts < cutoff) activeUsersRef.current.delete(id);
+    }
+  }
+
+  return {
+    ...summary,
+    apiRequestsToday,
+    eventsToday,
+    avgResponseTimeMs,
+    errorRatePct: apiRequestsToday
+      ? Math.round((nextErrorCount / apiRequestsToday) * 100)
+      : summary.errorRatePct,
+    activeSessions: activeUsersRef.current.size || summary.activeSessions,
+  };
+}
+
+function applyHistoryPatch(history, patch) {
+  const buckets = [...(history.buckets || [])];
+  const idx = buckets.findIndex((b) => b.bucket === patch.bucket);
+
+  if (idx >= 0) {
+    const current = buckets[idx];
+    const requests = current.requests + (patch.requestsDelta || 0);
+    const errors = current.errors + (patch.isError ? 1 : 0);
+    const avgDurationMs = requests
+      ? Math.round((current.avgDurationMs * current.requests + (patch.durationMs || 0)) / requests)
+      : current.avgDurationMs;
+
+    buckets[idx] = { ...current, requests, errors, avgDurationMs };
+  } else {
+    buckets.push({
+      bucket: patch.bucket,
+      requests: patch.requestsDelta || 1,
+      errors: patch.isError ? 1 : 0,
+      avgDurationMs: patch.durationMs || 0,
+    });
+  }
+
+  buckets.sort((a, b) => new Date(a.bucket) - new Date(b.bucket));
+  return { ...history, buckets };
+}
+
 export default function SuperAdminActivityPage() {
   const [tab, setTab] = useState("activity");
   const [summary, setSummary] = useState(null);
@@ -87,6 +161,23 @@ export default function SuperAdminActivityPage() {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [logFilters, setLogFilters] = useState({ method: "", status: "", path: "" });
+  const [liveConnected, setLiveConnected] = useState(false);
+  const activeUsersRef = useRef(new Map());
+  const tabRef = useRef(tab);
+  const pageRef = useRef(page);
+  const logFiltersRef = useRef(logFilters);
+
+  useEffect(() => {
+    tabRef.current = tab;
+  }, [tab]);
+
+  useEffect(() => {
+    pageRef.current = page;
+  }, [page]);
+
+  useEffect(() => {
+    logFiltersRef.current = logFilters;
+  }, [logFilters]);
 
   useEffect(() => {
     document.title = "Activity — AIFitnova Admin";
@@ -151,6 +242,49 @@ export default function SuperAdminActivityPage() {
     loadTabData();
   }, [loadTabData]);
 
+  useEffect(() => {
+    connectActivitySocket({
+      onConnect: () => setLiveConnected(true),
+      onDisconnect: () => setLiveConnected(false),
+      onError: () => setLiveConnected(false),
+      onTrafficLog: (log) => {
+        if (tabRef.current === "logs" && pageRef.current === 1 && logMatchesFilters(log, logFiltersRef.current)) {
+          setLogs((prev) => ({
+            ...prev,
+            logs: [log, ...(prev.logs || [])].slice(0, 25),
+            pagination: {
+              ...prev.pagination,
+              total: (prev.pagination?.total || 0) + 1,
+            },
+          }));
+        }
+      },
+      onActivityEvent: (event) => {
+        if (tabRef.current === "activity" && pageRef.current === 1) {
+          setActivity((prev) => ({
+            ...prev,
+            events: [event, ...(prev.events || [])].slice(0, 25),
+            pagination: {
+              ...prev.pagination,
+              total: (prev.pagination?.total || 0) + 1,
+            },
+          }));
+        }
+      },
+      onSummaryPatch: (patch) => {
+        setSummary((prev) => applySummaryPatch(prev, patch, activeUsersRef));
+      },
+      onHistoryPatch: (patch) => {
+        setHistory((prev) => applyHistoryPatch(prev, patch));
+      },
+    });
+
+    return () => {
+      disconnectActivitySocket();
+      setLiveConnected(false);
+    };
+  }, []);
+
   const maxRequests = useMemo(
     () => Math.max(...(history.buckets?.map((b) => b.requests) ?? [1]), 1),
     [history.buckets],
@@ -166,21 +300,33 @@ export default function SuperAdminActivityPage() {
         title="Activity & Traffic"
         subtitle="Monitor user actions, API requests, and platform traffic in real time."
         action={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={async () => {
-              setLoading(true);
-              try {
-                await loadSummary();
-                await loadTabData();
-              } finally {
-                setLoading(false);
-              }
-            }}
-          >
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
+                liveConnected
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-slate-100 text-slate-500"
+              }`}
+            >
+              <Radio className={`h-3 w-3 ${liveConnected ? "animate-pulse" : ""}`} />
+              {liveConnected ? "Live" : "Connecting..."}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  await loadSummary();
+                  await loadTabData();
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              Refresh
+            </Button>
+          </div>
         }
       />
 
