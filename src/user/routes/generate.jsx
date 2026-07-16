@@ -623,13 +623,14 @@ function GeneratePage() {
       </div>
     </div>
   </Card>
-
-</div>
+  </div>
 
 </div>
     </AppShell>
   );
 }
+
+
 
 function WorkoutLine({ icon, label, value }) {
   return (
